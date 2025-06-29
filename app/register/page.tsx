@@ -36,29 +36,16 @@ export default function RegisterPage() {
       return
     }
 
-    await supabase.from('users').insert({
-      id: data.user.id,
-      email,
-      phone,
-      last_login: new Date().toISOString(),
-    })
+    await supabase.from('users').insert({ id: data.user.id, email, phone })
 
     // Assurer la connexion de l'utilisateur apr\u00e8s l'inscription
-    const { data: signInData, error: signInError } =
-      await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
     if (signInError) {
       setError(signInError.message)
       return
-    }
-
-    if (signInData.user) {
-      await supabase
-        .from('users')
-        .update({ last_login: new Date().toISOString() })
-        .eq('id', signInData.user.id)
     }
 
     setSuccess("Inscription r\u00e9ussie !")
