@@ -8,6 +8,7 @@ export default function RegisterPage() {
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [phone, setPhone] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
 
@@ -23,13 +24,19 @@ export default function RegisterPage() {
     e.preventDefault()
     setError(null)
 
-    const { data, error } = await supabase.auth.signUp({ email, password })
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { phone },
+      },
+    })
     if (error || !data.user) {
       setError(error?.message || 'Erreur inconnue')
       return
     }
 
-    await supabase.from('users').insert({ id: data.user.id, email })
+    await supabase.from('users').insert({ id: data.user.id, email, phone })
 
     // Assurer la connexion de l'utilisateur apr\u00e8s l'inscription
     const { error: signInError } = await supabase.auth.signInWithPassword({
@@ -57,6 +64,14 @@ export default function RegisterPage() {
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          className="w-full border rounded px-3 py-2"
+          required
+        />
+        <input
+          type="tel"
+          placeholder="Num\u00e9ro de t\u00e9l\u00e9phone"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
           className="w-full border rounded px-3 py-2"
           required
         />

@@ -9,6 +9,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 export interface User {
   id: string
   email: string
+  phone: string
   created_at: string
   generation_count: number
 }
