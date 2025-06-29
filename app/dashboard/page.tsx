@@ -1,24 +1,18 @@
 'use client'
-
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import ModernWebApp from '@/components/modernwebapp'
 import { supabase } from '@/lib/supabase-client'
 
-export default function Home() {
+export default function Dashboard() {
   const router = useRouter()
-
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) {
-        router.push('/login')
-      }
+      if (!session) router.push('/login')
     })
   }, [router])
-
   return (
-    <main className="min-h-screen">
-      <ModernWebApp />
-    </main>
+    <div className="flex items-center justify-center min-h-screen">
+      <h1 className="text-2xl font-bold">Dashboard</h1>
+    </div>
   )
 }

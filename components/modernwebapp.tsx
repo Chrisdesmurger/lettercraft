@@ -1,7 +1,20 @@
 'use client'
 
-import React, { useState, useEffect } from 'react';
-import { ChevronRight, ChevronLeft, Check, FileText, Upload, User, MessageSquare, Sparkles, Menu, X } from 'lucide-react';
+import React, { useState, useEffect } from 'react'
+import {
+  ChevronRight,
+  ChevronLeft,
+  Check,
+  FileText,
+  Upload,
+  User,
+  MessageSquare,
+  Sparkles,
+  Menu,
+  X,
+} from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { supabase } from '@/lib/supabase-client'
 
 const ModernWebApp = () => {
   const [currentStep, setCurrentStep] = useState(0);
@@ -10,6 +23,12 @@ const ModernWebApp = () => {
   const [isAnimating, setIsAnimating] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedLetter, setGeneratedLetter] = useState('');
+  const router = useRouter()
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut()
+    router.push('/login')
+  }
 
   const questions = [
     {
@@ -118,12 +137,18 @@ const ModernWebApp = () => {
               <span className="text-xl font-semibold text-gray-900">LetterCraft</span>
             </div>
             
-            <nav className="hidden md:flex space-x-8">
-              <a href="#" className="text-gray-700 hover:text-orange-600 transition-colors">Dashboard</a>
-              <a href="#" className="text-gray-700 hover:text-orange-600 transition-colors">Documents</a>
-              <a href="#" className="text-gray-700 hover:text-orange-600 transition-colors">Générateur</a>
-              <a href="#" className="text-gray-700 hover:text-orange-600 transition-colors">Profil</a>
-            </nav>
+              <nav className="hidden md:flex space-x-8 items-center">
+                <a href="#" className="text-gray-700 hover:text-orange-600 transition-colors">Dashboard</a>
+                <a href="#" className="text-gray-700 hover:text-orange-600 transition-colors">Documents</a>
+                <a href="#" className="text-gray-700 hover:text-orange-600 transition-colors">Générateur</a>
+                <a href="#" className="text-gray-700 hover:text-orange-600 transition-colors">Profil</a>
+                <button
+                  onClick={handleSignOut}
+                  className="text-gray-700 hover:text-orange-600 transition-colors"
+                >
+                  Déconnexion
+                </button>
+              </nav>
 
             <button 
               onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -137,12 +162,18 @@ const ModernWebApp = () => {
         {/* Mobile Menu */}
         {isMenuOpen && (
           <div className="md:hidden bg-white border-t border-gray-200">
-            <div className="px-4 py-2 space-y-1">
-              <a href="#" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md">Dashboard</a>
-              <a href="#" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md">Documents</a>
-              <a href="#" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md">Générateur</a>
-              <a href="#" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md">Profil</a>
-            </div>
+              <div className="px-4 py-2 space-y-1">
+                <a href="#" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md">Dashboard</a>
+                <a href="#" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md">Documents</a>
+                <a href="#" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md">Générateur</a>
+                <a href="#" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md">Profil</a>
+                <button
+                  onClick={handleSignOut}
+                  className="block w-full text-left px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md"
+                >
+                  Déconnexion
+                </button>
+              </div>
           </div>
         )}
       </header>
