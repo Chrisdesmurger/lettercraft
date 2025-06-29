@@ -12,6 +12,7 @@ export interface User {
   phone: string
   created_at: string
   generation_count: number
+  last_login: string | null
 }
 
 export interface Document {

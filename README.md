@@ -77,7 +77,8 @@ create table users (
   email text unique not null,
   phone text,
   created_at timestamp with time zone default now(),
-  generation_count integer default 0
+  generation_count integer default 0,
+  last_login timestamp with time zone
 );
 
 -- Table des documents
