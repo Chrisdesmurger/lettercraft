@@ -22,13 +22,16 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
-    const { error } = await supabase.auth.signUp({ email, password })
-    if (error) {
-      setError(error.message)
-    } else {
-      setSuccess('Inscription r\u00e9ussie !')
-      router.push('/')
+    const { data, error } = await supabase.auth.signUp({ email, password })
+    if (error || !data.user) {
+      setError(error?.message || 'Erreur inconnue')
+      return
     }
+
+    await supabase.from('users').insert({ id: data.user.id, email })
+
+    setSuccess('Inscription r\u00e9ussie !')
+    router.push('/')
   }
 
   return (
