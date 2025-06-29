@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabase-client'
+import { supabase } from '@/lib/supabaseClient'
 import { AnimatePresence, motion } from 'framer-motion'
 import Progress from './Progress'
 import Step1, { Step1Data } from './Step1'

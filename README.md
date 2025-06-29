@@ -1,5 +1,11 @@
 # LetterCraft - Générateur de lettres de motivation IA
 
+## Onboarding personnalisé
+1. Exécuter la migration SQL.
+2. Vérifier que le client Supabase est configuré.
+3. Installer React Hook Form et Zod.
+4. Lancer l’application et remplir le questionnaire.
+
 Une application web moderne pour générer des lettres de motivation personnalisées avec l'intelligence artificielle.
 
 ## 🚀 Fonctionnalités
