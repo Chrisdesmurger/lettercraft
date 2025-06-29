@@ -22,6 +22,7 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
+
     const { data, error } = await supabase.auth.signUp({ email, password })
     if (error || !data.user) {
       setError(error?.message || 'Erreur inconnue')
@@ -30,8 +31,18 @@ export default function RegisterPage() {
 
     await supabase.from('users').insert({ id: data.user.id, email })
 
-    setSuccess('Inscription r\u00e9ussie !')
-    router.push('/')
+    // Assurer la connexion de l'utilisateur apr\u00e8s l'inscription
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
+    if (signInError) {
+      setError(signInError.message)
+      return
+    }
+
+    setSuccess("Inscription r\u00e9ussie !")
+    router.push("/")
   }
 
   return (
