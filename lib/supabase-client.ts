@@ -11,6 +11,7 @@ export interface User {
   email: string
   created_at: string
   generation_count: number
+  onboarded: boolean
 }
 
 export interface Document {
