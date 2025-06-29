@@ -78,7 +78,6 @@ Si vous souhaitez utiliser Supabase pour stocker les données :
 create table users (
   id uuid primary key default uuid_generate_v4(),
   email text unique not null,
-  phone text,
   created_at timestamp with time zone default now(),
   generation_count integer default 0
 );
