@@ -15,7 +15,7 @@ export default function LoginPage() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        router.push('/')
+        router.push('/dashboard')
       }
     })
   }, [router])
@@ -30,17 +30,8 @@ export default function LoginPage() {
     if (error) {
       setError(error.message)
     } else if (data.user) {
-      const { data: userRow } = await supabase
-        .from('users')
-        .select('onboarded')
-        .eq('id', data.user.id)
-        .single()
       setSuccess('Connexion r\u00e9ussie !')
-      if (userRow && !userRow.onboarded) {
-        router.push('/onboarding')
-      } else {
-        router.push('/')
-      }
+      router.push('/dashboard')
     }
   }
 
