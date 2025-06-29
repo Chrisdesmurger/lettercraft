@@ -28,9 +28,6 @@ cd lettercraft
 ```bash
 npm install
 ```
-Les packages suivants sont utilisés pour le module d'onboarding :
-`react-hook-form`, `zod`, `@hookform/resolvers`, `framer-motion` et
-`react-hot-toast`.
 
 3. Configurer les variables d'environnement
 ```bash
