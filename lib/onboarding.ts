@@ -3,7 +3,7 @@
  * Utilise react-hook-form pour la gestion des formulaires et zod pour la validation
  */
 
-import { supabase } from './supabaseClient'
+import { supabase } from '@/lib/supabase-client'
 import { z } from 'zod'
 
 // Schémas de validation avec Zod
