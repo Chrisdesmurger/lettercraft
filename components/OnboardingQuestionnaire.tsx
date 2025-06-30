@@ -172,7 +172,7 @@ const schema = z.object({
 export type FormValues = z.infer<typeof schema>
 
 export default function OnboardingQuestionnaire() {
-  const { user } = useUser()
+  const user = useUser()
   const { register, watch, setValue } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: { category: '', responses: {} },
@@ -195,7 +195,7 @@ export default function OnboardingQuestionnaire() {
     supabase
       .from('onboarding_responses')
       .select('question_id, response')
-      .eq('user_id', user.id)
+      .eq('user_id', user?.id)
       .eq('category', category)
       .then(({ data }) => {
         const values: Record<string, string> = {}
@@ -211,7 +211,7 @@ export default function OnboardingQuestionnaire() {
   const handleChange = (qid: string, value: string) => {
     if (!user || !category) return
     setValue(`responses.${qid}` as const, value)
-    saveOnboardingResponse(user.id, category, qid, value)
+    saveOnboardingResponse(user?.id as string, category, qid, value)
   }
 
   return (

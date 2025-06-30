@@ -1,13 +1,10 @@
 import { NextResponse } from 'next/server'
 import OpenAI from 'openai'
-import { supabase } from '@/lib/supabase'
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
+import { supabase } from '@/lib/supabaseClient'
 
 export async function POST(request: Request) {
   try {
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || '' })
     const { cvSummary, jobOffer, answers, language = 'fr' } = await request.json()
 
     // Validation des données
