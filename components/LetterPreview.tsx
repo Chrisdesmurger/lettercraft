@@ -18,7 +18,7 @@ import {
   Save
 } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { supabase } from '@/lib/supabase-Client'
+import { supabase } from '@/lib/supabase-client'
 import html2pdf from 'html2pdf.js'
 import { useUser } from '@/hooks/useUser'
 
