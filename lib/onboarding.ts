@@ -1,17 +1,17 @@
 /**
- * Fonctions utilitaires pour la gestion des réponses d'onboarding
+ * Fonctions utilitaires pour la gestion des rÃ©ponses d'onboarding
  * Utilise react-hook-form pour la gestion des formulaires et zod pour la validation
  */
 
 import { supabase } from '@/lib/supabase-client'
 import { z } from 'zod'
 
-// Schémas de validation avec Zod
+// SchÃ©mas de validation avec Zod
 export const OnboardingResponseSchema = z.object({
     userId: z.string().uuid(),
-    category: z.string().min(1, "La catégorie est requise"),
+    category: z.string().min(1, "La catÃ©gorie est requise"),
     questionId: z.string().min(1, "L'ID de question est requis"),
-    response: z.string().min(1, "La réponse est requise")
+    response: z.string().min(1, "La rÃ©ponse est requise")
 })
 
 export type OnboardingResponse = z.infer<typeof OnboardingResponseSchema>
@@ -24,31 +24,31 @@ export interface Question {
     required?: boolean
 }
 
-// Configuration des questions par catégorie
+// Configuration des questions par catÃ©gorie
 export const questionsByCategory: Record<string, Question[]> = {
     developer: [
         {
             id: 'stack_expertise',
-            text: 'Quels langages, frameworks ou outils maîtrisez-vous le mieux ?',
+            text: 'Quels langages, frameworks ou outils maÃ®trisez-vous le mieux ?',
             placeholder: 'Ex: JavaScript, React, Node.js, Docker...',
             required: true
         },
         {
             id: 'project_proud',
-            text: 'Quel projet technique dont vous êtes le plus fier pouvez-vous décrire en 2–3 phrases ?',
-            placeholder: 'Décrivez brièvement le contexte, les technologies utilisées et l\'impact...',
+            text: 'Quel projet technique dont vous Ãªtes le plus fier pouvez-vous dÃ©crire en 2â€“3 phrases ?',
+            placeholder: 'DÃ©crivez briÃ¨vement le contexte, les technologies utilisÃ©es et l\'impact...',
             required: true
         },
         {
             id: 'problem_solving',
-            text: 'Parlez-moi d\'un défi technique complexe que vous avez su résoudre : contexte, solution, résultat.',
-            placeholder: 'Détaillez le problème rencontré, votre approche et le résultat obtenu...',
+            text: 'Parlez-moi d\'un dÃ©fi technique complexe que vous avez su rÃ©soudre : contexte, solution, rÃ©sultat.',
+            placeholder: 'DÃ©taillez le problÃ¨me rencontrÃ©, votre approche et le rÃ©sultat obtenu...',
             required: true
         },
         {
             id: 'learning_culture',
-            text: 'Comment vous tenez-vous à jour des nouvelles technologies ? (blogs, meetups, formations…)',
-            placeholder: 'Ex: Je suis des blogs tech, participe à des meetups, contribue à l\'open source...',
+            text: 'Comment vous tenez-vous Ã  jour des nouvelles technologies ? (blogs, meetups, formationsâ€¦)',
+            placeholder: 'Ex: Je suis des blogs tech, participe Ã  des meetups, contribue Ã  l\'open source...',
             required: true
         },
         {
@@ -59,16 +59,16 @@ export const questionsByCategory: Record<string, Question[]> = {
         }
     ],
     designer: [
-        // Questions pour designers à ajouter
+        // Questions pour designers Ã  ajouter
     ],
     marketing: [
-        // Questions pour marketing à ajouter
+        // Questions pour marketing Ã  ajouter
     ]
 }
 
 /**
- * Sauvegarde ou met à jour une réponse d'onboarding
- * Utilise UPSERT pour gérer automatiquement création/mise à jour
+ * Sauvegarde ou met Ã  jour une rÃ©ponse d'onboarding
+ * Utilise UPSERT pour gÃ©rer automatiquement crÃ©ation/mise Ã  jour
  */
 export async function saveOnboardingResponse(
     userId: string,
@@ -77,7 +77,7 @@ export async function saveOnboardingResponse(
     response: string
 ): Promise<{ data: any; error: any }> {
     try {
-        // Validation des données avec Zod
+        // Validation des donnÃ©es avec Zod
         const validatedData = OnboardingResponseSchema.parse({
             userId,
             category,
@@ -115,7 +115,7 @@ export async function saveOnboardingResponse(
 }
 
 /**
- * Récupère toutes les réponses d'onboarding pour un utilisateur
+ * RÃ©cupÃ¨re toutes les rÃ©ponses d'onboarding pour un utilisateur
  */
 export async function getOnboardingResponses(
     userId: string,
@@ -133,7 +133,7 @@ export async function getOnboardingResponses(
     const { data, error } = await query.order('created_at', { ascending: true })
 
     if (error) {
-        console.error('Erreur lors de la récupération:', error)
+        console.error('Erreur lors de la rÃ©cupÃ©ration:', error)
         return { data: [], error }
     }
 
@@ -141,7 +141,7 @@ export async function getOnboardingResponses(
 }
 
 /**
- * Supprime une réponse d'onboarding spécifique
+ * Supprime une rÃ©ponse d'onboarding spÃ©cifique
  */
 export async function deleteOnboardingResponse(
     userId: string,

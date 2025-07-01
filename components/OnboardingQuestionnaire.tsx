@@ -1,93 +1,108 @@
-﻿/**
- * Version adaptée pour le flow de création
- * Ajoute les props data et onUpdate pour l'intégration
+/**
+ * Composant de questionnaire d'onboarding dynamique
+ * Utilise react-hook-form pour la gestion du formulaire et framer-motion pour les animations
+ * Les réponses sont sauvegardées automatiquement dans Supabase à chaque modification
  */
-import { useUser } from '@/hooks/useUser'
-import { supabase } from '@/lib/supabaseClient' // ou votre nom de fichier
+
+import React, { useEffect, useState, useCallback } from 'react'
+import { useForm, Controller } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { motion, AnimatePresence } from 'framer-motion'
+import toast from 'react-hot-toast'
+import { z } from 'zod'
+import { useUser } from '@/hooks/useUser' // Import existant
 import {
-    saveOnboardingResponse,
-    getOnboardingResponses,
-    questionsByCategory,
-    type Question
+  saveOnboardingResponse,
+  getOnboardingResponses,
+  questionsByCategory,
+  type Question
 } from '@/lib/onboarding'
-// ... imports existants ...
+import { Loader2, ChevronRight } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+
+// Schéma de validation du formulaire
+const FormSchema = z.object({
+  category: z.string().min(1, 'Veuillez sélectionner une catégorie'),
+  responses: z.record(z.string())
+})
+
+type FormData = z.infer<typeof FormSchema>
+
+// Catégories disponibles
+const categories = [
+  { value: 'developer', label: 'Développeur' },
+  { value: 'designer', label: 'Designer' },
+  { value: 'marketing', label: 'Marketing' },
+  { value: 'other', label: 'Autre' }
+]
 
 interface OnboardingQuestionnaireProps {
-    data?: any
-    onUpdate?: (data: any) => void
-    onNext?: () => void
+  data?: any
+  onUpdate?: (data: any) => void
+  onNext?: () => void
 }
 
 export default function OnboardingQuestionnaire({
-    data,
-    onUpdate,
-    onNext
+  data,
+  onUpdate,
+  onNext
 }: OnboardingQuestionnaireProps) {
-    // ... code existant ...
+  const { user } = useUser() // ✅ AJOUT IMPORTANT - Récupération de l'utilisateur
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState<string | null>(null)
+  const [questions, setQuestions] = useState<Question[]>([])
 
-    // Modifier la sauvegarde pour mettre à jour le flow
-    const saveResponse = useCallback(
-        async (questionId: string, response: string) => {
-            if (!user || !selectedCategory || !response.trim()) return
+  const {
+    control,
+    watch,
+    setValue,
+    formState: { errors }
+  } = useForm<FormData>({
+    resolver: zodResolver(FormSchema),
+    defaultValues: {
+      category: '',
+      responses: {}
+    }
+  })
 
-            setSaving(questionId)
-            try {
-                const { error } = await saveOnboardingResponse(
-                    user.id,
-                    selectedCategory,
-                    questionId,
-                    response
-                )
+  const selectedCategory = watch('category')
 
-                if (error) {
-                    toast.error('Erreur lors de la sauvegarde')
-                } else {
-                    // Mettre à jour les données du flow
-                    if (onUpdate) {
-                        const currentResponses = watch('responses')
-                        onUpdate({
-                            category: selectedCategory,
-                            responses: currentResponses
-                        })
-                    }
+  // Chargement des réponses existantes
+  useEffect(() => {
+    async function loadExistingResponses() {
+      if (!user) return // ✅ Maintenant user est défini
 
-                    toast.success('Réponse sauvegardée', {
-                        duration: 2000,
-                        position: 'bottom-right'
-                    })
-                }
-            } catch (error) {
-                console.error('Erreur:', error)
-                toast.error('Une erreur est survenue')
-            } finally {
-                setSaving(null)
+      setLoading(true)
+      try {
+        const { data, error } = await getOnboardingResponses(user.id)
+
+        if (!error && data.length > 0) {
+          // Grouper les réponses par catégorie
+          const responsesByCategory = data.reduce((acc, resp) => {
+            if (!acc[resp.category]) {
+              acc[resp.category] = {}
             }
-        },
-        [user, selectedCategory, onUpdate, watch]
-    )
+            acc[resp.category][resp.question_id] = resp.response
+            return acc
+          }, {} as Record<string, Record<string, string>>)
 
-    // Ajouter un bouton pour continuer à la fin
-    const allQuestionsAnswered = questions.every(
-        q => watch(`responses.${q.id}`)?.trim()
-    )
+          // Si une catégorie a déjà des réponses, la sélectionner
+          const firstCategory = Object.keys(responsesByCategory)[0]
+          if (firstCategory) {
+            setValue('category', firstCategory)
+            setValue('responses', responsesByCategory[firstCategory] || {})
+          }
+        }
+      } catch (error) {
+        console.error('Erreur lors du chargement des réponses:', error)
+        toast.error('Impossible de charger vos réponses précédentes')
+      } finally {
+        setLoading(false)
+      }
+    }
 
-    return (
-        <div className="max-w-2xl mx-auto">
-            {/* ... contenu existant ... */}
+    loadExistingResponses()
+  }, [user, setValue])
 
-            {/* Ajouter à la fin du composant */}
-            {selectedCategory && questions.length > 0 && allQuestionsAnswered && onNext && (
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="mt-8 flex justify-end"
-                >
-                    <Button onClick={onNext} size="lg">
-                        Continuer vers votre CV
-                        <ChevronRight className="ml-2 h-4 w-4" />
-                    </Button>
-                </motion.div>
-            )}
-        </div>
-    )
+  // ... reste du code avec saveResponse callback qui utilise maintenant user correctement
 }

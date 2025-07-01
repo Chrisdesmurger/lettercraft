@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Flow de création de lettre de motivation avec stepper
  * Intègre le questionnaire d'onboarding comme première étape
  */
@@ -109,18 +109,18 @@ interface FlowData {
 
 export default function LetterCreationFlow() {
     const router = useRouter()
-    const { user } = useUser()
+    const { user, loading: userLoading } = useUser() // Récupérer loading
     const [currentStep, setCurrentStep] = useState(0)
     const [flowData, setFlowData] = useState<FlowData>({})
     const [isValidating, setIsValidating] = useState(false)
     const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set())
 
     // Rediriger si non connecté
-    useEffect(() => {
-        if (!user) {
-            router.push('/login')
-        }
-    }, [user, router])
+  useEffect(() => {
+    if (!userLoading && !user) {
+      router.push('/login')
+    }
+  }, [user, userLoading, router])
 
     // Sauvegarder les données dans le localStorage pour persistance
     useEffect(() => {

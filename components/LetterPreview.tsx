@@ -1,6 +1,6 @@
 LetterPreview.tsx/**
- * Composant d'aperçu et de téléchargement de la lettre
- * Permet de prévisualiser, éditer et exporter la lettre
+ * Composant d'aperÃ§u et de tÃ©lÃ©chargement de la lettre
+ * Permet de prÃ©visualiser, Ã©diter et exporter la lettre
  */
 
 import React, { useState, useRef } from 'react'
@@ -18,8 +18,7 @@ import {
   Save
 } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { useUser } from '@/hooks/useUser'
-import { supabase } from '@/lib/supabaseClient'
+import { supabase } from '@/lib/supabase-Client'
 import html2pdf from 'html2pdf.js'
 import { useUser } from '@/hooks/useUser'
 
@@ -41,7 +40,7 @@ export default function LetterPreview({ data, onUpdate, onNext }: LetterPreviewP
     try {
       await navigator.clipboard.writeText(editedLetter)
       setCopied(true)
-      toast.success('Lettre copiée dans le presse-papier!')
+      toast.success('Lettre copiÃ©e dans le presse-papier!')
       setTimeout(() => setCopied(false), 2000)
     } catch (error) {
       toast.error('Erreur lors de la copie')
@@ -60,7 +59,7 @@ export default function LetterPreview({ data, onUpdate, onNext }: LetterPreviewP
     }
 
     html2pdf().set(opt).from(letterRef.current).save()
-    toast.success('PDF téléchargé!')
+    toast.success('PDF tÃ©lÃ©chargÃ©!')
   }
 
   const handleDownloadTXT = () => {
@@ -71,7 +70,7 @@ export default function LetterPreview({ data, onUpdate, onNext }: LetterPreviewP
     document.body.appendChild(element)
     element.click()
     document.body.removeChild(element)
-    toast.success('Fichier texte téléchargé!')
+    toast.success('Fichier texte tÃ©lÃ©chargÃ©!')
   }
 
   const handleSave = async () => {
@@ -97,7 +96,7 @@ export default function LetterPreview({ data, onUpdate, onNext }: LetterPreviewP
 
       if (error) throw error
 
-      toast.success('Lettre sauvegardée dans votre espace!')
+      toast.success('Lettre sauvegardÃ©e dans votre espace!')
     } catch (error) {
       console.error('Erreur:', error)
       toast.error('Erreur lors de la sauvegarde')
@@ -111,7 +110,7 @@ export default function LetterPreview({ data, onUpdate, onNext }: LetterPreviewP
       if (onUpdate) {
         onUpdate({ generatedLetter: editedLetter })
       }
-      toast.success('Modifications enregistrées')
+      toast.success('Modifications enregistrÃ©es')
     }
     setIsEditing(!isEditing)
   }
@@ -149,7 +148,7 @@ export default function LetterPreview({ data, onUpdate, onNext }: LetterPreviewP
               {copied ? (
                 <>
                   <Check className="h-4 w-4 mr-2" />
-                  Copié!
+                  CopiÃ©!
                 </>
               ) : (
                 <>
@@ -197,7 +196,7 @@ export default function LetterPreview({ data, onUpdate, onNext }: LetterPreviewP
         </div>
       </Card>
 
-      {/* Aperçu/Édition de la lettre */}
+      {/* AperÃ§u/Ã‰dition de la lettre */}
       <Card className="p-8">
         {isEditing ? (
           <Textarea
@@ -215,7 +214,7 @@ export default function LetterPreview({ data, onUpdate, onNext }: LetterPreviewP
         )}
       </Card>
 
-      {/* Résumé et actions finales */}
+      {/* RÃ©sumÃ© et actions finales */}
       <Card className="p-6 bg-green-50 border-green-200">
         <div className="flex items-start space-x-4">
           <div className="p-3 bg-green-100 rounded-full">
@@ -223,10 +222,10 @@ export default function LetterPreview({ data, onUpdate, onNext }: LetterPreviewP
           </div>
           <div className="flex-1">
             <h3 className="font-semibold text-green-900 mb-2">
-              Votre lettre est prête!
+              Votre lettre est prÃªte!
             </h3>
             <p className="text-green-800 text-sm mb-4">
-              Vous avez créé une lettre personnalisée pour le poste de{' '}
+              Vous avez crÃ©Ã© une lettre personnalisÃ©e pour le poste de{' '}
               <strong>{data?.jobOffer?.title}</strong> chez{' '}
               <strong>{data?.jobOffer?.company}</strong>.
             </p>
@@ -242,7 +241,7 @@ export default function LetterPreview({ data, onUpdate, onNext }: LetterPreviewP
                 onClick={() => window.location.reload()}
                 size="sm"
               >
-                Créer une nouvelle lettre
+                CrÃ©er une nouvelle lettre
               </Button>
             </div>
           </div>
