@@ -18,7 +18,7 @@ import {
     AlertCircle
 } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { supabase } from '@/lib/supabase-Client'
+import { supabase } from '@/lib/supabase-client'
 import { useUser } from '@/hooks/useUser'
 
 interface CVUploadProps {

@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabaseClient'
+import { supabase } from '@/lib/supabase-client'
 
 interface GenerateLetterParams {
     profile: {
@@ -25,7 +25,7 @@ interface GenerateLetterParams {
 }
 
 export async function generateLetter(params: GenerateLetterParams): Promise<string> {
-    // Appel à votre API OpenAI
+    // Appel Ã  votre API OpenAI
     const response = await fetch('/api/generate-letter', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -33,7 +33,7 @@ export async function generateLetter(params: GenerateLetterParams): Promise<stri
     })
 
     if (!response.ok) {
-        throw new Error('Erreur lors de la génération')
+        throw new Error('Erreur lors de la gÃ©nÃ©ration')
     }
 
     const data = await response.json()
