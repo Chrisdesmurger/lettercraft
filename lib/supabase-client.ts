@@ -101,6 +101,41 @@ export type Database = {
                     created_at?: string
                     updated_at?: string
                 }
+            },
+            user_profiles: {
+                Row: {
+                    user_id: string
+                    first_name: string | null
+                    last_name: string | null
+                    phone: string | null
+                    country: string | null
+                    language: string | null
+                    birth_date: string | null
+                    created_at: string | null
+                    updated_at: string | null
+                }
+                Insert: {
+                    user_id: string
+                    first_name?: string | null
+                    last_name?: string | null
+                    phone?: string | null
+                    country?: string | null
+                    language?: string | null
+                    birth_date?: string | null
+                    created_at?: string | null
+                    updated_at?: string | null
+                }
+                Update: {
+                    user_id?: string
+                    first_name?: string | null
+                    last_name?: string | null
+                    phone?: string | null
+                    country?: string | null
+                    language?: string | null
+                    birth_date?: string | null
+                    created_at?: string | null
+                    updated_at?: string | null
+                }
             }
         }
     }
@@ -143,4 +178,6 @@ export const db = {
         supabase.from('saved_letters'),
     userQuotas: () =>
         supabase.from('user_quotas'),
+    userProfiles: () =>
+        supabase.from('user_profiles'),
 }
