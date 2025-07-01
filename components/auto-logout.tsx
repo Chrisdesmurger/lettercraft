@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import { supabase } from '@/lib/supabase-client'
 
 
 const INACTIVITY_LIMIT = 30 * 60 * 1000 // 30 minutes
