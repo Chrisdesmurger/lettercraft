@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase-client'
 import {
@@ -12,13 +12,14 @@ import {
 } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
+import intlTelInput from 'intl-tel-input'
+import 'intl-tel-input/build/css/intlTelInput.css'
 import { Button } from '@/components/ui/button'
 
 interface Profile {
   first_name: string
   last_name: string
-  phoneCode: string
-  phoneNumber: string
+  phone: string
   country: string
   language: string
   birth_date: string
@@ -26,11 +27,12 @@ interface Profile {
 
 export default function ProfilePage() {
   const router = useRouter()
+  const phoneRef = useRef<HTMLInputElement>(null)
+  const [iti, setIti] = useState<any>(null)
   const [profile, setProfile] = useState<Profile>({
     first_name: '',
     last_name: '',
-    phoneCode: '+33',
-    phoneNumber: '',
+    phone: '',
     country: '',
     language: '',
     birth_date: '',
@@ -39,6 +41,22 @@ export default function ProfilePage() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const [phoneError, setPhoneError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (phoneRef.current && !iti) {
+      const instance = intlTelInput(phoneRef.current, {
+        initialCountry: 'fr',
+        loadUtils: () => import('intl-tel-input/build/js/utils.js'),
+      })
+      if (profile.phone) {
+        instance.setNumber(profile.phone)
+      }
+      setIti(instance)
+    }
+    return () => {
+      iti?.destroy()
+    }
+  }, [iti, profile.phone])
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
@@ -52,12 +70,10 @@ export default function ProfilePage() {
         .eq('user_id', session.user.id)
         .single()
       if (data) {
-        const match = data.phone?.match(/^(\+\d{1,3})(.*)$/)
         setProfile({
           first_name: data.first_name || '',
           last_name: data.last_name || '',
-          phoneCode: match ? match[1] : '+33',
-          phoneNumber: match ? match[2] : data.phone || '',
+          phone: data.phone || '',
           country: data.country || '',
           language: data.language || '',
           birth_date: data.birth_date || '',
@@ -71,7 +87,7 @@ export default function ProfilePage() {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target
-    if (name === 'phoneNumber') {
+    if (name === 'phone') {
       setPhoneError(null)
     }
     setProfile((prev) => ({ ...prev, [name]: value }))
@@ -88,12 +104,12 @@ export default function ProfilePage() {
       router.push('/login')
       return
     }
-    if (!profile.phoneNumber.match(/^\d{4,}$/)) {
+    const phone = iti ? iti.getNumber() : profile.phone
+    if (!iti || !iti.isValidNumber()) {
       setPhoneError('Numéro de téléphone invalide')
       return
     }
     setPhoneError(null)
-    const phone = `${profile.phoneCode}${profile.phoneNumber}`
     const updates = {
       first_name: profile.first_name,
       last_name: profile.last_name,
@@ -148,30 +164,15 @@ export default function ProfilePage() {
               />
             </div>
             <div>
-              <Label htmlFor="phoneNumber">Téléphone</Label>
-              <div className="flex space-x-2">
-                <select
-                  id="phoneCode"
-                  name="phoneCode"
-                  value={profile.phoneCode}
-                  onChange={handleChange}
-                  className="border rounded-md px-2 py-2 text-sm bg-white"
-                >
-                  <option value="+33">France (+33)</option>
-                  <option value="+32">Belgique (+32)</option>
-                  <option value="+41">Suisse (+41)</option>
-                  <option value="+1">États-Unis (+1)</option>
-                  <option value="+44">Royaume-Uni (+44)</option>
-                </select>
-                <Input
-                  id="phoneNumber"
-                  name="phoneNumber"
-                  type="tel"
-                  value={profile.phoneNumber}
-                  onChange={handleChange}
-                  className="flex-1"
-                />
-              </div>
+              <Label htmlFor="phone">Téléphone</Label>
+              <Input
+                id="phone"
+                name="phone"
+                type="tel"
+                ref={phoneRef}
+                defaultValue={profile.phone}
+                onChange={handleChange}
+              />
               {phoneError && <p className="text-red-500 text-sm">{phoneError}</p>}
             </div>
             <div>
