@@ -17,7 +17,8 @@ import { Button } from '@/components/ui/button'
 interface Profile {
   first_name: string
   last_name: string
-  phone: string
+  phoneCode: string
+  phoneNumber: string
   country: string
   language: string
   birth_date: string
@@ -28,7 +29,8 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<Profile>({
     first_name: '',
     last_name: '',
-    phone: '',
+    phoneCode: '+33',
+    phoneNumber: '',
     country: '',
     language: '',
     birth_date: '',
@@ -36,6 +38,7 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const [phoneError, setPhoneError] = useState<string | null>(null)
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
@@ -49,10 +52,12 @@ export default function ProfilePage() {
         .eq('user_id', session.user.id)
         .single()
       if (data) {
+        const match = data.phone?.match(/^(\+\d{1,3})(.*)$/)
         setProfile({
           first_name: data.first_name || '',
           last_name: data.last_name || '',
-          phone: data.phone || '',
+          phoneCode: match ? match[1] : '+33',
+          phoneNumber: match ? match[2] : data.phone || '',
           country: data.country || '',
           language: data.language || '',
           birth_date: data.birth_date || '',
@@ -62,8 +67,13 @@ export default function ProfilePage() {
     })
   }, [router])
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target
+    if (name === 'phoneNumber') {
+      setPhoneError(null)
+    }
     setProfile((prev) => ({ ...prev, [name]: value }))
   }
 
@@ -78,8 +88,19 @@ export default function ProfilePage() {
       router.push('/login')
       return
     }
+    if (!profile.phoneNumber.match(/^\d{4,}$/)) {
+      setPhoneError('Numéro de téléphone invalide')
+      return
+    }
+    setPhoneError(null)
+    const phone = `${profile.phoneCode}${profile.phoneNumber}`
     const updates = {
-      ...profile,
+      first_name: profile.first_name,
+      last_name: profile.last_name,
+      phone,
+      country: profile.country,
+      language: profile.language,
+      birth_date: profile.birth_date,
       updated_at: new Date().toISOString(),
     }
     const { error } = await supabase
@@ -127,8 +148,31 @@ export default function ProfilePage() {
               />
             </div>
             <div>
-              <Label htmlFor="phone">Téléphone</Label>
-              <Input id="phone" name="phone" value={profile.phone} onChange={handleChange} />
+              <Label htmlFor="phoneNumber">Téléphone</Label>
+              <div className="flex space-x-2">
+                <select
+                  id="phoneCode"
+                  name="phoneCode"
+                  value={profile.phoneCode}
+                  onChange={handleChange}
+                  className="border rounded-md px-2 py-2 text-sm bg-white"
+                >
+                  <option value="+33">France (+33)</option>
+                  <option value="+32">Belgique (+32)</option>
+                  <option value="+41">Suisse (+41)</option>
+                  <option value="+1">États-Unis (+1)</option>
+                  <option value="+44">Royaume-Uni (+44)</option>
+                </select>
+                <Input
+                  id="phoneNumber"
+                  name="phoneNumber"
+                  type="tel"
+                  value={profile.phoneNumber}
+                  onChange={handleChange}
+                  className="flex-1"
+                />
+              </div>
+              {phoneError && <p className="text-red-500 text-sm">{phoneError}</p>}
             </div>
             <div>
               <Label htmlFor="country">Pays</Label>
