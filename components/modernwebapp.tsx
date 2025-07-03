@@ -2,10 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { ChevronRight, ChevronLeft, Check, FileText, Upload, User, MessageSquare, Sparkles, Menu, X } from 'lucide-react';
+import Header from '@/components/Header'
 
 const ModernWebApp = () => {
   const [currentStep, setCurrentStep] = useState(0);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [isAnimating, setIsAnimating] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -108,44 +108,7 @@ const ModernWebApp = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-amber-50">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-md border-b border-orange-100/50 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gradient-to-r from-orange-400 to-amber-500 rounded-lg flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-xl font-semibold text-gray-900">LetterCraft</span>
-            </div>
-            
-            <nav className="hidden md:flex space-x-8">
-              <a href="#" className="text-gray-700 hover:text-orange-600 transition-colors">Dashboard</a>
-              <a href="#" className="text-gray-700 hover:text-orange-600 transition-colors">Documents</a>
-              <a href="#" className="text-gray-700 hover:text-orange-600 transition-colors">Générateur</a>
-              <a href="/profile" className="text-gray-700 hover:text-orange-600 transition-colors">Profil</a>
-            </nav>
-
-            <button 
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
-            >
-              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Menu */}
-        {isMenuOpen && (
-          <div className="md:hidden bg-white border-t border-gray-200">
-            <div className="px-4 py-2 space-y-1">
-              <a href="#" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md">Dashboard</a>
-              <a href="#" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md">Documents</a>
-              <a href="#" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md">Générateur</a>
-              <a href="/profile" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md">Profil</a>
-            </div>
-          </div>
-        )}
-      </header>
+      <Header />
 
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 py-8">

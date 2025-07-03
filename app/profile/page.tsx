@@ -15,6 +15,7 @@ import { Input } from '@/components/ui/input'
 import intlTelInput from 'intl-tel-input'
 import 'intl-tel-input/build/css/intlTelInput.css'
 import { Button } from '@/components/ui/button'
+import Header from '@/components/Header'
 
 interface Profile {
   first_name: string
@@ -138,6 +139,10 @@ export default function ProfilePage() {
   }
 
   return (
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-amber-50">
+      {/* Header */}
+      <Header />
+    {/* Main Content */ }
     <div className="flex items-center justify-center py-10">
       <Card className="w-full max-w-xl">
         <CardHeader>
@@ -203,6 +208,7 @@ export default function ProfilePage() {
           </CardFooter>
         </form>
       </Card>
+      </div>
     </div>
   )
 }
