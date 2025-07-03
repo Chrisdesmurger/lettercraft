@@ -14,6 +14,8 @@ import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import intlTelInput from 'intl-tel-input'
 import 'intl-tel-input/build/css/intlTelInput.css'
+import { countries, codeToFlagEmoji } from '@/lib/data/countries'
+import { languages } from '@/lib/data/languages'
 import { Button } from '@/components/ui/button'
 import Header from '@/components/Header'
 
@@ -43,19 +45,24 @@ export default function ProfilePage() {
   const [success, setSuccess] = useState<string | null>(null)
   const [phoneError, setPhoneError] = useState<string | null>(null)
 
+  // Init phone input on mount
   useEffect(() => {
-    if (phoneRef.current && !iti) {
+    if (phoneRef.current) {
       const instance = intlTelInput(phoneRef.current, {
         initialCountry: 'fr',
         loadUtils: () => import('intl-tel-input/build/js/utils.js'),
       })
-      if (profile.phone) {
-        instance.setNumber(profile.phone)
-      }
       setIti(instance)
+      return () => {
+        instance.destroy()
+      }
     }
-    return () => {
-      iti?.destroy()
+  }, [])
+
+  // Update phone number when profile data is loaded
+  useEffect(() => {
+    if (iti && profile.phone) {
+      iti.setNumber(profile.phone)
     }
   }, [iti, profile.phone])
 
@@ -182,11 +189,37 @@ export default function ProfilePage() {
             </div>
             <div>
               <Label htmlFor="country">Pays</Label>
-              <Input id="country" name="country" value={profile.country} onChange={handleChange} />
+              <select
+                id="country"
+                name="country"
+                value={profile.country}
+                onChange={handleChange}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              >
+                <option value="">-- Sélectionner --</option>
+                {countries.map((c) => (
+                  <option key={c.code} value={c.code}>
+                    {codeToFlagEmoji(c.code)} {c.name}
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
               <Label htmlFor="language">Langue</Label>
-              <Input id="language" name="language" value={profile.language} onChange={handleChange} />
+              <select
+                id="language"
+                name="language"
+                value={profile.language}
+                onChange={handleChange}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              >
+                <option value="">-- Sélectionner --</option>
+                {languages.map((l) => (
+                  <option key={l.code} value={l.code}>
+                    {l.flag} {l.label}
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
               <Label htmlFor="birth_date">Date de naissance</Label>
