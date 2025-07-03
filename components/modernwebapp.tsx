@@ -122,7 +122,7 @@ const ModernWebApp = () => {
               <a href="#" className="text-gray-700 hover:text-orange-600 transition-colors">Dashboard</a>
               <a href="#" className="text-gray-700 hover:text-orange-600 transition-colors">Documents</a>
               <a href="#" className="text-gray-700 hover:text-orange-600 transition-colors">Générateur</a>
-              <a href="#" className="text-gray-700 hover:text-orange-600 transition-colors">Profil</a>
+              <a href="/profile" className="text-gray-700 hover:text-orange-600 transition-colors">Profil</a>
             </nav>
 
             <button 
@@ -141,7 +141,7 @@ const ModernWebApp = () => {
               <a href="#" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md">Dashboard</a>
               <a href="#" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md">Documents</a>
               <a href="#" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md">Générateur</a>
-              <a href="#" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md">Profil</a>
+              <a href="/profile" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md">Profil</a>
             </div>
           </div>
         )}
