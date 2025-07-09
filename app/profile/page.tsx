@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase-client'
 import {
@@ -12,8 +12,9 @@ import {
 } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
-import intlTelInput from 'intl-tel-input'
-import 'intl-tel-input/build/css/intlTelInput.css'
+import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input'
+import { countries, codeToFlagEmoji } from '@/lib/data/countries'
+import { languages } from '@/lib/data/languages'
 import { Button } from '@/components/ui/button'
 import Header from '@/components/Header'
 
@@ -28,8 +29,6 @@ interface Profile {
 
 export default function ProfilePage() {
   const router = useRouter()
-  const phoneRef = useRef<HTMLInputElement>(null)
-  const [iti, setIti] = useState<any>(null)
   const [profile, setProfile] = useState<Profile>({
     first_name: '',
     last_name: '',
@@ -43,21 +42,6 @@ export default function ProfilePage() {
   const [success, setSuccess] = useState<string | null>(null)
   const [phoneError, setPhoneError] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (phoneRef.current && !iti) {
-      const instance = intlTelInput(phoneRef.current, {
-        initialCountry: 'fr',
-        loadUtils: () => import('intl-tel-input/build/js/utils.js'),
-      })
-      if (profile.phone) {
-        instance.setNumber(profile.phone)
-      }
-      setIti(instance)
-    }
-    return () => {
-      iti?.destroy()
-    }
-  }, [iti, profile.phone])
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
@@ -88,9 +72,6 @@ export default function ProfilePage() {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target
-    if (name === 'phone') {
-      setPhoneError(null)
-    }
     setProfile((prev) => ({ ...prev, [name]: value }))
   }
 
@@ -105,8 +86,8 @@ export default function ProfilePage() {
       router.push('/login')
       return
     }
-    const phone = iti ? iti.getNumber() : profile.phone
-    if (!iti || !iti.isValidNumber()) {
+    const phone = profile.phone
+    if (!phone || !isValidPhoneNumber(phone)) {
       setPhoneError('Numéro de téléphone invalide')
       return
     }
@@ -170,23 +151,52 @@ export default function ProfilePage() {
             </div>
             <div>
               <Label htmlFor="phone">Téléphone</Label>
-              <Input
+              <PhoneInput
                 id="phone"
                 name="phone"
-                type="tel"
-                ref={phoneRef}
-                defaultValue={profile.phone}
-                onChange={handleChange}
+                defaultCountry="FR"
+                value={profile.phone || undefined}
+                onChange={(value) => {
+                  setPhoneError(null)
+                  setProfile((prev) => ({ ...prev, phone: value || '' }))
+                }}
+                international
               />
               {phoneError && <p className="text-red-500 text-sm">{phoneError}</p>}
             </div>
             <div>
               <Label htmlFor="country">Pays</Label>
-              <Input id="country" name="country" value={profile.country} onChange={handleChange} />
+              <select
+                id="country"
+                name="country"
+                value={profile.country}
+                onChange={handleChange}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              >
+                <option value="">-- Sélectionner --</option>
+                {countries.map((c) => (
+                  <option key={c.code} value={c.code}>
+                    {codeToFlagEmoji(c.code)} {c.name}
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
               <Label htmlFor="language">Langue</Label>
-              <Input id="language" name="language" value={profile.language} onChange={handleChange} />
+              <select
+                id="language"
+                name="language"
+                value={profile.language}
+                onChange={handleChange}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              >
+                <option value="">-- Sélectionner --</option>
+                {languages.map((l) => (
+                  <option key={l.code} value={l.code}>
+                    {l.flag} {l.label}
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
               <Label htmlFor="birth_date">Date de naissance</Label>

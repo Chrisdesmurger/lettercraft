@@ -1,4 +1,5 @@
 import './globals.css'
+import 'react-phone-number-input/style.css'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import AutoLogout from '@/components/auto-logout'
