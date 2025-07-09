@@ -13,7 +13,6 @@ import {
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import intlTelInput from 'intl-tel-input'
-import 'intl-tel-input/build/css/intlTelInput.css'
 import { countries, codeToFlagEmoji } from '@/lib/data/countries'
 import { languages } from '@/lib/data/languages'
 import { Button } from '@/components/ui/button'
