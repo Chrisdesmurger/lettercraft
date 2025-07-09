@@ -260,4 +260,4 @@ export const countries: Country[] = [
   { code: "SH", name: "Saint Helena, Ascension and Tristan da Cunha" },
   { code: "GG", name: "Guernsey" },
   { code: "TK", name: "Tokelau" },
-]\n
+]
