@@ -19,7 +19,7 @@ export default function Home() {
           .eq('id', session.user.id)
           .single()
         if (user && !user.onboarded) {
-          router.push('/onboarding')
+          router.push('/')
         }
       }
     })

@@ -35,9 +35,9 @@ export default function LoginPage() {
         .select('onboarded')
         .eq('id', data.user.id)
         .single()
-      setSuccess('Connexion r\u00e9ussie !')
+      setSuccess('Connexion reussie !')
       if (userRow && !userRow.onboarded) {
-        router.push('/onboarding')
+        router.push('/')
       } else {
         router.push('/')
       }
