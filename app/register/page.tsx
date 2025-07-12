@@ -31,7 +31,7 @@ export default function RegisterPage() {
 
     await supabase.from('users').insert({ id: data.user.id, email, onboarded: false })
 
-    // Assurer la connexion de l'utilisateur apr\u00e8s l'inscription
+    // Assurer la connexion de l'utilisateur apres l'inscription
     const { error: signInError } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -41,8 +41,8 @@ export default function RegisterPage() {
       return
     }
 
-    setSuccess("Inscription r\u00e9ussie !")
-    router.push('/onboarding')
+    setSuccess("Inscription reussie !")
+    router.push('/')
   }
 
   return (
