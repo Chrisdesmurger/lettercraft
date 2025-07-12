@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import toast from 'react-hot-toast'
 import { useRouter } from 'next/navigation'
 import Header from '@/components/Header'
 import { Input } from '@/components/ui/input'
@@ -45,8 +46,10 @@ export default function DocumentUploadPage() {
       })
       setProfileId(id)
       setFilePath(path)
+      toast.success('Document téléversé avec succès!')
     } catch (error) {
       console.error(error)
+      toast.error('Erreur lors du téléversement')
     } finally {
       setUploading(false)
     }
