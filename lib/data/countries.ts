@@ -6,7 +6,7 @@ export interface Country {
 export function codeToFlagEmoji(code: string): string {
   return code
     .toUpperCase()
-    .replace(/./g, char => String.fromCodePoint(char.charCodeAt(0) + 127397));
+    .replace(/./g, (char) => String.fromCodePoint(char.charCodeAt(0) + 127397));
 }
 
 export const countries: Country[] = [
@@ -260,4 +260,4 @@ export const countries: Country[] = [
   { code: "SH", name: "Saint Helena, Ascension and Tristan da Cunha" },
   { code: "GG", name: "Guernsey" },
   { code: "TK", name: "Tokelau" },
-]\n
+];
