@@ -168,6 +168,50 @@ export type Database = {
           flag?: string;
         };
       };
+      candidates_profile: {
+        Row: {
+          id: string;
+          user_id: string;
+          title: string;
+          language: string;
+          description: string | null;
+          file_url: string;
+          uploaded_at: string;
+          first_name: string | null;
+          last_name: string | null;
+          experiences: string[] | null;
+          skills: string[] | null;
+          education: string[] | null;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          title: string;
+          language: string;
+          description?: string | null;
+          file_url: string;
+          uploaded_at?: string;
+          first_name?: string | null;
+          last_name?: string | null;
+          experiences?: string[] | null;
+          skills?: string[] | null;
+          education?: string[] | null;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          title?: string;
+          language?: string;
+          description?: string | null;
+          file_url?: string;
+          uploaded_at?: string;
+          first_name?: string | null;
+          last_name?: string | null;
+          experiences?: string[] | null;
+          skills?: string[] | null;
+          education?: string[] | null;
+        };
+      };
     };
   };
 };
@@ -209,4 +253,5 @@ export const db = {
   userProfiles: () => supabase.from("user_profiles"),
   countries: () => supabase.from("countries"),
   languages: () => supabase.from("languages"),
+  candidatesProfile: () => supabase.from("candidates_profile"),
 };
