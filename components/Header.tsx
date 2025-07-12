@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import Link from 'next/link'
 import { Sparkles, Menu, X } from 'lucide-react'
 
 const Header = () => {
@@ -18,10 +19,10 @@ const Header = () => {
           </div>
 
           <nav className="hidden md:flex space-x-8">
-            <a href="./" className="text-gray-700 hover:text-orange-600 transition-colors">Dashboard</a>
-            <a href="#" className="text-gray-700 hover:text-orange-600 transition-colors">Documents</a>
+            <Link href="/" className="text-gray-700 hover:text-orange-600 transition-colors">Dashboard</Link>
+            <Link href="/upload" className="text-gray-700 hover:text-orange-600 transition-colors">Documents</Link>
             <a href="#" className="text-gray-700 hover:text-orange-600 transition-colors">Générateur</a>
-            <a href="./profile" className="text-gray-700 hover:text-orange-600 transition-colors">Profil</a>
+            <Link href="/profile" className="text-gray-700 hover:text-orange-600 transition-colors">Profil</Link>
           </nav>
 
           <button
@@ -37,10 +38,10 @@ const Header = () => {
       {isMenuOpen && (
         <div className="md:hidden bg-white border-t border-gray-200">
           <div className="px-4 py-2 space-y-1">
-            <a href="#" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md">Dashboard</a>
-            <a href="#" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md">Documents</a>
+            <Link href="/" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md">Dashboard</Link>
+            <Link href="/upload" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md">Documents</Link>
             <a href="#" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md">Générateur</a>
-            <a href="#" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md">Profil</a>
+            <Link href="/profile" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md">Profil</Link>
           </div>
         </div>
       )}
