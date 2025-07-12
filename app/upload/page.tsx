@@ -13,6 +13,7 @@ import { uploadDocument } from '@/services/supabase'
 import { useUser } from '@/hooks/useUser'
 import ProfileTable from '@/components/ProfileTable'
 import { useExtractCVData } from '@/hooks/useExtractCVData'
+import { Loader2 } from 'lucide-react'
 
 export default function DocumentUploadPage() {
   const router = useRouter()
@@ -26,7 +27,7 @@ export default function DocumentUploadPage() {
   const [profileId, setProfileId] = useState<string | null>(null)
   const [filePath, setFilePath] = useState<string | null>(null)
 
-  const { data: extracted } = useExtractCVData(profileId, filePath)
+  const { data: extracted, loading: parsing } = useExtractCVData(profileId, filePath)
 
   useEffect(() => {
     if (!userLoading && !user) router.push('/login')
@@ -100,6 +101,12 @@ export default function DocumentUploadPage() {
                 {uploading ? 'Envoi...' : 'Envoyer'}
               </Button>
             </form>
+            {parsing && (
+              <div className="flex items-center justify-center mt-8">
+                <Loader2 className="mr-2 h-4 w-4 animate-spin text-primary" />
+                Analyse en cours...
+              </div>
+            )}
             {extracted && (
               <div className="mt-8">
                 <ProfileTable data={extracted} />
