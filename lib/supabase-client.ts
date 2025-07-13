@@ -110,6 +110,8 @@ export type Database = {
           phone: string | null;
           country: string | null;
           language: string | null;
+          bio: string | null;
+          avatar_url: string | null;
           birth_date: string | null;
           created_at: string | null;
           updated_at: string | null;
@@ -121,6 +123,8 @@ export type Database = {
           phone?: string | null;
           country?: string | null;
           language?: string | null;
+          bio?: string | null;
+          avatar_url?: string | null;
           birth_date?: string | null;
           created_at?: string | null;
           updated_at?: string | null;
@@ -132,6 +136,8 @@ export type Database = {
           phone?: string | null;
           country?: string | null;
           language?: string | null;
+          bio?: string | null;
+          avatar_url?: string | null;
           birth_date?: string | null;
           created_at?: string | null;
           updated_at?: string | null;

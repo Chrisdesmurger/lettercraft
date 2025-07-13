@@ -76,3 +76,51 @@ export async function setActiveCV(userId: string, cvId: string) {
 
   return { data, error }
 }
+
+// Recadre l'image au centre et la redimensionne en carré
+export async function cropImageToSquare(
+  file: File,
+  size = 256
+): Promise<Blob> {
+  const imageBitmap = await createImageBitmap(file)
+  const side = Math.min(imageBitmap.width, imageBitmap.height)
+  const canvas = document.createElement('canvas')
+  canvas.width = size
+  canvas.height = size
+  const ctx = canvas.getContext('2d')
+  if (!ctx) throw new Error('Canvas not supported')
+  ctx.drawImage(
+    imageBitmap,
+    (imageBitmap.width - side) / 2,
+    (imageBitmap.height - side) / 2,
+    side,
+    side,
+    0,
+    0,
+    size,
+    size
+  )
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (blob) resolve(blob)
+      else reject(new Error('Failed to crop image'))
+    }, 'image/png')
+  })
+}
+
+// Upload de la photo de profil dans le bucket `avatars`
+export async function uploadAvatar(userId: string, file: File) {
+  const cropped = await cropImageToSquare(file)
+  const fileName = `${userId}/${Date.now()}.png`
+  const { data: uploadData, error } = await supabase.storage
+    .from('avatars')
+    .upload(fileName, cropped, { contentType: 'image/png' })
+  if (error) return { error }
+
+  const {
+    data: { publicUrl },
+  } = supabase.storage.from('avatars').getPublicUrl(uploadData.path)
+
+  return { url: publicUrl, path: uploadData.path }
+}
+

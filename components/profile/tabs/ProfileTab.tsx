@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from '@/lib/supabase-client'
+import { uploadAvatar } from '@/lib/profile-utils'
 import { Camera, Mail, Award, Calendar } from 'lucide-react'
 import toast from 'react-hot-toast'
 
@@ -17,6 +18,7 @@ export default function ProfileTab() {
     generation_count: 0
   })
   const [loading, setLoading] = useState(true)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     loadProfile()
@@ -86,6 +88,34 @@ export default function ProfileTab() {
     }
   }
 
+  const triggerAvatarInput = () => {
+    fileInputRef.current?.click()
+  }
+
+  const handleAvatarChange = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
+    if (!session) return
+
+    const result = await uploadAvatar(session.user.id, file)
+    if ('error' in result && result.error) {
+      toast.error("Erreur lors de l'upload")
+      return
+    }
+
+    setProfile({ ...profile, avatar_url: result.url })
+    await supabase
+      .from('user_profiles')
+      .update({ avatar_url: result.url, updated_at: new Date().toISOString() })
+      .eq('user_id', session.user.id)
+  }
+
   if (loading) {
     return <div className="animate-pulse">
       <div className="h-32 bg-gray-200 rounded-lg mb-4"></div>
@@ -110,9 +140,20 @@ export default function ProfileTab() {
               </span>
             )}
           </div>
-          <button className="absolute bottom-0 right-0 bg-white rounded-full p-2 shadow-lg hover:shadow-xl transition-shadow">
+          <button
+            type="button"
+            onClick={triggerAvatarInput}
+            className="absolute bottom-0 right-0 bg-white rounded-full p-2 shadow-lg hover:shadow-xl transition-shadow"
+          >
             <Camera className="w-4 h-4 text-gray-600" />
           </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleAvatarChange}
+            className="hidden"
+          />
         </div>
         <div>
           <h2 className="text-2xl font-bold text-gray-900">
