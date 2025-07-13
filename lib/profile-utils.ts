@@ -1,11 +1,14 @@
 
 import { supabase } from './supabase-client'
 
-export async function updateUserProfile(userId: string, updates: any) {
+// Met à jour ou crée le profil utilisateur dans la table `user_profiles`
+export async function updateUserProfile(
+  userId: string,
+  updates: Record<string, any>
+) {
   const { data, error } = await supabase
-    .from('users')
-    .update(updates)
-    .eq('id', userId)
+    .from('user_profiles')
+    .upsert({ user_id: userId, ...updates }, { onConflict: 'user_id', returning: 'representation' })
     .select()
     .single()
 

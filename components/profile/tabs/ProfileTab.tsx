@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase-client'
 import { Camera, Mail, Award, Calendar } from 'lucide-react'
+import toast from 'react-hot-toast'
 
 export default function ProfileTab() {
   const [profile, setProfile] = useState({
@@ -23,20 +24,32 @@ export default function ProfileTab() {
 
   const loadProfile = async () => {
     try {
-      const { data: { session } } = await supabase.auth.getSession()
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
       if (session) {
-        const { data } = await supabase
+        const { data: userData } = await supabase
           .from('users')
-          .select('*')
+          .select('created_at, generation_count')
           .eq('id', session.user.id)
           .single()
 
-        if (data) {
-          setProfile({
-            ...data,
-            email: session.user.email || ''
-          })
-        }
+        const { data: profileData } = await supabase
+          .from('user_profiles')
+          .select('first_name, last_name, phone, bio, avatar_url')
+          .eq('user_id', session.user.id)
+          .single()
+
+        setProfile({
+          email: session.user.email || '',
+          firstName: profileData?.first_name || '',
+          lastName: profileData?.last_name || '',
+          phone: profileData?.phone || '',
+          bio: profileData?.bio || '',
+          avatar_url: profileData?.avatar_url || '',
+          created_at: userData?.created_at || '',
+          generation_count: userData?.generation_count || 0,
+        })
       }
     } catch (error) {
       console.error('Error loading profile:', error)
@@ -47,7 +60,30 @@ export default function ProfileTab() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Logique de mise à jour du profil
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
+    if (!session) return
+
+    const { error } = await supabase.from('user_profiles').upsert(
+      {
+        user_id: session.user.id,
+        first_name: profile.firstName,
+        last_name: profile.lastName,
+        phone: profile.phone,
+        bio: profile.bio,
+        avatar_url: profile.avatar_url,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'user_id' }
+    )
+
+    if (error) {
+      console.error('Error saving profile:', error)
+      toast.error('Erreur lors de la sauvegarde')
+    } else {
+      toast.success('Profil mis à jour')
+    }
   }
 
   if (loading) {
