@@ -43,12 +43,18 @@ export function useExtractCVData(
           text = ocr.text;
         }
 
-        const extracted = parseText(text);
+        const response = await fetch('/api/extract-cv', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text }),
+        })
+        if (!response.ok) throw new Error('extraction failed')
+        const extracted: ExtractedProfile = await response.json()
 
         await supabase
           .from("candidates_profile")
           .update(extracted)
-          .eq("id", profileId);
+          .eq("id", profileId)
 
         setData(extracted);
       } catch (e: any) {
@@ -78,47 +84,4 @@ async function extractPdfText(file: Blob): Promise<string> {
     text += "\n";
   }
   return text;
-}
-
-function parseText(text: string): ExtractedProfile {
-  const firstNameMatch = text.match(/Pr[eé]nom[:\s]+([A-Za-zÀ-ÖØ-öø-ÿ'-]+)/i);
-  const lastNameMatch = text.match(/Nom[:\s]+([A-Za-zÀ-ÖØ-öø-ÿ'-]+)/i);
-
-  const expMatch = text.match(
-    /(?:Exp[ée]riences?|Experience)([\s\S]*?)(?:Comp[ée]tences|Skills|$)/i,
-  );
-  const experiences = expMatch
-    ? expMatch[1]
-        .split(/\n+/)
-        .map((v) => v.trim())
-        .filter(Boolean)
-    : undefined;
-
-  const skillsMatch = text.match(
-    /(?:Comp[ée]tences|Skills)([\s\S]*?)(?:Formation|Education|$)/i,
-  );
-  const skills = skillsMatch
-    ? skillsMatch[1]
-        .split(/[,\n]+/)
-        .map((v) => v.trim())
-        .filter(Boolean)
-    : undefined;
-
-  const eduMatch = text.match(
-    /(?:Formation|Education)([\s\S]*?)(?:Exp[ée]riences?|Skills|$)/i,
-  );
-  const education = eduMatch
-    ? eduMatch[1]
-        .split(/\n+/)
-        .map((v) => v.trim())
-        .filter(Boolean)
-    : undefined;
-
-  return {
-    first_name: firstNameMatch ? firstNameMatch[1] : undefined,
-    last_name: lastNameMatch ? lastNameMatch[1] : undefined,
-    experiences,
-    skills,
-    education,
-  };
 }
