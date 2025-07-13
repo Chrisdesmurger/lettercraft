@@ -17,6 +17,10 @@ import { codeToFlagEmoji, Country } from "@/lib/data/countries";
 import { Language } from "@/lib/data/languages";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import CVUpload from "@/components/CVUpload";
+import ProfileSettings from "@/components/ProfileSettings";
+import SubscriptionInfo from "@/components/SubscriptionInfo";
 
 interface Profile {
   first_name: string;
@@ -146,105 +150,133 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-amber-50">
-      {/* Header */}
       <Header />
-      {/* Main Content */}
-      <div className="flex items-center justify-center py-10">
-        <Card className="w-full max-w-xl">
-          <CardHeader>
-            <CardTitle>Mon Profil</CardTitle>
-          </CardHeader>
-          <form onSubmit={handleSubmit}>
-            <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="first_name">Prénom</Label>
-                <Input
-                  id="first_name"
-                  name="first_name"
-                  value={profile.first_name}
-                  onChange={handleChange}
-                />
-              </div>
-              <div>
-                <Label htmlFor="last_name">Nom</Label>
-                <Input
-                  id="last_name"
-                  name="last_name"
-                  value={profile.last_name}
-                  onChange={handleChange}
-                />
-              </div>
-              <div>
-                <Label htmlFor="phone">Téléphone</Label>
-                <PhoneInput
-                  id="phone"
-                  name="phone"
-                  defaultCountry="FR"
-                  value={profile.phone || undefined}
-                  onChange={(value) => {
-                    setPhoneError(null);
-                    setProfile((prev) => ({ ...prev, phone: value || "" }));
-                  }}
-                  international
-                />
-                {phoneError && (
-                  <p className="text-red-500 text-sm">{phoneError}</p>
-                )}
-              </div>
-              <div>
-                <Label htmlFor="country">Pays</Label>
-                <select
-                  id="country"
-                  name="country"
-                  value={profile.country}
-                  onChange={handleChange}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                >
-                  <option value="">-- Sélectionner --</option>
-                  {countries.map((c) => (
-                    <option key={c.code} value={c.code}>
-                      {codeToFlagEmoji(c.code)} {c.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <Label htmlFor="language">Langue</Label>
-                <select
-                  id="language"
-                  name="language"
-                  value={profile.language}
-                  onChange={handleChange}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                >
-                  <option value="">-- Sélectionner --</option>
-                  {languages.map((l) => (
-                    <option key={l.code} value={l.code}>
-                      {l.flag} {l.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <Label htmlFor="birth_date">Date de naissance</Label>
-                <Input
-                  id="birth_date"
-                  name="birth_date"
-                  type="date"
-                  value={profile.birth_date}
-                  onChange={handleChange}
-                />
-              </div>
-              {error && <p className="text-red-500 text-sm">{error}</p>}
-              {success && <p className="text-green-600 text-sm">{success}</p>}
-            </CardContent>
-            <CardFooter>
-              <Button type="submit" className="ml-auto">
-                Enregistrer
-              </Button>
-            </CardFooter>
-          </form>
-        </Card>
+      <div className="flex justify-center py-10">
+        <Tabs
+          defaultValue="profile"
+          orientation="vertical"
+          className="flex w-full max-w-4xl gap-4"
+        >
+          <TabsList className="w-40">
+            <TabsTrigger value="profile">Profil</TabsTrigger>
+            <TabsTrigger value="cv">CV</TabsTrigger>
+            <TabsTrigger value="settings">Paramètres</TabsTrigger>
+            <TabsTrigger value="subscription">Abonnement</TabsTrigger>
+          </TabsList>
+          <div className="flex-1">
+            <TabsContent value="profile">
+              <Card className="w-full">
+                <CardHeader>
+                  <CardTitle>Mon Profil</CardTitle>
+                </CardHeader>
+                <form onSubmit={handleSubmit}>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <Label htmlFor="first_name">Prénom</Label>
+                      <Input
+                        id="first_name"
+                        name="first_name"
+                        value={profile.first_name}
+                        onChange={handleChange}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="last_name">Nom</Label>
+                      <Input
+                        id="last_name"
+                        name="last_name"
+                        value={profile.last_name}
+                        onChange={handleChange}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="phone">Téléphone</Label>
+                      <PhoneInput
+                        id="phone"
+                        name="phone"
+                        defaultCountry="FR"
+                        value={profile.phone || undefined}
+                        onChange={(value) => {
+                          setPhoneError(null);
+                          setProfile((prev) => ({
+                            ...prev,
+                            phone: value || "",
+                          }));
+                        }}
+                        international
+                      />
+                      {phoneError && (
+                        <p className="text-red-500 text-sm">{phoneError}</p>
+                      )}
+                    </div>
+                    <div>
+                      <Label htmlFor="country">Pays</Label>
+                      <select
+                        id="country"
+                        name="country"
+                        value={profile.country}
+                        onChange={handleChange}
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                      >
+                        <option value="">-- Sélectionner --</option>
+                        {countries.map((c) => (
+                          <option key={c.code} value={c.code}>
+                            {codeToFlagEmoji(c.code)} {c.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <Label htmlFor="language">Langue</Label>
+                      <select
+                        id="language"
+                        name="language"
+                        value={profile.language}
+                        onChange={handleChange}
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                      >
+                        <option value="">-- Sélectionner --</option>
+                        {languages.map((l) => (
+                          <option key={l.code} value={l.code}>
+                            {l.flag} {l.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <Label htmlFor="birth_date">Date de naissance</Label>
+                      <Input
+                        id="birth_date"
+                        name="birth_date"
+                        type="date"
+                        value={profile.birth_date}
+                        onChange={handleChange}
+                      />
+                    </div>
+                    {error && <p className="text-red-500 text-sm">{error}</p>}
+                    {success && (
+                      <p className="text-green-600 text-sm">{success}</p>
+                    )}
+                  </CardContent>
+                  <CardFooter>
+                    <Button type="submit" className="ml-auto">
+                      Enregistrer
+                    </Button>
+                  </CardFooter>
+                </form>
+              </Card>
+            </TabsContent>
+            <TabsContent value="cv">
+              <CVUpload />
+            </TabsContent>
+            <TabsContent value="settings">
+              <ProfileSettings />
+            </TabsContent>
+            <TabsContent value="subscription">
+              <SubscriptionInfo />
+            </TabsContent>
+          </div>
+        </Tabs>
       </div>
     </div>
   );
