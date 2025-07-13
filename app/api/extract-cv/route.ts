@@ -6,15 +6,13 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 export async function POST(request: NextRequest) {
   try {
     const form = await request.formData()
-    const file = form.get('file')
-    if (!file || !(file instanceof File)) {
+    const file = form.get('file') as Blob | null
+    if (!file || typeof (file as any).arrayBuffer !== 'function') {
       return NextResponse.json({ error: 'Fichier manquant' }, { status: 400 })
     }
 
-    const arrayBuffer = await file.arrayBuffer()
-    const uploadFile = new File([arrayBuffer], file.name, { type: file.type })
     const uploaded = await openai.files.create({
-      file: uploadFile,
+      file: file as any,
       purpose: 'assistants',
     })
 
