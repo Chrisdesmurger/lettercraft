@@ -29,7 +29,7 @@ export async function extractResumeDataFromFile(file: File): Promise<ExtractedPr
     body: JSON.stringify({ text }),
   })
   if (!res.ok) throw new Error('extraction failed')
-  return res.json()
+  return (await res.json()) as ExtractedProfile
 }
 
 async function extractPdfText(file: File): Promise<string> {
