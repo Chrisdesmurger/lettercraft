@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from '@/lib/supabase-client'
 import { Camera, Mail, Award, Calendar } from 'lucide-react'
+import toast from 'react-hot-toast'
 
 export default function ProfileTab() {
   const [profile, setProfile] = useState({
@@ -16,6 +17,8 @@ export default function ProfileTab() {
     generation_count: 0
   })
   const [loading, setLoading] = useState(true)
+  const [uploading, setUploading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     loadProfile()
@@ -25,16 +28,35 @@ export default function ProfileTab() {
     try {
       const { data: { session } } = await supabase.auth.getSession()
       if (session) {
+        // Charger depuis user_profiles au lieu de users
         const { data } = await supabase
-          .from('users')
+          .from('user_profiles')
           .select('*')
-          .eq('id', session.user.id)
+          .eq('user_id', session.user.id)
           .single()
 
         if (data) {
           setProfile({
-            ...data,
-            email: session.user.email || ''
+            email: session.user.email || '',
+            firstName: data.first_name || '',
+            lastName: data.last_name || '',
+            phone: data.phone || '',
+            bio: data.bio || '',
+            avatar_url: data.avatar_url || '',
+            created_at: data.created_at || '',
+            generation_count: 0 // TODO: récupérer depuis user_quotas
+          })
+        } else {
+          // Profil n'existe pas encore, utiliser les données de base
+          setProfile({
+            email: session.user.email || '',
+            firstName: '',
+            lastName: '',
+            phone: '',
+            bio: '',
+            avatar_url: '',
+            created_at: session.user.created_at || '',
+            generation_count: 0
           })
         }
       }
@@ -42,6 +64,108 @@ export default function ProfileTab() {
       console.error('Error loading profile:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click()
+  }
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Vérifications côté client
+    if (!file.type.startsWith('image/')) {
+      toast.error('Veuillez sélectionner une image')
+      return
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('L\'image doit faire moins de 5MB')
+      return
+    }
+
+    setUploading(true)
+    
+    try {
+      // Obtenir le token d'authentification
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      console.log('Session status:', {
+        hasSession: !!session,
+        hasUser: !!session?.user,
+        userId: session?.user?.id,
+        hasAccessToken: !!session?.access_token,
+        tokenPreview: session?.access_token?.substring(0, 20) + '...'
+      })
+      
+      if (!session) {
+        toast.error('Vous devez être connecté pour changer votre photo')
+        return
+      }
+
+      console.log('File to upload:', {
+        name: file.name,
+        size: file.size,
+        type: file.type
+      })
+
+      const formData = new FormData()
+      formData.append('avatar', file)
+
+      const response = await fetch('/api/upload-avatar', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: formData
+      })
+
+      console.log('API Response:', {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        console.error('API Error Details:', errorData)
+        throw new Error(errorData.error || 'Erreur lors de l\'upload')
+      }
+
+      const { avatar_url } = await response.json()
+      
+      // Mettre à jour le profil côté client
+      const { error: updateError } = await supabase
+        .from('user_profiles')
+        .upsert({
+          user_id: session.user.id,
+          avatar_url: avatar_url,
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id'
+        })
+
+      if (updateError) {
+        console.error('Error updating profile:', updateError)
+        // Continuer même si la mise à jour échoue
+      }
+      
+      // Mettre à jour l'état local
+      setProfile(prev => ({ ...prev, avatar_url }))
+      
+      toast.success('Photo de profil mise à jour!')
+      
+    } catch (error) {
+      console.error('Error uploading avatar:', error)
+      toast.error(error instanceof Error ? error.message : 'Erreur lors de l\'upload')
+    } finally {
+      setUploading(false)
+      // Reset input pour permettre de re-sélectionner le même fichier
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
     }
   }
 
@@ -62,6 +186,15 @@ export default function ProfileTab() {
 
   return (
     <div className="space-y-6">
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleAvatarChange}
+        className="hidden"
+      />
+      
       {/* Profile Header */}
       <div className="flex items-center space-x-6">
         <div className="relative">
@@ -74,8 +207,17 @@ export default function ProfileTab() {
               </span>
             )}
           </div>
-          <button className="absolute bottom-0 right-0 bg-white rounded-full p-2 shadow-lg hover:shadow-xl transition-shadow">
-            <Camera className="w-4 h-4 text-gray-600" />
+          <button 
+            onClick={handleAvatarClick}
+            disabled={uploading}
+            title={uploading ? "Upload en cours..." : "Changer la photo de profil"}
+            className="absolute bottom-0 right-0 bg-white rounded-full p-2 shadow-lg hover:shadow-xl transition-shadow disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {uploading ? (
+              <div className="w-4 h-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+            ) : (
+              <Camera className="w-4 h-4 text-gray-600" />
+            )}
           </button>
         </div>
         <div>
