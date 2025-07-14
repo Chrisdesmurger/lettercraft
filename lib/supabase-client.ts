@@ -111,6 +111,8 @@ export type Database = {
           country: string | null;
           language: string | null;
           birth_date: string | null;
+          avatar_url: string | null;
+          bio: string | null;
           created_at: string | null;
           updated_at: string | null;
         };
@@ -122,6 +124,8 @@ export type Database = {
           country?: string | null;
           language?: string | null;
           birth_date?: string | null;
+          avatar_url?: string | null;
+          bio?: string | null;
           created_at?: string | null;
           updated_at?: string | null;
         };
@@ -133,6 +137,8 @@ export type Database = {
           country?: string | null;
           language?: string | null;
           birth_date?: string | null;
+          avatar_url?: string | null;
+          bio?: string | null;
           created_at?: string | null;
           updated_at?: string | null;
         };

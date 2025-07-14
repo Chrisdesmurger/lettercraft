@@ -10,9 +10,10 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { languages } from '@/lib/data/languages'
 import { uploadDocument } from '@/services/supabase'
+import { supabase } from '@/lib/supabase-client'
 import { useUser } from '@/hooks/useUser'
 import ProfileTable from '@/components/ProfileTable'
-import { useExtractCVData } from '@/hooks/useExtractCVData'
+import { extractResumeDataFromFile, ExtractedProfile } from '@/services/resumeExtractor'
 
 export default function DocumentUploadPage() {
   const router = useRouter()
@@ -23,10 +24,7 @@ export default function DocumentUploadPage() {
   const [language, setLanguage] = useState('')
   const [description, setDescription] = useState('')
   const [uploading, setUploading] = useState(false)
-  const [profileId, setProfileId] = useState<string | null>(null)
-  const [filePath, setFilePath] = useState<string | null>(null)
-
-  const { data: extracted } = useExtractCVData(profileId, filePath)
+  const [extracted, setExtracted] = useState<ExtractedProfile | null>(null)
 
   useEffect(() => {
     if (!userLoading && !user) router.push('/login')
@@ -37,15 +35,20 @@ export default function DocumentUploadPage() {
     if (!user || !file) return
     setUploading(true)
     try {
-      const { id, path } = await uploadDocument({
+      const { id } = await uploadDocument({
         userId: user.id,
         file,
         title,
         language,
         description,
       })
-      setProfileId(id)
-      setFilePath(path)
+      const data = await extractResumeDataFromFile(file)
+      await supabase
+        .from('candidates_profile')
+        .update(data)
+        .eq('id', id)
+      setExtracted(data)
+
       toast.success('Document téléversé avec succès!')
     } catch (error) {
       console.error(error)
