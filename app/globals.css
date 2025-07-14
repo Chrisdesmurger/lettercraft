@@ -1,4 +1,4 @@
-﻿/* /app/globals.css ou /styles/globals.css */
+/* /app/globals.css ou /styles/globals.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -58,4 +58,37 @@
     body {
         @apply bg-background text-foreground;
     }
+}
+css /* Animations pour les onglets */
+@keyframes slideIn {
+    from
+
+{
+    opacity: 0;
+    transform: translateX(20px);
+}
+
+to {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+}
+
+.tab-content {
+    animation: slideIn 0.3s ease-out;
+}
+
+/* Style pour les switches/toggles */
+input[type="checkbox"] {
+    @apply rounded border-gray-300 text-orange-600 focus:ring-orange-500;
+}
+
+/* Amélioration du style des tables */
+table {
+    @apply min-w-full divide-y divide-gray-200;
+}
+
+tbody tr:hover {
+    @apply bg-gray-50;
 }
