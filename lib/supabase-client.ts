@@ -230,6 +230,138 @@ export type Database = {
           is_active?: boolean | null;
         };
       };
+      job_offers: {
+        Row: {
+          id: string;
+          user_id: string;
+          title: string;
+          company: string;
+          description: string;
+          requirements: string[] | null;
+          location: string | null;
+          salary_range: string | null;
+          employment_type: string | null;
+          source_url: string | null;
+          extracted_keywords: string[] | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          title: string;
+          company: string;
+          description: string;
+          requirements?: string[] | null;
+          location?: string | null;
+          salary_range?: string | null;
+          employment_type?: string | null;
+          source_url?: string | null;
+          extracted_keywords?: string[] | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          title?: string;
+          company?: string;
+          description?: string;
+          requirements?: string[] | null;
+          location?: string | null;
+          salary_range?: string | null;
+          employment_type?: string | null;
+          source_url?: string | null;
+          extracted_keywords?: string[] | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      letter_questionnaire_responses: {
+        Row: {
+          id: string;
+          user_id: string;
+          job_offer_id: string;
+          cv_id: string;
+          motivation: string;
+          experience_highlight: any;
+          skills_match: string[];
+          company_values: string;
+          additional_context: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          job_offer_id: string;
+          cv_id: string;
+          motivation: string;
+          experience_highlight: any;
+          skills_match: string[];
+          company_values: string;
+          additional_context?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          job_offer_id?: string;
+          cv_id?: string;
+          motivation?: string;
+          experience_highlight?: any;
+          skills_match?: string[];
+          company_values?: string;
+          additional_context?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      generated_letters: {
+        Row: {
+          id: string;
+          user_id: string;
+          questionnaire_response_id: string;
+          job_offer_id: string;
+          cv_id: string;
+          content: string;
+          html_content: string | null;
+          pdf_url: string | null;
+          generation_settings: any;
+          openai_model: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          questionnaire_response_id: string;
+          job_offer_id: string;
+          cv_id: string;
+          content: string;
+          html_content?: string | null;
+          pdf_url?: string | null;
+          generation_settings?: any;
+          openai_model?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          questionnaire_response_id?: string;
+          job_offer_id?: string;
+          cv_id?: string;
+          content?: string;
+          html_content?: string | null;
+          pdf_url?: string | null;
+          generation_settings?: any;
+          openai_model?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
     };
   };
 };
@@ -272,4 +404,7 @@ export const db = {
   countries: () => supabase.from("countries"),
   languages: () => supabase.from("languages"),
   candidatesProfile: () => supabase.from("candidates_profile"),
+  jobOffers: () => supabase.from("job_offers"),
+  letterQuestionnaireResponses: () => supabase.from("letter_questionnaire_responses"),
+  generatedLetters: () => supabase.from("generated_letters"),
 };
