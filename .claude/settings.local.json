@@ -1,6 +1,11 @@
 {
   "permissions": {
     "allow": [
+      "Bash(npm install:*)",
+      "Bash(npx @next/codemod@latest:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(npm run dev:*)",
+      "Bash(git add:*)"
     ],
     "deny": []
   }

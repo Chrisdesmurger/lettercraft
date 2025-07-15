@@ -21,7 +21,7 @@ const Header = () => {
           <nav className="hidden md:flex space-x-8">
             <Link href="/" className="text-gray-700 hover:text-orange-600 transition-colors">Dashboard</Link>
             <Link href="/upload" className="text-gray-700 hover:text-orange-600 transition-colors">Documents</Link>
-            <a href="#" className="text-gray-700 hover:text-orange-600 transition-colors">Générateur</a>
+            <Link href="/generate-letter" className="text-gray-700 hover:text-orange-600 transition-colors">Générateur</Link>
             <Link href="/profile" className="text-gray-700 hover:text-orange-600 transition-colors">Profil</Link>
           </nav>
 
@@ -40,7 +40,7 @@ const Header = () => {
           <div className="px-4 py-2 space-y-1">
             <Link href="/" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md">Dashboard</Link>
             <Link href="/upload" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md">Documents</Link>
-            <a href="#" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md">Générateur</a>
+            <Link href="/generate-letter" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md">Générateur</Link>
             <Link href="/profile" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md">Profil</Link>
           </div>
         </div>
