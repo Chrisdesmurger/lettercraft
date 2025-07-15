@@ -113,6 +113,8 @@ export type Database = {
           birth_date: string | null;
           avatar_url: string | null;
           bio: string | null;
+          subscription_tier: 'free' | 'premium';
+          subscription_end_date: string | null;
           created_at: string | null;
           updated_at: string | null;
         };
@@ -126,6 +128,8 @@ export type Database = {
           birth_date?: string | null;
           avatar_url?: string | null;
           bio?: string | null;
+          subscription_tier?: 'free' | 'premium';
+          subscription_end_date?: string | null;
           created_at?: string | null;
           updated_at?: string | null;
         };
@@ -139,6 +143,8 @@ export type Database = {
           birth_date?: string | null;
           avatar_url?: string | null;
           bio?: string | null;
+          subscription_tier?: 'free' | 'premium';
+          subscription_end_date?: string | null;
           created_at?: string | null;
           updated_at?: string | null;
         };
@@ -188,6 +194,8 @@ export type Database = {
           experiences: string[] | null;
           skills: string[] | null;
           education: string[] | null;
+          file_size: number | null;
+          is_active: boolean | null;
         };
         Insert: {
           id?: string;
@@ -202,6 +210,8 @@ export type Database = {
           experiences?: string[] | null;
           skills?: string[] | null;
           education?: string[] | null;
+          file_size?: number | null;
+          is_active?: boolean | null;
         };
         Update: {
           id?: string;
@@ -216,6 +226,8 @@ export type Database = {
           experiences?: string[] | null;
           skills?: string[] | null;
           education?: string[] | null;
+          file_size?: number | null;
+          is_active?: boolean | null;
         };
       };
     };
