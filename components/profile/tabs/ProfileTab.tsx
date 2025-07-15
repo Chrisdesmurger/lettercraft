@@ -1,11 +1,13 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase-client'
 import { Camera, Mail, Award, Calendar } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 export default function ProfileTab() {
+  const router = useRouter()
   const [profile, setProfile] = useState({
     email: '',
     firstName: '',
@@ -230,7 +232,10 @@ export default function ProfileTab() {
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-gray-50 rounded-lg p-4">
+        <div 
+          className="bg-gray-50 rounded-lg p-4 cursor-pointer hover:bg-gray-100 transition-colors"
+          onClick={() => router.push('/dashboard/letters')}
+        >
           <div className="flex items-center space-x-3">
             <div className="bg-blue-100 rounded-lg p-2">
               <Award className="w-5 h-5 text-blue-600" />
