@@ -1,8 +1,8 @@
 'use client'
 
-import { Suspense } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useUser } from '@/hooks/useUser'
+import { supabase } from '@/lib/supabase-client'
 import { useUserProfile } from '@/hooks/useUserProfile'
 import { useUserCVs } from '@/hooks/useUserCVs'
 import LetterGenerationFlow from '@/components/letter-generation/LetterGenerationFlow'
@@ -27,10 +27,22 @@ function LoadingSkeleton() {
 }
 
 function GenerateLetterContent() {
-  const { user, isLoading: userLoading } = useUser()
+  const [user, setUser] = useState<any>(null)
+  const [userLoading, setUserLoading] = useState(true)
   const { profile, loading: profileLoading } = useUserProfile()
   const { cvs, loading: cvsLoading } = useUserCVs()
   const router = useRouter()
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        router.push('/login')
+      } else {
+        setUser(session.user)
+        setUserLoading(false)
+      }
+    })
+  }, [router])
 
   const isLoading = userLoading || profileLoading || cvsLoading
   const activeCV = cvs.find(cv => cv.is_active)
@@ -41,7 +53,7 @@ function GenerateLetterContent() {
 
   // Redirection si non authentifié
   if (!isLoading && !user) {
-    router.push('/auth/login')
+    router.push('/login')
     return null
   }
 

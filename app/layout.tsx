@@ -1,7 +1,6 @@
 import './globals.css'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
-import AutoLogout from '@/components/auto-logout'
 import ToastProvider from '@/components/toaster'
 
 const inter = Inter({ 
@@ -30,7 +29,6 @@ export default function RootLayout({
   return (
     <html lang="fr" className="h-full">
       <body className={`${inter.className} h-full antialiased`}>
-        <AutoLogout />
         <ToastProvider />
         {children}
       </body>

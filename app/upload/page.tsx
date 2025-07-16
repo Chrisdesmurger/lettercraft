@@ -11,13 +11,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { languages } from '@/lib/data/languages'
 import { uploadDocument } from '@/services/supabase'
 import { supabase } from '@/lib/supabase-client'
-import { useUser } from '@/hooks/useUser'
 import ProfileTable from '@/components/ProfileTable'
 import { extractResumeDataFromFile, ExtractedProfile } from '@/services/resumeExtractor'
 
 export default function DocumentUploadPage() {
   const router = useRouter()
-  const { user, isLoading: userLoading } = useUser()
+  const [user, setUser] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
 
   const [file, setFile] = useState<File | null>(null)
   const [title, setTitle] = useState('')
@@ -27,16 +27,25 @@ export default function DocumentUploadPage() {
   const [extracted, setExtracted] = useState<ExtractedProfile | null>(null)
 
   useEffect(() => {
-    if (!userLoading && !user) router.push('/login')
-  }, [userLoading, user, router])
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        router.push('/login')
+      } else {
+        setUser(session.user)
+        setLoading(false)
+      }
+    })
+  }, [router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!user || !file) return
     setUploading(true)
     try {
+      const userId = user.id
+      
       const { id } = await uploadDocument({
-        userId: user.id,
+        userId,
         file,
         title,
         language,
@@ -56,6 +65,17 @@ export default function DocumentUploadPage() {
     } finally {
       setUploading(false)
     }
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-amber-50">
+        <Header />
+        <div className="flex items-center justify-center py-10">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+        </div>
+      </div>
+    )
   }
 
   return (

@@ -5,9 +5,12 @@ import { supabase } from '@/lib/supabase-client'
 
 export default function Dashboard() {
   const router = useRouter()
+  
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) router.push('/login')
+      if (!session) {
+        router.push('/login')
+      }
     })
   }, [router])
   return (

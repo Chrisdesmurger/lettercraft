@@ -64,7 +64,30 @@ export async function POST(request: NextRequest) {
 
         const letter = completion.choices[0].message.content
 
-        // Sauvegarder le quota utilis�
+        // Sauvegarder la lettre générée dans la base de données
+        const { data: savedLetter, error: saveError } = await supabase
+            .from('generated_letters')
+            .insert({
+                user_id: user.id,
+                content: letter || '',
+                html_content: null,
+                pdf_url: null,
+                generation_settings: settings,
+                openai_model: 'gpt-4',
+                // Ces champs sont requis selon le schéma mais on peut les laisser vides pour l'instant
+                questionnaire_response_id: 'temp-' + Date.now(),
+                job_offer_id: 'temp-' + Date.now(),
+                cv_id: 'temp-' + Date.now()
+            })
+            .select()
+            .single()
+
+        if (saveError) {
+            console.error('Erreur lors de la sauvegarde:', saveError)
+            // Continuer même si la sauvegarde échoue
+        }
+
+        // Sauvegarder le quota utilisé
         await supabase.from('user_quotas').upsert({
             user_id: user.id,
             letters_generated: 1
@@ -73,7 +96,7 @@ export async function POST(request: NextRequest) {
             ignoreDuplicates: false
         })
 
-        return NextResponse.json({ letter })
+        return NextResponse.json({ letter, letterId: savedLetter?.id })
     } catch (error) {
         console.error('Erreur:', error)
         return NextResponse.json(
