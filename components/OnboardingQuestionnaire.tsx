@@ -104,5 +104,146 @@ export default function OnboardingQuestionnaire({
     loadExistingResponses()
   }, [user, setValue])
 
-  // ... reste du code avec saveResponse callback qui utilise maintenant user correctement
+  // Sauvegarde automatique des réponses
+  const saveResponse = useCallback(async (questionId: string, response: string) => {
+    if (!user) return
+
+    setSaving(questionId)
+    try {
+      await saveOnboardingResponse(user.id, selectedCategory, questionId, response)
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde:', error)
+      toast.error('Erreur lors de la sauvegarde')
+    } finally {
+      setSaving(null)
+    }
+  }, [user, selectedCategory])
+
+  // Mise à jour des questions quand la catégorie change
+  useEffect(() => {
+    if (selectedCategory) {
+      const categoryQuestions = questionsByCategory[selectedCategory] || []
+      setQuestions(categoryQuestions)
+      
+      // Informer le parent du changement
+      if (onUpdate) {
+        onUpdate({
+          category: selectedCategory,
+          responses: watch('responses')
+        })
+      }
+    }
+  }, [selectedCategory, onUpdate, watch])
+
+  const handleNext = () => {
+    const formData = {
+      category: selectedCategory,
+      responses: watch('responses')
+    }
+    
+    if (onUpdate) {
+      onUpdate(formData)
+    }
+    
+    if (onNext) {
+      onNext()
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Loader2 className="h-6 w-6 animate-spin" />
+        <span className="ml-2">Chargement...</span>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Sélection de catégorie */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-3">
+          Quelle est votre spécialité ?
+        </label>
+        <div className="grid grid-cols-2 gap-3">
+          {categories.map((category) => (
+            <button
+              key={category.value}
+              type="button"
+              onClick={() => setValue('category', category.value)}
+              className={`p-4 border rounded-lg text-left transition-colors ${
+                selectedCategory === category.value
+                  ? 'border-blue-500 bg-blue-50 text-blue-700'
+                  : 'border-gray-200 hover:border-gray-300'
+              }`}
+            >
+              {category.label}
+            </button>
+          ))}
+        </div>
+        {errors.category && (
+          <p className="mt-1 text-sm text-red-600">{errors.category.message}</p>
+        )}
+      </div>
+
+      {/* Questions dynamiques */}
+      <AnimatePresence mode="wait">
+        {selectedCategory && questions.length > 0 && (
+          <motion.div
+            key={selectedCategory}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="space-y-4"
+          >
+            {questions.map((question) => (
+              <div key={question.id}>
+                <Controller
+                  name={`responses.${question.id}`}
+                  control={control}
+                  render={({ field }) => (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        {question.text}
+                      </label>
+                      <textarea
+                        {...field}
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        rows={3}
+                        placeholder={question.placeholder}
+                        onChange={(e) => {
+                          field.onChange(e.target.value)
+                          saveResponse(question.id, e.target.value)
+                        }}
+                      />
+                      {saving === question.id && (
+                        <div className="mt-1 flex items-center text-sm text-gray-500">
+                          <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                          Sauvegarde...
+                        </div>
+                      )}
+                    </div>
+                  )}
+                />
+              </div>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Bouton Suivant */}
+      {selectedCategory && questions.length > 0 && (
+        <div className="flex justify-end pt-4">
+          <Button
+            onClick={handleNext}
+            className="flex items-center"
+          >
+            Continuer
+            <ChevronRight className="ml-1 h-4 w-4" />
+          </Button>
+        </div>
+      )}
+    </div>
+  )
 }

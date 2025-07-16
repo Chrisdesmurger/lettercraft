@@ -5,7 +5,13 @@
       "Bash(npx @next/codemod@latest:*)",
       "Bash(npm uninstall:*)",
       "Bash(npm run dev:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(rmdir:*)",
+      "Bash(del package-lock.json)",
+      "Bash(rm:*)",
+      "Bash(git push:*)",
+      "Bash(pnpm build:*)",
+      "Bash(npm run build:*)"
     ],
     "deny": []
   }

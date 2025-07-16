@@ -1,4 +1,4 @@
-LetterPreview.tsx/**
+/**
  * Composant d'aperçu et de téléchargement de la lettre
  * Permet de prévisualiser, éditer et exporter la lettre
  */

@@ -1,9 +1,10 @@
 'use client'
 
+import { useState } from 'react'
 import { Check, X, Zap } from 'lucide-react'
 
 export default function SubscriptionTab() {
-  const currentPlan = 'free' // ou 'premium'
+  const [currentPlan] = useState<'free' | 'premium'>('free') // ou 'premium'
 
   const plans = [
     {
