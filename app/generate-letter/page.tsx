@@ -27,7 +27,7 @@ function LoadingSkeleton() {
 }
 
 function GenerateLetterContent() {
-  const { user, loading: userLoading } = useUser()
+  const { user, isLoading: userLoading } = useUser()
   const { profile, loading: profileLoading } = useUserProfile()
   const { cvs, loading: cvsLoading } = useUserCVs()
   const router = useRouter()

@@ -10,10 +10,5 @@
     "app/api/generate-letter/route.ts": {
       "maxDuration": 30
     }
-  },
-  "env": {
-    "NEXT_PUBLIC_SUPABASE_URL": "@supabase_url",
-    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "@supabase_anon_key",
-    "OPENAI_API_KEY": "@openai_api_key"
   }
 }

@@ -17,7 +17,7 @@ import { extractResumeDataFromFile, ExtractedProfile } from '@/services/resumeEx
 
 export default function DocumentUploadPage() {
   const router = useRouter()
-  const { user, loading: userLoading } = useUser()
+  const { user, isLoading: userLoading } = useUser()
 
   const [file, setFile] = useState<File | null>(null)
   const [title, setTitle] = useState('')

@@ -109,7 +109,7 @@ interface FlowData {
 
 export default function LetterCreationFlow() {
     const router = useRouter()
-    const { user, loading: userLoading } = useUser() // Récupérer loading
+    const { user, isLoading: userLoading } = useUser() // Récupérer loading
     const [currentStep, setCurrentStep] = useState(0)
     const [flowData, setFlowData] = useState<FlowData>({})
     const [isValidating, setIsValidating] = useState(false)

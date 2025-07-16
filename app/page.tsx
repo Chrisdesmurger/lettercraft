@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import ModernWebApp from '@/components/ModernWebApp'
+import ModernWebApp from '@/components/modernwebapp'
 import { supabase } from '@/lib/supabase-client'
 
 export default function Home() {
