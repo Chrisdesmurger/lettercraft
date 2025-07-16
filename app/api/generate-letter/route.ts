@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
         const { data: { user } } = await supabase.auth.getUser()
 
         if (!user) {
-            return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+            return NextResponse.json({ error: 'Non autorisÃ©' }, { status: 401 })
         }
 
         const body = await request.json()
@@ -22,28 +22,28 @@ export async function POST(request: NextRequest) {
 
         // Construire le prompt pour OpenAI
         const prompt = `
-    Génère une lettre de motivation professionnelle avec les informations suivantes:
+    GÃ©nÃ¨re une lettre de motivation professionnelle avec les informations suivantes:
     
     Profil du candidat:
-    - Catégorie: ${profile.category}
+    - CatÃ©gorie: ${profile.category}
     - Stack/Expertise: ${profile.responses.stack_expertise}
     - Projet phare: ${profile.responses.project_proud}
-    - Résolution de problèmes: ${profile.responses.problem_solving}
+    - RÃ©solution de problÃ¨mes: ${profile.responses.problem_solving}
     - Culture d'apprentissage: ${profile.responses.learning_culture}
-    - Objectifs de carrière: ${profile.responses.career_goals}
+    - Objectifs de carriÃ¨re: ${profile.responses.career_goals}
     
     Offre d'emploi:
     - Poste: ${jobOffer.title}
     - Entreprise: ${jobOffer.company}
     - Description: ${jobOffer.description}
     
-    Paramètres:
+    ParamÃ¨tres:
     - Langue: ${settings.language}
     - Ton: ${settings.tone}
     - Longueur: environ ${settings.length} mots
-    - Mettre en avant l'expérience: ${settings.emphasizeExperience ? 'Oui' : 'Non'}
+    - Mettre en avant l'expÃ©rience: ${settings.emphasizeExperience ? 'Oui' : 'Non'}
     
-    La lettre doit être structurée, personnalisée et convaincante.
+    La lettre doit Ãªtre structurÃ©e, personnalisÃ©e et convaincante.
     `
 
         const completion = await openai.chat.completions.create({
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
             messages: [
                 {
                     role: "system",
-                    content: "Tu es un expert en rédaction de lettres de motivation professionnelles."
+                    content: "Tu es un expert en rÃ©daction de lettres de motivation professionnelles."
                 },
                 {
                     role: "user",
@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
 
         const letter = completion.choices[0].message.content
 
-        // Sauvegarder le quota utilisé
+        // Sauvegarder le quota utilisï¿½
         await supabase.from('user_quotas').upsert({
             user_id: user.id,
             letters_generated: 1
@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
     } catch (error) {
         console.error('Erreur:', error)
         return NextResponse.json(
-            { error: 'Erreur lors de la génération' },
+            { error: 'Erreur lors de la gÃ©nÃ©ration' },
             { status: 500 }
         )
     }

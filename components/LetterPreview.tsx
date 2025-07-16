@@ -5,6 +5,7 @@ LetterPreview.tsx/**
 
 import React, { useState, useRef } from 'react'
 import { motion } from 'framer-motion'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
@@ -30,6 +31,7 @@ interface LetterPreviewProps {
 
 export default function LetterPreview({ data, onUpdate, onNext }: LetterPreviewProps) {
   const { user } = useUser()
+  const router = useRouter()
   const [isEditing, setIsEditing] = useState(false)
   const [editedLetter, setEditedLetter] = useState(data?.generatedLetter || '')
   const [copied, setCopied] = useState(false)
