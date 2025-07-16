@@ -3,9 +3,12 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
 import { Sparkles, Menu, X } from 'lucide-react'
+import { useI18n } from '@/lib/i18n-context'
+import LanguageSwitcher from '@/components/LanguageSwitcher'
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const { t } = useI18n()
 
   return (
     <header className="bg-white/80 backdrop-blur-md border-b border-orange-100/50 sticky top-0 z-50">
@@ -19,11 +22,15 @@ const Header = () => {
           </div>
 
           <nav className="hidden md:flex space-x-8">
-            <Link href="/" className="text-gray-700 hover:text-orange-600 transition-colors">Dashboard</Link>
-            <Link href="/generate-letter" className="text-gray-700 hover:text-orange-600 transition-colors">Générateur</Link>
-            <Link href="/dashboard/letters" className="text-gray-700 hover:text-orange-600 transition-colors">Mes Lettres</Link>
-            <Link href="/profile" className="text-gray-700 hover:text-orange-600 transition-colors">Profil</Link>
+            <Link href="/" className="text-gray-700 hover:text-orange-600 transition-colors">{t('navigation.dashboard')}</Link>
+            <Link href="/generate-letter" className="text-gray-700 hover:text-orange-600 transition-colors">{t('navigation.generator')}</Link>
+            <Link href="/dashboard/letters" className="text-gray-700 hover:text-orange-600 transition-colors">{t('navigation.letters')}</Link>
+            <Link href="/profile" className="text-gray-700 hover:text-orange-600 transition-colors">{t('navigation.profile')}</Link>
           </nav>
+
+          <div className="hidden md:flex items-center space-x-4">
+            <LanguageSwitcher />
+          </div>
 
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -38,10 +45,13 @@ const Header = () => {
       {isMenuOpen && (
         <div className="md:hidden bg-white border-t border-gray-200">
           <div className="px-4 py-2 space-y-1">
-            <Link href="/" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md">Dashboard</Link>
-            <Link href="/generate-letter" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md">Générateur</Link>
-            <Link href="/dashboard/letters" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md">Mes Lettres</Link>
-            <Link href="/profile" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md">Profil</Link>
+            <Link href="/" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md">{t('navigation.dashboard')}</Link>
+            <Link href="/generate-letter" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md">{t('navigation.generator')}</Link>
+            <Link href="/dashboard/letters" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md">{t('navigation.letters')}</Link>
+            <Link href="/profile" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md">{t('navigation.profile')}</Link>
+            <div className="px-3 py-2">
+              <LanguageSwitcher />
+            </div>
           </div>
         </div>
       )}
