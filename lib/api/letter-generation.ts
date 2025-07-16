@@ -37,6 +37,12 @@ export async function generateLetter(params: GenerateLetterParams): Promise<stri
     }
 
     const data = await response.json()
+    
+    // Déclencher l'événement pour notifier les autres composants
+    if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('letter-generated'))
+    }
+    
     return data.letter
 }
 

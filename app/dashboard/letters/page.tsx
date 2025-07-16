@@ -10,6 +10,7 @@ import { AlertCircle, FileText } from 'lucide-react'
 
 export default function LettersPage() {
   const router = useRouter()
+  const [user, setUser] = useState<any>(null)
   const [letters, setLetters] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -20,24 +21,19 @@ export default function LettersPage() {
       if (!session) {
         router.push('/login')
       } else {
+        setUser(session.user)
         setLoading(false)
-        // Récupérer les lettres
-        fetchLetters()
+        fetchLetters(session.user)
       }
     })
   }, [router])
 
-  const fetchLetters = async () => {
+  const fetchLetters = async (currentUser: any) => {
+    if (!currentUser) return
+    
     try {
       setIsLoading(true)
       setError(null)
-      
-      // Récupérer l'utilisateur actuel
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        router.push('/login')
-        return
-      }
 
       // Récupérer les lettres de l'utilisateur
       const { data, error } = await supabase
@@ -47,7 +43,7 @@ export default function LettersPage() {
           job_offers(*),
           candidates_profile(title)
         `)
-        .eq('user_id', user.id)
+        .eq('user_id', currentUser.id)
         .order('created_at', { ascending: false })
 
       if (error) {

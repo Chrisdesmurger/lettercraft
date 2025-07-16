@@ -24,6 +24,17 @@ export default function ProfileTab() {
 
   useEffect(() => {
     loadProfile()
+    
+    // Écouter l'événement de rafraîchissement
+    const handleRefresh = () => {
+      loadProfile()
+    }
+    
+    window.addEventListener('letter-generated', handleRefresh)
+    
+    return () => {
+      window.removeEventListener('letter-generated', handleRefresh)
+    }
   }, [])
 
   const loadProfile = async () => {
@@ -37,6 +48,14 @@ export default function ProfileTab() {
           .eq('user_id', session.user.id)
           .single()
 
+        // Récupérer le nombre de lettres générées
+        const { data: lettersData } = await supabase
+          .from('generated_letters')
+          .select('id')
+          .eq('user_id', session.user.id)
+
+        const letterCount = lettersData?.length || 0
+
         if (data) {
           setProfile({
             email: session.user.email || '',
@@ -46,7 +65,7 @@ export default function ProfileTab() {
             bio: data.bio || '',
             avatar_url: data.avatar_url || '',
             created_at: data.created_at || '',
-            generation_count: 0 // TODO: récupérer depuis user_quotas
+            generation_count: letterCount
           })
         } else {
           // Profil n'existe pas encore, utiliser les données de base
@@ -58,7 +77,7 @@ export default function ProfileTab() {
             bio: '',
             avatar_url: '',
             created_at: session.user.created_at || '',
-            generation_count: 0
+            generation_count: letterCount
           })
         }
       }
