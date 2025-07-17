@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import ModernWebApp from '@/components/modernwebapp'
+import DynamicMetadata from '@/components/DynamicMetadata'
 import { supabase } from '@/lib/supabase-client'
 
 export default function Home() {
@@ -27,6 +28,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen">
+      <DynamicMetadata />
       <ModernWebApp />
     </main>
   )

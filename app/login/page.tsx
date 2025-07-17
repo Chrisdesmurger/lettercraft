@@ -4,9 +4,11 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase-client'
+import { useI18n } from '@/lib/i18n-context'
 
 export default function LoginPage() {
   const router = useRouter()
+  const { t } = useI18n()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -35,7 +37,7 @@ export default function LoginPage() {
         .select('onboarded')
         .eq('id', data.user.id)
         .single()
-      setSuccess('Connexion reussie !')
+      setSuccess(t('auth.loginSuccess'))
       if (userRow && !userRow.onboarded) {
         router.push('/')
       } else {
@@ -50,10 +52,10 @@ export default function LoginPage() {
         onSubmit={handleSubmit}
         className="bg-white p-8 rounded-xl shadow-md space-y-4 w-full max-w-sm"
       >
-        <h1 className="text-2xl font-bold text-center">Connexion</h1>
+        <h1 className="text-2xl font-bold text-center">{t('auth.login')}</h1>
         <input
           type="email"
-          placeholder="Email"
+          placeholder={t('auth.email')}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           className="w-full border rounded px-3 py-2"
@@ -61,7 +63,7 @@ export default function LoginPage() {
         />
         <input
           type="password"
-          placeholder="Mot de passe"
+          placeholder={t('auth.password')}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           className="w-full border rounded px-3 py-2"
@@ -73,12 +75,12 @@ export default function LoginPage() {
           type="submit"
           className="w-full bg-gradient-to-r from-orange-400 to-amber-500 text-white px-4 py-2 rounded"
         >
-          Se connecter
+          {t('auth.signin')}
         </button>
         <p className="text-center text-sm">
-          Pas de compte?{' '}
+          {t('auth.noAccount')}{' '}
           <Link href="/register" className="text-orange-600 hover:underline">
-            Inscription
+            {t('auth.register')}
           </Link>
         </p>
       </form>

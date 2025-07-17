@@ -1,6 +1,6 @@
 ﻿/**
- * Composant de génération et personnalisation de la lettre
- * Utilise l'IA pour créer une lettre personnalisée
+ * Letter generation and customization component
+ * Uses AI to create a personalized letter
  */
 
 import React, { useState, useEffect } from 'react'
@@ -21,6 +21,7 @@ import {
     Settings
 } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { useI18n } from '@/lib/i18n-context'
 
 interface LetterGeneratorProps {
     data?: any
@@ -35,18 +36,19 @@ const languages = [
     { value: 'de', label: 'Deutsch', flag: '🇩🇪' },
 ]
 
-const tones = [
-    { value: 'professional', label: 'Professionnel', description: 'Formel et structuré' },
-    { value: 'enthusiastic', label: 'Enthousiaste', description: 'Dynamique et motivé' },
-    { value: 'creative', label: 'Créatif', description: 'Original et unique' },
-]
-
 export default function LetterGenerator({ data, onUpdate, onNext }: LetterGeneratorProps) {
+    const { t } = useI18n()
+    
+    const tones = [
+        { value: 'professional', label: t('letter.tones.professional'), description: t('letter.tones.professionalDesc') },
+        { value: 'enthusiastic', label: t('letter.tones.enthusiastic'), description: t('letter.tones.enthusiasticDesc') },
+        { value: 'creative', label: t('letter.tones.creative'), description: t('letter.tones.creativeDesc') },
+    ]
     const [generating, setGenerating] = useState(false)
     const [regenerating, setRegenerating] = useState(false)
     const [generatedLetter, setGeneratedLetter] = useState(data?.generatedLetter || '')
 
-    // Paramètres de génération
+    // Generation parameters
     const [language, setLanguage] = useState(data?.letterLanguage || 'fr')
     const [tone, setTone] = useState('professional')
     const [length, setLength] = useState([250]) // Nombre de mots
@@ -57,10 +59,10 @@ export default function LetterGenerator({ data, onUpdate, onNext }: LetterGenera
         setGenerating(true)
 
         try {
-            // Simulation de la génération (à remplacer par votre appel API OpenAI)
+            // Generation simulation (replace with your OpenAI API call)
             await new Promise(resolve => setTimeout(resolve, 3000))
 
-            // Lettre générée (à implémenter avec votre logique)
+            // Generated letter (implement with your logic)
             const letter = `Madame, Monsieur,
 
 C'est avec un grand intérêt que je vous adresse ma candidature pour le poste de ${data?.jobOffer?.title} au sein de ${data?.jobOffer?.company}.
@@ -90,9 +92,9 @@ ${data?.userName || 'Votre nom'}`
                 })
             }
 
-            toast.success('Lettre générée avec succès!')
+            toast.success(t('letter.generateSuccess'))
         } catch (error) {
-            toast.error('Erreur lors de la génération')
+            toast.error(t('letter.generateError'))
         } finally {
             setGenerating(false)
         }
@@ -104,7 +106,7 @@ ${data?.userName || 'Votre nom'}`
         setRegenerating(false)
     }
 
-    // Générer automatiquement au chargement si pas déjà fait
+    // Auto-generate on load if not already done
     useEffect(() => {
         if (!generatedLetter && data?.jobOffer && data?.responses) {
             generateLetter()
@@ -120,9 +122,9 @@ ${data?.userName || 'Votre nom'}`
                     className="space-y-4"
                 >
                     <Sparkles className="h-12 w-12 mx-auto text-primary animate-pulse" />
-                    <h3 className="text-xl font-semibold">Génération en cours...</h3>
+                    <h3 className="text-xl font-semibold">{t('letter.generating')}</h3>
                     <p className="text-gray-600">
-                        Notre IA crée votre lettre de motivation personnalisée
+                        {t('letter.generatingDesc')}
                     </p>
                     <div className="flex justify-center">
                         <Loader2 className="h-6 w-6 animate-spin text-primary" />
@@ -139,10 +141,10 @@ ${data?.userName || 'Votre nom'}`
                     <div className="space-y-6">
                         <div>
                             <h3 className="text-lg font-semibold mb-4">
-                                Personnalisez votre lettre
+                                {t('letter.customize')}
                             </h3>
                             <p className="text-gray-600 mb-6">
-                                Ajustez les paramètres pour obtenir une lettre qui vous ressemble
+                                {t('letter.customizeDesc')}
                             </p>
                         </div>
 
@@ -150,7 +152,7 @@ ${data?.userName || 'Votre nom'}`
                         <div>
                             <Label className="text-base mb-3 block">
                                 <Globe className="inline h-4 w-4 mr-2" />
-                                Langue de la lettre
+                                {t('letter.language')}
                             </Label>
                             <RadioGroup value={language} onValueChange={setLanguage}>
                                 <div className="grid grid-cols-2 gap-3">
@@ -174,7 +176,7 @@ ${data?.userName || 'Votre nom'}`
                         <div>
                             <Label className="text-base mb-3 block">
                                 <Zap className="inline h-4 w-4 mr-2" />
-                                Ton de la lettre
+                                {t('letter.tone')}
                             </Label>
                             <RadioGroup value={tone} onValueChange={setTone}>
                                 <div className="space-y-3">
@@ -196,7 +198,7 @@ ${data?.userName || 'Votre nom'}`
                         {/* Longueur */}
                         <div>
                             <Label className="text-base mb-3 block">
-                                Longueur de la lettre ({length[0]} mots)
+                                {t('letter.length', { words: length[0].toString() })}
                             </Label>
                             <Slider
                                 value={length}
@@ -207,8 +209,8 @@ ${data?.userName || 'Votre nom'}`
                                 className="mb-2"
                             />
                             <div className="flex justify-between text-sm text-gray-500">
-                                <span>Concise</span>
-                                <span>Détaillée</span>
+                                <span>{t('letter.concise')}</span>
+                                <span>{t('letter.detailed')}</span>
                             </div>
                         </div>
 
@@ -216,7 +218,7 @@ ${data?.userName || 'Votre nom'}`
                         <div className="space-y-3">
                             <div className="flex items-center justify-between">
                                 <Label htmlFor="hobbies" className="cursor-pointer">
-                                    Inclure mes centres d'intérêt
+                                    {t('letter.includeHobbies')}
                                 </Label>
                                 <Switch
                                     id="hobbies"
@@ -226,7 +228,7 @@ ${data?.userName || 'Votre nom'}`
                             </div>
                             <div className="flex items-center justify-between">
                                 <Label htmlFor="experience" className="cursor-pointer">
-                                    Mettre en avant mon expérience
+                                    {t('letter.emphasizeExperience')}
                                 </Label>
                                 <Switch
                                     id="experience"
@@ -243,7 +245,7 @@ ${data?.userName || 'Votre nom'}`
                             disabled={generating}
                         >
                             <Sparkles className="mr-2 h-4 w-4" />
-                            Générer ma lettre
+                            {t('letter.generate')}
                         </Button>
                     </div>
                 </Card>
@@ -253,7 +255,7 @@ ${data?.userName || 'Votre nom'}`
                     animate={{ opacity: 1 }}
                     className="space-y-6"
                 >
-                    {/* Options de personnalisation rapide */}
+                    {/* Quick customization options */}
                     <Card className="p-4">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center space-x-4">
@@ -263,7 +265,7 @@ ${data?.userName || 'Votre nom'}`
                                     size="sm"
                                 >
                                     <Settings className="h-4 w-4 mr-2" />
-                                    Paramètres
+                                    {t('letter.settings')}
                                 </Button>
                                 <Button
                                     onClick={regenerateLetter}
@@ -276,7 +278,7 @@ ${data?.userName || 'Votre nom'}`
                                     ) : (
                                         <RefreshCw className="h-4 w-4 mr-2" />
                                     )}
-                                    Régénérer
+                                    {t('letter.regenerate')}
                                 </Button>
                             </div>
                             <div className="text-sm text-gray-500">
@@ -285,7 +287,7 @@ ${data?.userName || 'Votre nom'}`
                         </div>
                     </Card>
 
-                    {/* Aperçu de la lettre */}
+                    {/* Letter preview */}
                     <Card className="p-8">
                         <div className="prose max-w-none">
                             <pre className="whitespace-pre-wrap font-sans text-base leading-relaxed">
@@ -297,7 +299,7 @@ ${data?.userName || 'Votre nom'}`
                     {onNext && (
                         <div className="flex justify-end">
                             <Button onClick={onNext} size="lg">
-                                Voir l'aperçu final
+                                {t('letter.viewFinal')}
                                 <ChevronRight className="ml-2 h-4 w-4" />
                             </Button>
                         </div>

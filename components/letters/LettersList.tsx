@@ -7,6 +7,7 @@ import LetterViewer from './LetterViewer'
 import { Input } from '@/components/ui/input'
 import { Search, Filter } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useI18n } from '@/lib/i18n-context'
 
 type GeneratedLetter = Tables<'generated_letters'> & {
   job_offers: Tables<'job_offers'> | null
@@ -18,6 +19,7 @@ interface LettersListProps {
 }
 
 export default function LettersList({ letters }: LettersListProps) {
+  const { t } = useI18n()
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedLetter, setSelectedLetter] = useState<GeneratedLetter | null>(null)
   const [isViewerOpen, setIsViewerOpen] = useState(false)
@@ -44,16 +46,16 @@ export default function LettersList({ letters }: LettersListProps) {
           <Search className="w-8 h-8 text-gray-400" />
         </div>
         <h3 className="text-lg font-semibold text-gray-900 mb-2">
-          Aucune lettre générée
+          {t('dashboard.noLetters')}
         </h3>
         <p className="text-gray-600 mb-6">
-          Vous n'avez pas encore généré de lettres de motivation.
+          {t('dashboard.noLettersSubtitle')}
         </p>
         <Button 
           onClick={() => window.location.href = '/generate-letter'}
           className="bg-gradient-to-r from-orange-400 to-amber-500 hover:from-orange-500 hover:to-amber-600"
         >
-          Créer ma première lettre
+          {t('dashboard.createFirst')}
         </Button>
       </div>
     )
@@ -67,7 +69,7 @@ export default function LettersList({ letters }: LettersListProps) {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
               type="text"
-              placeholder="Rechercher par poste ou entreprise..."
+              placeholder={t('dashboard.searchPlaceholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -75,7 +77,7 @@ export default function LettersList({ letters }: LettersListProps) {
           </div>
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <Filter className="w-4 h-4" />
-            <span>{filteredLetters.length} lettre{filteredLetters.length > 1 ? 's' : ''} trouvée{filteredLetters.length > 1 ? 's' : ''}</span>
+            <span>{filteredLetters.length} {filteredLetters.length === 1 ? t('dashboard.letterCount.singular') : t('dashboard.letterCount.plural')}</span>
           </div>
         </div>
       </div>

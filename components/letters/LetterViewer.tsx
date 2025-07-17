@@ -18,6 +18,7 @@ import {
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import toast from 'react-hot-toast'
+import { useI18n } from '@/lib/i18n-context'
 
 type GeneratedLetter = Tables<'generated_letters'> & {
   job_offers: Tables<'job_offers'> | null
@@ -31,6 +32,7 @@ interface LetterViewerProps {
 }
 
 export default function LetterViewer({ letter, isOpen, onClose }: LetterViewerProps) {
+  const { t } = useI18n()
   const [isDownloading, setIsDownloading] = useState(false)
   const [copied, setCopied] = useState(false)
 
@@ -60,7 +62,7 @@ export default function LetterViewer({ letter, isOpen, onClose }: LetterViewerPr
       })
 
       if (!response.ok) {
-        throw new Error('Erreur lors de la génération du PDF')
+        throw new Error(t('error.pdfGeneration'))
       }
 
       const blob = await response.blob()
@@ -74,10 +76,10 @@ export default function LetterViewer({ letter, isOpen, onClose }: LetterViewerPr
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
 
-      toast.success('PDF téléchargé avec succès')
+      toast.success(t('success.pdfDownloaded'))
     } catch (error) {
       console.error('Erreur lors du téléchargement:', error)
-      toast.error('Erreur lors du téléchargement du PDF')
+      toast.error(t('error.pdfDownload'))
     } finally {
       setIsDownloading(false)
     }
@@ -87,10 +89,10 @@ export default function LetterViewer({ letter, isOpen, onClose }: LetterViewerPr
     try {
       await navigator.clipboard.writeText(letter.content)
       setCopied(true)
-      toast.success('Lettre copiée dans le presse-papiers')
+      toast.success(t('success.letterCopied'))
       setTimeout(() => setCopied(false), 2000)
     } catch (error) {
-      toast.error('Erreur lors de la copie')
+      toast.error(t('error.copyFailed'))
     }
   }
 
@@ -110,7 +112,7 @@ export default function LetterViewer({ letter, isOpen, onClose }: LetterViewerPr
             </div>
             <div>
               <h2 className="text-xl font-semibold text-gray-900">
-                {jobOffer?.title || 'Lettre de motivation'}
+                {jobOffer?.title || t('letter.defaultTitle')}
               </h2>
               <div className="flex items-center gap-4 mt-1">
                 {jobOffer?.company && (
@@ -156,7 +158,7 @@ export default function LetterViewer({ letter, isOpen, onClose }: LetterViewerPr
         {/* Footer */}
         <div className="flex items-center justify-between p-6 border-t bg-gray-50 flex-shrink-0">
           <div className="text-sm text-gray-600">
-            Généré le {format(createdDate, 'dd MMMM yyyy à HH:mm', { locale: fr })}
+            {t('letter.generatedOn', { date: format(createdDate, 'dd MMMM yyyy à HH:mm', { locale: fr }) })}
           </div>
           <div className="flex items-center gap-2">
             <Button
@@ -170,7 +172,7 @@ export default function LetterViewer({ letter, isOpen, onClose }: LetterViewerPr
               ) : (
                 <Copy className="w-4 h-4" />
               )}
-              {copied ? 'Copié' : 'Copier'}
+              {copied ? t('common.copied') : t('common.copy')}
             </Button>
             <Button
               size="sm"
@@ -183,7 +185,7 @@ export default function LetterViewer({ letter, isOpen, onClose }: LetterViewerPr
               ) : (
                 <Download className="w-4 h-4 mr-2" />
               )}
-              {isDownloading ? 'Téléchargement...' : 'Télécharger PDF'}
+              {isDownloading ? t('common.downloading') : t('common.downloadPdf')}
             </Button>
           </div>
         </div>

@@ -1,6 +1,6 @@
 ﻿/**
- * Composant d'upload et d'analyse de CV
- * Supporte PDF et images, extrait les informations automatiquement
+ * CV upload and analysis component
+ * Supports PDF and images, automatically extracts information
  */
 
 import React, { useState, useCallback } from 'react'
@@ -20,6 +20,7 @@ import {
 import toast from 'react-hot-toast'
 import { supabase } from '@/lib/supabase-client'
 import { useUser } from '@/hooks/useUser'
+import { useI18n } from '@/lib/i18n-context'
 
 interface CVUploadProps {
     data?: any
@@ -29,6 +30,7 @@ interface CVUploadProps {
 
 export default function CVUpload({ data, onUpdate, onNext }: CVUploadProps) {
     const { user } = useUser()
+    const { t } = useI18n()
     const [uploading, setUploading] = useState(false)
     const [cvFile, setCvFile] = useState<File | null>(null)
     const [cvData, setCvData] = useState(data?.cvData || null)
@@ -41,7 +43,7 @@ export default function CVUpload({ data, onUpdate, onNext }: CVUploadProps) {
         setUploading(true)
 
         try {
-            // Upload vers Supabase Storage
+            // Upload to Supabase Storage
             const fileExt = file.name.split('.').pop()
             const fileName = `${user.id}-cv-${Date.now()}.${fileExt}`
 
@@ -51,15 +53,15 @@ export default function CVUpload({ data, onUpdate, onNext }: CVUploadProps) {
 
             if (uploadError) throw uploadError
 
-            // Ici, vous pouvez ajouter l'extraction de texte du CV
-            // Par exemple avec une fonction Cloud ou une API
+            // Here you can add CV text extraction
+            // For example with a Cloud function or API
 
-            // Pour la demo, on simule l'extraction
+            // For demo purposes, we simulate extraction
             const extractedData = {
                 fileName: file.name,
                 uploadPath: uploadData.path,
-                // Données extraites (à implémenter avec OCR/parsing)
-                extractedText: 'CV uploadé avec succès',
+                // Extracted data (to implement with OCR/parsing)
+                extractedText: 'CV uploaded successfully',
                 skills: [],
                 experiences: [],
                 education: []
@@ -67,7 +69,7 @@ export default function CVUpload({ data, onUpdate, onNext }: CVUploadProps) {
 
             setCvData(extractedData)
 
-            // Mettre à jour le flow
+            // Update the flow
             if (onUpdate) {
                 onUpdate({
                     cvUploaded: true,
@@ -75,10 +77,10 @@ export default function CVUpload({ data, onUpdate, onNext }: CVUploadProps) {
                 })
             }
 
-            toast.success('CV uploadé et analysé avec succès!')
+            toast.success(t('cv.uploadSuccess'))
         } catch (error) {
-            console.error('Erreur upload:', error)
-            toast.error('Erreur lors de l\'upload du CV')
+            console.error('Upload error:', error)
+            toast.error(t('cv.uploadError'))
         } finally {
             setUploading(false)
         }
@@ -126,15 +128,15 @@ export default function CVUpload({ data, onUpdate, onNext }: CVUploadProps) {
 
                         <p className="text-lg font-medium mb-2">
                             {uploading
-                                ? 'Analyse en cours...'
+                                ? t('cv.analyzing')
                                 : isDragActive
-                                    ? 'Déposez votre CV ici'
-                                    : 'Glissez votre CV ici ou cliquez pour sélectionner'
+                                    ? t('cv.dropHere')
+                                    : t('cv.dragOrClick')
                             }
                         </p>
 
                         <p className="text-sm text-gray-500">
-                            Formats acceptés : PDF, PNG, JPG (max. 10MB)
+                            {t('cv.acceptedFormats')}
                         </p>
                     </div>
                 </Card>
@@ -155,7 +157,7 @@ export default function CVUpload({ data, onUpdate, onNext }: CVUploadProps) {
                                         <Check className="h-4 w-4 ml-2 text-green-500" />
                                     </h3>
                                     <p className="text-sm text-gray-500 mt-1">
-                                        CV uploadé et analysé avec succès
+                                        {t('cv.uploadedSuccessfully')}
                                     </p>
                                 </div>
                             </div>
@@ -174,11 +176,10 @@ export default function CVUpload({ data, onUpdate, onNext }: CVUploadProps) {
                         <div className="mt-6 p-4 bg-gray-50 rounded-lg">
                             <h4 className="text-sm font-medium mb-2 flex items-center">
                                 <AlertCircle className="h-4 w-4 mr-2" />
-                                Informations extraites
+                                {t('cv.extractedInfo')}
                             </h4>
                             <p className="text-sm text-gray-600">
-                                Nous avons extrait vos expériences et compétences pour personnaliser
-                                votre lettre de motivation.
+                                {t('cv.extractedDescription')}
                             </p>
                         </div>
                     </Card>
@@ -186,7 +187,7 @@ export default function CVUpload({ data, onUpdate, onNext }: CVUploadProps) {
                     {onNext && (
                         <div className="mt-8 flex justify-end">
                             <Button onClick={onNext} size="lg">
-                                Continuer vers l'offre d'emploi
+                                {t('cv.continueToJob')}
                                 <ChevronRight className="ml-2 h-4 w-4" />
                             </Button>
                         </div>
