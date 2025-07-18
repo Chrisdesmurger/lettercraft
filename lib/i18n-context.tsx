@@ -143,7 +143,6 @@ const translations = {
     'cv.setAsActive': 'Définir comme actif',
     'cv.unknownSize': 'Taille inconnue',
     'cv.noCV': 'Aucun CV uploadé pour le moment',
-    'cv.uploadFirst': 'Uploadez votre premier CV',
     'cv.tipKeepUpdated': 'Gardez votre CV à jour pour des lettres de motivation plus pertinentes',
     'cv.tipMultipleCV': 'Vous pouvez avoir jusqu\'à {maxCVs} CV {plan} pour différents types de postes',
     'cv.tipActiveCV': 'Le CV actif (affiché en haut) sera utilisé par défaut pour générer vos lettres',
@@ -267,8 +266,6 @@ const translations = {
     'settings.updatePassword': 'Mettre à jour le mot de passe',
     'settings.dangerZone': 'Zone de danger',
     'settings.deleteAccountWarning': 'La suppression de votre compte est irréversible. Toutes vos données seront perdues.',
-    'settings.deleteAccount': 'Supprimer mon compte',
-    'settings.deleteWarning': 'La suppression de votre compte est irréversible. Toutes vos données seront perdues.',
     'settings.deleteAccount': 'Supprimer mon compte',
     
     // Subscription
@@ -613,7 +610,6 @@ const translations = {
     'cv.setAsActive': 'Set as active',
     'cv.unknownSize': 'Unknown size',
     'cv.noCV': 'No CVs uploaded yet',
-    'cv.uploadFirst': 'Upload your first CV',
     'cv.tipKeepUpdated': 'Keep your CV up to date for more relevant cover letters',
     'cv.tipMultipleCV': 'You can have up to {maxCVs} CVs {plan} for different types of positions',
     'cv.tipActiveCV': 'The active CV (displayed at the top) will be used by default to generate your letters',
@@ -737,8 +733,6 @@ const translations = {
     'settings.updatePassword': 'Update password',
     'settings.dangerZone': 'Danger zone',
     'settings.deleteAccountWarning': 'Deleting your account is irreversible. All your data will be lost.',
-    'settings.deleteAccount': 'Delete my account',
-    'settings.deleteWarning': 'Deleting your account is irreversible. All your data will be lost.',
     'settings.deleteAccount': 'Delete my account',
     
     // Subscription
@@ -1083,7 +1077,6 @@ const translations = {
     'cv.setAsActive': 'Establecer como activo',
     'cv.unknownSize': 'Tamaño desconocido',
     'cv.noCV': 'Aún no hay CVs subidos',
-    'cv.uploadFirst': 'Sube tu primer CV',
     'cv.tipKeepUpdated': 'Mantén tu CV actualizado para cartas de presentación más relevantes',
     'cv.tipMultipleCV': 'Puedes tener hasta {maxCVs} CVs {plan} para diferentes tipos de puestos',
     'cv.tipActiveCV': 'El CV activo (mostrado arriba) se usará por defecto para generar tus cartas',
@@ -1207,8 +1200,6 @@ const translations = {
     'settings.updatePassword': 'Actualizar contraseña',
     'settings.dangerZone': 'Zona de peligro',
     'settings.deleteAccountWarning': 'Eliminar tu cuenta es irreversible. Todos tus datos se perderán.',
-    'settings.deleteAccount': 'Eliminar mi cuenta',
-    'settings.deleteWarning': 'Eliminar tu cuenta es irreversible. Todos tus datos se perderán.',
     'settings.deleteAccount': 'Eliminar mi cuenta',
     
     // Subscription
