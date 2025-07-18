@@ -42,10 +42,19 @@ export async function POST(request: NextRequest) {
   "company_values": ["valeur 1", "valeur 2", ...],
   "benefits": ["avantage 1", "avantage 2", ...],
   "experience_level": "Niveau d'expérience requis",
-  "skills": ["compétence 1", "compétence 2", ...]
+  "skills": ["compétence 1", "compétence 2", ...],
+  "language": "Code langue détectée (fr, en, es, de, it)"
 }
 
-Assure-toi d'extraire tous les mots-clés techniques et compétences mentionnés. Si une information n'est pas disponible, utilise null.`
+Assure-toi d'extraire tous les mots-clés techniques et compétences mentionnés. 
+Pour la langue, détecte automatiquement la langue principale du texte de l'offre d'emploi et retourne UNIQUEMENT le code langue correspondant :
+- "fr" pour le français
+- "en" pour l'anglais
+- "es" pour l'espagnol
+- "de" pour l'allemand
+- "it" pour l'italien
+
+Si une information n'est pas disponible, utilise null (sauf pour la langue qui doit toujours être détectée).`
         },
         {
           role: "user",
@@ -95,7 +104,8 @@ Assure-toi d'extraire tous les mots-clés techniques et compétences mentionnés
       company_values: analyzedData.company_values || [],
       benefits: analyzedData.benefits || [],
       experience_level: analyzedData.experience_level || null,
-      skills: analyzedData.skills || []
+      skills: analyzedData.skills || [],
+      language: analyzedData.language || 'fr' // Défaut français si pas détecté
     }
 
     return NextResponse.json(enrichedData)
