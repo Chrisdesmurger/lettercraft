@@ -1,6 +1,6 @@
 ﻿/**
- * Composant pour extraire et analyser une offre d'emploi
- * Supporte le texte, les liens et les photos d'offres
+ * Component for extracting and analyzing job offers
+ * Supports text, links and photos of job offers
  */
 
 import React, { useState } from 'react'
@@ -20,6 +20,7 @@ import {
     Sparkles
 } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { useI18n } from '@/lib/i18n-context'
 
 interface JobOfferExtractorProps {
     data?: any
@@ -28,6 +29,7 @@ interface JobOfferExtractorProps {
 }
 
 export default function JobOfferExtractor({ data, onUpdate, onNext }: JobOfferExtractorProps) {
+    const { t } = useI18n()
     const [extracting, setExtracting] = useState(false)
     const [jobData, setJobData] = useState(data?.jobOffer || null)
     const [inputType, setInputType] = useState<'text' | 'url' | 'photo'>('text')
@@ -38,16 +40,16 @@ export default function JobOfferExtractor({ data, onUpdate, onNext }: JobOfferEx
         setExtracting(true)
 
         try {
-            // Simulation de l'extraction (à remplacer par votre logique réelle)
+            // Extraction simulation (replace with your actual logic)
             await new Promise(resolve => setTimeout(resolve, 2000))
 
-            // Données extraites (à implémenter avec IA/parsing)
+            // Extracted data (implement with AI/parsing)
             const extracted = {
                 title: 'Développeur Full Stack React/Node.js',
                 company: 'TechCorp',
                 location: 'Paris, France',
                 type: 'CDI',
-                description: textInput || 'Description extraite de l\'offre...',
+                description: textInput || 'Description extracted from offer...',
                 requirements: [
                     '3+ ans d\'expérience en React',
                     'Maîtrise de Node.js',
@@ -66,9 +68,9 @@ export default function JobOfferExtractor({ data, onUpdate, onNext }: JobOfferEx
                 onUpdate({ jobOffer: extracted })
             }
 
-            toast.success('Offre d\'emploi analysée avec succès!')
+            toast.success(t('job.analysisSuccess'))
         } catch (error) {
-            toast.error('Erreur lors de l\'analyse')
+            toast.error(t('job.analysisError'))
         } finally {
             setExtracting(false)
         }
@@ -94,37 +96,37 @@ export default function JobOfferExtractor({ data, onUpdate, onNext }: JobOfferEx
                     <div className="flex items-start justify-between mb-4">
                         <h3 className="text-lg font-semibold flex items-center">
                             <Check className="h-5 w-5 mr-2 text-green-500" />
-                            Offre analysée
+                            {t('job.analysisComplete')}
                         </h3>
                         <Button
                             onClick={resetJobOffer}
                             variant="outline"
                             size="sm"
                         >
-                            Modifier
+                            {t('job.modify')}
                         </Button>
                     </div>
 
                     <div className="space-y-4">
                         <div>
-                            <p className="text-sm text-gray-500">Poste</p>
+                            <p className="text-sm text-gray-500">{t('job.position')}</p>
                             <p className="font-medium">{jobData.title}</p>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <p className="text-sm text-gray-500">Entreprise</p>
+                                <p className="text-sm text-gray-500">{t('job.company')}</p>
                                 <p className="font-medium">{jobData.company}</p>
                             </div>
                             <div>
-                                <p className="text-sm text-gray-500">Localisation</p>
+                                <p className="text-sm text-gray-500">{t('job.location')}</p>
                                 <p className="font-medium">{jobData.location}</p>
                             </div>
                         </div>
 
                         {jobData.requirements && (
                             <div>
-                                <p className="text-sm text-gray-500 mb-2">Compétences requises</p>
+                                <p className="text-sm text-gray-500 mb-2">{t('job.requirements')}</p>
                                 <ul className="space-y-1">
                                     {jobData.requirements.map((req: string, index: number) => (
                                         <li key={index} className="text-sm flex items-start">
@@ -141,7 +143,7 @@ export default function JobOfferExtractor({ data, onUpdate, onNext }: JobOfferEx
                 {onNext && (
                     <div className="mt-8 flex justify-end">
                         <Button onClick={onNext} size="lg">
-                            Générer ma lettre
+                            {t('job.generateLetter')}
                             <Sparkles className="ml-2 h-4 w-4" />
                         </Button>
                     </div>
@@ -156,22 +158,22 @@ export default function JobOfferExtractor({ data, onUpdate, onNext }: JobOfferEx
                 <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="text">
                         <FileText className="h-4 w-4 mr-2" />
-                        Texte
+                        {t('job.text')}
                     </TabsTrigger>
                     <TabsTrigger value="url">
                         <Link className="h-4 w-4 mr-2" />
-                        Lien
+                        {t('job.link')}
                     </TabsTrigger>
                     <TabsTrigger value="photo">
                         <Camera className="h-4 w-4 mr-2" />
-                        Photo
+                        {t('job.photo')}
                     </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="text" className="mt-6">
                     <Card className="p-6">
                         <Textarea
-                            placeholder="Collez ici le texte de l'offre d'emploi..."
+                            placeholder={t('job.textPlaceholder')}
                             value={textInput}
                             onChange={(e) => setTextInput(e.target.value)}
                             rows={10}
@@ -185,10 +187,10 @@ export default function JobOfferExtractor({ data, onUpdate, onNext }: JobOfferEx
                             {extracting ? (
                                 <>
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Analyse en cours...
+                                    {t('job.analyzing')}
                                 </>
                             ) : (
-                                'Analyser l\'offre'
+                                t('job.analyzeOffer')
                             )}
                         </Button>
                     </Card>
@@ -197,7 +199,7 @@ export default function JobOfferExtractor({ data, onUpdate, onNext }: JobOfferEx
                 <TabsContent value="url" className="mt-6">
                     <Card className="p-6">
                         <Input
-                            placeholder="https://exemple.com/offre-emploi"
+                            placeholder={t('job.urlPlaceholder')}
                             value={urlInput}
                             onChange={(e) => setUrlInput(e.target.value)}
                             className="mb-4"
@@ -210,10 +212,10 @@ export default function JobOfferExtractor({ data, onUpdate, onNext }: JobOfferEx
                             {extracting ? (
                                 <>
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Extraction en cours...
+                                    {t('job.extracting')}
                                 </>
                             ) : (
-                                'Extraire depuis le lien'
+                                t('job.extractFromLink')
                             )}
                         </Button>
                     </Card>
@@ -223,9 +225,9 @@ export default function JobOfferExtractor({ data, onUpdate, onNext }: JobOfferEx
                     <Card className="p-6">
                         <div className="text-center text-gray-500 mb-4">
                             <Camera className="h-12 w-12 mx-auto mb-2 text-gray-400" />
-                            <p>Fonctionnalité photo à venir</p>
+                            <p>{t('job.photoFeatureComingSoon')}</p>
                             <p className="text-sm mt-2">
-                                Vous pourrez bientôt prendre en photo une offre d'emploi
+                                {t('job.photoFeatureDesc')}
                             </p>
                         </div>
                     </Card>

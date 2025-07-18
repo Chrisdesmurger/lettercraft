@@ -17,6 +17,7 @@ import {
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import toast from 'react-hot-toast'
+import { useI18n } from '@/lib/i18n-context'
 
 type GeneratedLetter = Tables<'generated_letters'> & {
   job_offers: Tables<'job_offers'> | null
@@ -29,6 +30,7 @@ interface LetterCardProps {
 }
 
 export default function LetterCard({ letter, onView }: LetterCardProps) {
+  const { t } = useI18n()
   const [isDownloading, setIsDownloading] = useState(false)
 
   const handleDownload = async () => {
@@ -45,7 +47,7 @@ export default function LetterCard({ letter, onView }: LetterCardProps) {
       })
 
       if (!response.ok) {
-        throw new Error('Erreur lors de la génération du PDF')
+        throw new Error(t('letter.pdfGenerationError'))
       }
 
       const blob = await response.blob()
@@ -59,10 +61,10 @@ export default function LetterCard({ letter, onView }: LetterCardProps) {
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
 
-      toast.success('PDF téléchargé avec succès')
+      toast.success(t('letter.pdfDownloadSuccess'))
     } catch (error) {
-      console.error('Erreur lors du téléchargement:', error)
-      toast.error('Erreur lors du téléchargement du PDF')
+      console.error('Download error:', error)
+      toast.error(t('letter.pdfDownloadError'))
     } finally {
       setIsDownloading(false)
     }
@@ -77,11 +79,11 @@ export default function LetterCard({ letter, onView }: LetterCardProps) {
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <CardTitle className="text-lg font-semibold text-gray-900 mb-1 line-clamp-2">
-              {jobOffer?.title || 'Poste non spécifié'}
+              {jobOffer?.title || t('job.unspecifiedTitle')}
             </CardTitle>
             <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
               <Building className="w-4 h-4" />
-              <span className="font-medium">{jobOffer?.company || 'Entreprise non spécifiée'}</span>
+              <span className="font-medium">{jobOffer?.company || t('job.unspecifiedCompany')}</span>
             </div>
             {jobOffer?.location && (
               <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
@@ -114,7 +116,7 @@ export default function LetterCard({ letter, onView }: LetterCardProps) {
             className="flex-1"
           >
             <Eye className="w-4 h-4 mr-2" />
-            Voir
+            {t('letter.view')}
           </Button>
           <Button
             variant="outline"
@@ -128,7 +130,7 @@ export default function LetterCard({ letter, onView }: LetterCardProps) {
             ) : (
               <Download className="w-4 h-4 mr-2" />
             )}
-            {isDownloading ? 'Téléchargement...' : 'PDF'}
+            {isDownloading ? t('letter.downloading') : 'PDF'}
           </Button>
         </div>
       </CardContent>

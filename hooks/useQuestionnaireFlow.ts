@@ -117,7 +117,7 @@ export function useQuestionnaireFlow(questions: QuestionnaireQuestion[] = defaul
     if (!question) return null
 
     if (question.required && (!value || (Array.isArray(value) && value.length === 0))) {
-      return 'Cette réponse est obligatoire'
+      return 'Cette réponse est obligatoire' // This will be handled by the component
     }
 
     if (question.validation) {

@@ -13,6 +13,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { ChevronRight, ChevronLeft, AlertCircle, CheckCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { QuestionnaireQuestion } from '@/hooks/useQuestionnaireFlow'
+import { useI18n } from '@/lib/i18n-context'
 
 interface QuestionCardProps {
   question: QuestionnaireQuestion
@@ -60,6 +61,7 @@ export default function QuestionCard({
   cvData,
   jobOfferData
 }: QuestionCardProps) {
+  const { t } = useI18n()
   const [error, setError] = useState<string | null>(null)
   const [localValue, setLocalValue] = useState(value)
 
@@ -168,7 +170,7 @@ export default function QuestionCard({
                 )}
                 onClick={() => handleValueChange({
                   experience_id: experience.id || `exp-${index}`,
-                  experience_title: experience.title || experience.position || 'Expérience',
+                  experience_title: experience.title || experience.position || t('questionnaire.experience'),
                   key_points: experience.key_points || []
                 })}
               >
@@ -176,7 +178,7 @@ export default function QuestionCard({
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <h4 className="font-semibold text-gray-900">
-                        {experience.title || experience.position || 'Expérience'}
+                        {experience.title || experience.position || t('questionnaire.experience')}
                       </h4>
                       <p className="text-sm text-gray-600 mt-1">
                         {experience.company} • {experience.duration}
@@ -239,8 +241,8 @@ export default function QuestionCard({
               })}
             </div>
             <div className="text-xs text-gray-500 space-y-1">
-              <p>📋 = Compétences demandées dans l'offre</p>
-              <p>📄 = Compétences présentes dans votre CV</p>
+              <p>{t('questionnaire.skillsFromOffer')}</p>
+              <p>{t('questionnaire.skillsFromCV')}</p>
             </div>
           </div>
         )
@@ -269,11 +271,11 @@ export default function QuestionCard({
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium text-gray-500">
-                Question {questionNumber} sur {totalQuestions}
+                {t('questionnaire.questionOf', { questionNumber: questionNumber.toString(), totalQuestions: totalQuestions.toString() })}
               </span>
               {question.required && (
                 <Badge variant="outline" className="text-xs">
-                  Obligatoire
+                  {t('questionnaire.required')}
                 </Badge>
               )}
             </div>
@@ -308,7 +310,7 @@ export default function QuestionCard({
             className="flex items-center gap-2"
           >
             <ChevronLeft className="w-4 h-4" />
-            Précédent
+            {t('common.previous')}
           </Button>
 
           <Button
@@ -316,7 +318,7 @@ export default function QuestionCard({
             disabled={!canGoNext || !!error}
             className="flex items-center gap-2"
           >
-            {isLastQuestion ? 'Générer la lettre' : 'Suivant'}
+            {isLastQuestion ? t('questionnaire.generateLetter') : t('common.next')}
             <ChevronRight className="w-4 h-4" />
           </Button>
         </CardFooter>

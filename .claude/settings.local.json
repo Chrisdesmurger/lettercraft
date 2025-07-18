@@ -16,7 +16,8 @@
       "Bash(gh pr view:*)",
       "Bash(git checkout:*)",
       "Bash(pnpm install:*)",
-      "Bash(powershell:*)"
+      "Bash(powershell:*)",
+      "Bash(npm run type-check:*)"
     ],
     "deny": []
   }

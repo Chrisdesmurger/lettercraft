@@ -9,10 +9,12 @@ import ProfileTab from './tabs/ProfileTab'
 import CVTab from './tabs/CVTab'
 import SettingsTab from './tabs/SettingsTab'
 import SubscriptionTab from './tabs/SubscriptionTab'
+import { useI18n } from '@/lib/i18n-context'
 
 type TabType = 'profile' | 'cv' | 'settings' | 'subscription'
 
 export default function ProfileLayout() {
+    const { t } = useI18n()
     const [activeTab, setActiveTab] = useState<TabType>('profile')
     const router = useRouter()
 
@@ -22,10 +24,10 @@ export default function ProfileLayout() {
     }
 
     const tabs = [
-        { id: 'profile', label: 'Profil', icon: User },
-        { id: 'cv', label: 'CV', icon: FileText },
-        { id: 'settings', label: 'Paramètres', icon: Settings },
-        { id: 'subscription', label: 'Abonnement', icon: CreditCard },
+        { id: 'profile', label: t('profile.tabs.profile'), icon: User },
+        { id: 'cv', label: t('profile.tabs.cv'), icon: FileText },
+        { id: 'settings', label: t('profile.tabs.settings'), icon: Settings },
+        { id: 'subscription', label: t('profile.tabs.subscription'), icon: CreditCard },
     ]
 
     return (
@@ -34,8 +36,8 @@ export default function ProfileLayout() {
                 <Card className="w-full max-w-4xl">
                     {/* Header avec titre */}
                     <div className="p-6 border-b">
-                        <h1 className="text-2xl font-bold text-gray-900">Mon Profil</h1>
-                        <p className="text-gray-600 mt-1">Gérez vos informations et paramètres</p>
+                        <h1 className="text-2xl font-bold text-gray-900">{t('profile.title')}</h1>
+                        <p className="text-gray-600 mt-1">{t('profile.subtitle')}</p>
                     </div>
 
                     {/* Navigation Tabs */}
@@ -78,7 +80,7 @@ export default function ProfileLayout() {
                             className="flex items-center space-x-2 px-4 py-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
                         >
                             <LogOut className="w-4 h-4" />
-                            <span>Déconnexion</span>
+                            <span>{t('auth.logout')}</span>
                         </button>
                     </div>
                 </Card>

@@ -5,8 +5,10 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase-client'
 import { Camera, Mail, Award, Calendar } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { useI18n } from '@/lib/i18n-context'
 
 export default function ProfileTab() {
+  const { t } = useI18n()
   const router = useRouter()
   const [profile, setProfile] = useState({
     email: '',
@@ -98,12 +100,12 @@ export default function ProfileTab() {
 
     // Vérifications côté client
     if (!file.type.startsWith('image/')) {
-      toast.error('Veuillez sélectionner une image')
+      toast.error(t('profile.selectImage'))
       return
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      toast.error('L\'image doit faire moins de 5MB')
+      toast.error(t('profile.imageTooLarge'))
       return
     }
 
@@ -122,7 +124,7 @@ export default function ProfileTab() {
       })
       
       if (!session) {
-        toast.error('Vous devez être connecté pour changer votre photo')
+        toast.error(t('profile.mustBeLoggedIn'))
         return
       }
 
@@ -152,7 +154,7 @@ export default function ProfileTab() {
       if (!response.ok) {
         const errorData = await response.json()
         console.error('API Error Details:', errorData)
-        throw new Error(errorData.error || 'Erreur lors de l\'upload')
+        throw new Error(errorData.error || t('profile.photoUpdateError'))
       }
 
       const { avatar_url } = await response.json()
@@ -176,11 +178,11 @@ export default function ProfileTab() {
       // Mettre à jour l'état local
       setProfile(prev => ({ ...prev, avatar_url }))
       
-      toast.success('Photo de profil mise à jour!')
+      toast.success(t('profile.photoUpdateSuccess'))
       
     } catch (error) {
       console.error('Error uploading avatar:', error)
-      toast.error(error instanceof Error ? error.message : 'Erreur lors de l\'upload')
+      toast.error(error instanceof Error ? error.message : t('profile.photoUpdateError'))
     } finally {
       setUploading(false)
       // Reset input pour permettre de re-sélectionner le même fichier
@@ -231,7 +233,7 @@ export default function ProfileTab() {
           <button 
             onClick={handleAvatarClick}
             disabled={uploading}
-            title={uploading ? "Upload en cours..." : "Changer la photo de profil"}
+            title={uploading ? t('common.uploading') : t('profile.changePhoto')}
             className="absolute bottom-0 right-0 bg-white rounded-full p-2 shadow-lg hover:shadow-xl transition-shadow disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {uploading ? (
@@ -260,7 +262,7 @@ export default function ProfileTab() {
               <Award className="w-5 h-5 text-blue-600" />
             </div>
             <div>
-              <p className="text-sm text-gray-600">Lettres générées</p>
+              <p className="text-sm text-gray-600">{t('profile.lettersGenerated')}</p>
               <p className="text-xl font-semibold">{profile.generation_count || 0}</p>
             </div>
           </div>
@@ -271,8 +273,8 @@ export default function ProfileTab() {
               <Mail className="w-5 h-5 text-green-600" />
             </div>
             <div>
-              <p className="text-sm text-gray-600">Email vérifié</p>
-              <p className="text-xl font-semibold">Oui</p>
+              <p className="text-sm text-gray-600">{t('profile.emailVerified')}</p>
+              <p className="text-xl font-semibold">{t('common.yes')}</p>
             </div>
           </div>
         </div>
@@ -282,7 +284,7 @@ export default function ProfileTab() {
               <Calendar className="w-5 h-5 text-purple-600" />
             </div>
             <div>
-              <p className="text-sm text-gray-600">Membre depuis</p>
+              <p className="text-sm text-gray-600">{t('profile.memberSince')}</p>
               <p className="text-xl font-semibold">
                 {new Date(profile.created_at).toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' })}
               </p>
@@ -296,7 +298,7 @@ export default function ProfileTab() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Prénom
+              {t('profile.firstName')}
             </label>
             <input
               type="text"
@@ -307,7 +309,7 @@ export default function ProfileTab() {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Nom
+              {t('profile.lastName')}
             </label>
             <input
               type="text"
@@ -320,7 +322,7 @@ export default function ProfileTab() {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Téléphone
+            {t('profile.phone')}
           </label>
           <input
             type="tel"
@@ -332,14 +334,14 @@ export default function ProfileTab() {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Bio
+            {t('profile.bio')}
           </label>
           <textarea
             value={profile.bio}
             onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
             rows={4}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-            placeholder="Parlez-nous un peu de vous..."
+            placeholder={t('profile.bioPlaceholder')}
           />
         </div>
 
@@ -348,7 +350,7 @@ export default function ProfileTab() {
             type="submit"
             className="px-6 py-2 bg-gradient-to-r from-orange-400 to-amber-500 text-white rounded-lg hover:shadow-lg transition-shadow"
           >
-            Enregistrer les modifications
+            {t('profile.saveChanges')}
           </button>
         </div>
       </form>

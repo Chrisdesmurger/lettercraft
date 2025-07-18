@@ -1,6 +1,6 @@
 /**
- * Composant d'aperçu et de téléchargement de la lettre
- * Permet de prévisualiser, éditer et exporter la lettre
+ * Letter preview and download component
+ * Allows previewing, editing and exporting the letter
  */
 
 import React, { useState, useRef } from 'react'
@@ -22,6 +22,7 @@ import toast from 'react-hot-toast'
 import { supabase } from '@/lib/supabase-client'
 import html2pdf from 'html2pdf.js'
 import { useUser } from '@/hooks/useUser'
+import { useI18n } from '@/lib/i18n-context'
 
 interface LetterPreviewProps {
   data?: any
@@ -31,6 +32,7 @@ interface LetterPreviewProps {
 
 export default function LetterPreview({ data, onUpdate, onNext }: LetterPreviewProps) {
   const { user } = useUser()
+  const { t } = useI18n()
   const router = useRouter()
   const [isEditing, setIsEditing] = useState(false)
   const [editedLetter, setEditedLetter] = useState(data?.generatedLetter || '')
@@ -42,10 +44,10 @@ export default function LetterPreview({ data, onUpdate, onNext }: LetterPreviewP
     try {
       await navigator.clipboard.writeText(editedLetter)
       setCopied(true)
-      toast.success('Lettre copiée dans le presse-papier!')
+      toast.success(t('letter.copySuccess'))
       setTimeout(() => setCopied(false), 2000)
     } catch (error) {
-      toast.error('Erreur lors de la copie')
+      toast.error(t('letter.copyError'))
     }
   }
 
@@ -61,7 +63,7 @@ export default function LetterPreview({ data, onUpdate, onNext }: LetterPreviewP
     }
 
     html2pdf().set(opt).from(letterRef.current).save()
-    toast.success('PDF téléchargé!')
+    toast.success(t('letter.pdfDownloaded'))
   }
 
   const handleDownloadTXT = () => {
@@ -72,7 +74,7 @@ export default function LetterPreview({ data, onUpdate, onNext }: LetterPreviewP
     document.body.appendChild(element)
     element.click()
     document.body.removeChild(element)
-    toast.success('Fichier texte téléchargé!')
+    toast.success(t('letter.txtDownloaded'))
   }
 
   const handleSave = async () => {
@@ -80,7 +82,7 @@ export default function LetterPreview({ data, onUpdate, onNext }: LetterPreviewP
 
     setSaving(true)
     try {
-      // Sauvegarder dans Supabase
+      // Save to Supabase
       const { error } = await supabase
         .from('saved_letters')
         .insert({
@@ -98,10 +100,10 @@ export default function LetterPreview({ data, onUpdate, onNext }: LetterPreviewP
 
       if (error) throw error
 
-      toast.success('Lettre sauvegardée dans votre espace!')
+      toast.success(t('letter.saveSuccess'))
     } catch (error) {
-      console.error('Erreur:', error)
-      toast.error('Erreur lors de la sauvegarde')
+      console.error('Error:', error)
+      toast.error(t('letter.saveError'))
     } finally {
       setSaving(false)
     }
@@ -112,14 +114,14 @@ export default function LetterPreview({ data, onUpdate, onNext }: LetterPreviewP
       if (onUpdate) {
         onUpdate({ generatedLetter: editedLetter })
       }
-      toast.success('Modifications enregistrées')
+      toast.success(t('letter.changesSuccess'))
     }
     setIsEditing(!isEditing)
   }
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      {/* Barre d'actions */}
+      {/* Action bar */}
       <Card className="p-4">
         <div className="flex flex-wrap gap-3 justify-between items-center">
           <div className="flex flex-wrap gap-2">
@@ -131,12 +133,12 @@ export default function LetterPreview({ data, onUpdate, onNext }: LetterPreviewP
               {isEditing ? (
                 <>
                   <Save className="h-4 w-4 mr-2" />
-                  Enregistrer
+                  {t('letter.save')}
                 </>
               ) : (
                 <>
                   <Edit3 className="h-4 w-4 mr-2" />
-                  Modifier
+                  {t('letter.edit')}
                 </>
               )}
             </Button>
@@ -150,12 +152,12 @@ export default function LetterPreview({ data, onUpdate, onNext }: LetterPreviewP
               {copied ? (
                 <>
                   <Check className="h-4 w-4 mr-2" />
-                  Copié!
+                  {t('letter.copied')}
                 </>
               ) : (
                 <>
                   <Copy className="h-4 w-4 mr-2" />
-                  Copier
+                  {t('letter.copy')}
                 </>
               )}
             </Button>
@@ -171,7 +173,7 @@ export default function LetterPreview({ data, onUpdate, onNext }: LetterPreviewP
               ) : (
                 <>
                   <Save className="h-4 w-4 mr-2" />
-                  Sauvegarder
+                  {t('letter.save')}
                 </>
               )}
             </Button>
@@ -198,14 +200,14 @@ export default function LetterPreview({ data, onUpdate, onNext }: LetterPreviewP
         </div>
       </Card>
 
-      {/* Aperçu/Édition de la lettre */}
+      {/* Letter preview/edit */}
       <Card className="p-8">
         {isEditing ? (
           <Textarea
             value={editedLetter}
             onChange={(e) => setEditedLetter(e.target.value)}
             className="min-h-[600px] font-sans text-base leading-relaxed"
-            placeholder="Votre lettre de motivation..."
+            placeholder={t('letter.placeholder')}
           />
         ) : (
           <div ref={letterRef} className="prose max-w-none">
@@ -216,7 +218,7 @@ export default function LetterPreview({ data, onUpdate, onNext }: LetterPreviewP
         )}
       </Card>
 
-      {/* Résumé et actions finales */}
+      {/* Summary and final actions */}
       <Card className="p-6 bg-green-50 border-green-200">
         <div className="flex items-start space-x-4">
           <div className="p-3 bg-green-100 rounded-full">
@@ -224,12 +226,13 @@ export default function LetterPreview({ data, onUpdate, onNext }: LetterPreviewP
           </div>
           <div className="flex-1">
             <h3 className="font-semibold text-green-900 mb-2">
-              Votre lettre est prête!
+              {t('letter.ready')}
             </h3>
             <p className="text-green-800 text-sm mb-4">
-              Vous avez créé une lettre personnalisée pour le poste de{' '}
-              <strong>{data?.jobOffer?.title}</strong> chez{' '}
-              <strong>{data?.jobOffer?.company}</strong>.
+              {t('letter.readyDesc', { 
+                title: data?.jobOffer?.title, 
+                company: data?.jobOffer?.company 
+              })}
             </p>
             <div className="flex flex-wrap gap-3">
               <Button
@@ -237,13 +240,13 @@ export default function LetterPreview({ data, onUpdate, onNext }: LetterPreviewP
                 variant="outline"
                 size="sm"
               >
-                Retour au tableau de bord
+                {t('letter.backToDashboard')}
               </Button>
               <Button
                 onClick={() => window.location.reload()}
                 size="sm"
               >
-                Créer une nouvelle lettre
+                {t('letter.createNew')}
               </Button>
             </div>
           </div>

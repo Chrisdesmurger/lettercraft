@@ -11,9 +11,11 @@ import { cn } from '@/lib/utils'
 import QuestionCard from './QuestionCard'
 import { useQuestionnaireFlow, defaultQuestions } from '@/hooks/useQuestionnaireFlow'
 import type { QuestionnaireData } from '@/hooks/useLetterGeneration'
+import { useI18n } from '@/lib/i18n-context'
+import { createQuestionnaireQuestions } from '@/hooks/useQuestionnaireQuestions'
 
 // Fonction pour transformer les données CV pour les rendre compatibles avec QuestionCard
-function transformCVData(cvData: any) {
+function transformCVData(cvData: any, t: (key: string) => string) {
   if (!cvData) return null
   
   // Transformer les expériences string[] en objets
@@ -21,7 +23,7 @@ function transformCVData(cvData: any) {
     id: `exp-${index}`,
     title: exp,
     position: exp,
-    company: 'Expérience professionnelle',
+    company: t('questionnaire.professionalExperience'),
     duration: '',
     description: exp,
     key_points: []
@@ -49,7 +51,9 @@ export default function LetterQuestionnaire({
   onBack,
   isLoading = false
 }: LetterQuestionnaireProps) {
+  const { t } = useI18n()
   const [direction, setDirection] = useState(0)
+  const questions = createQuestionnaireQuestions(t)
   const {
     state,
     currentQuestion,
@@ -61,7 +65,7 @@ export default function LetterQuestionnaire({
     getProgress,
     getCompletedQuestions,
     validateAnswer
-  } = useQuestionnaireFlow(defaultQuestions)
+  } = useQuestionnaireFlow(questions)
 
   const handleNext = () => {
     setDirection(1)
@@ -97,15 +101,15 @@ export default function LetterQuestionnaire({
             className="mb-4 text-gray-600 hover:text-gray-900"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Retour
+            {t('common.back')}
           </Button>
 
           <div className="text-center mb-6">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Questionnaire personnalisé
+              {t('questionnaire.title')}
             </h1>
             <p className="text-gray-600">
-              Aidez-nous à créer une lettre de motivation parfaitement adaptée
+              {t('questionnaire.subtitle')}
             </p>
           </div>
 
@@ -126,7 +130,7 @@ export default function LetterQuestionnaire({
                 <FileText className="w-5 h-5 text-green-600" />
                 <div>
                   <h3 className="font-semibold text-green-900">{cvData.title}</h3>
-                  <p className="text-sm text-green-700">CV actif</p>
+                  <p className="text-sm text-green-700">{t('questionnaire.activeCV')}</p>
                 </div>
               </div>
             </Card>
@@ -136,10 +140,10 @@ export default function LetterQuestionnaire({
           <div className="mb-6">
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm font-medium text-gray-700">
-                Progression
+                {t('questionnaire.progress')}
               </span>
               <span className="text-sm text-gray-500">
-                {completedQuestions.length} / {defaultQuestions.length} questions
+                {completedQuestions.length} / {questions.length} {t('questionnaire.questions')}
               </span>
             </div>
             <Progress value={getProgress()} className="h-2" />
@@ -147,7 +151,7 @@ export default function LetterQuestionnaire({
 
           {/* Questions Overview */}
           <div className="flex flex-wrap gap-2 mb-8">
-            {defaultQuestions.map((question, index) => {
+            {questions.map((question, index) => {
               const isCompleted = completedQuestions.some(q => q.id === question.id)
               const isCurrent = index === state.currentQuestion
               
@@ -183,8 +187,8 @@ export default function LetterQuestionnaire({
             canGoPrevious={state.currentQuestion > 0}
             isLastQuestion={isLastQuestion}
             questionNumber={state.currentQuestion + 1}
-            totalQuestions={defaultQuestions.length}
-            cvData={transformCVData(cvData)}
+            totalQuestions={questions.length}
+            cvData={transformCVData(cvData, t)}
             jobOfferData={jobOffer}
           />
         </AnimatePresence>
@@ -196,10 +200,10 @@ export default function LetterQuestionnaire({
               <div className="text-center">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  Génération en cours...
+                  {t('common.generating')}
                 </h3>
                 <p className="text-gray-600">
-                  Nous créons votre lettre de motivation personnalisée
+                  {t('questionnaire.generatingDesc')}
                 </p>
               </div>
             </Card>

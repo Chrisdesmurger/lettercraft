@@ -2,8 +2,10 @@
 
 import { useState } from 'react'
 import { Bell, Globe, Shield, Eye, EyeOff } from 'lucide-react'
+import { useI18n } from '@/lib/i18n-context'
 
 export default function SettingsTab() {
+  const { t } = useI18n()
   const [notifications, setNotifications] = useState({
     email: true,
     push: false,
@@ -18,11 +20,11 @@ export default function SettingsTab() {
       <div>
         <h3 className="text-lg font-semibold mb-4 flex items-center">
           <Bell className="w-5 h-5 mr-2" />
-          Notifications
+          {t('settings.notifications')}
         </h3>
         <div className="space-y-3">
           <label className="flex items-center justify-between p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100">
-            <span className="text-gray-700">Notifications par email</span>
+            <span className="text-gray-700">{t('settings.notifications.email')}</span>
             <input
               type="checkbox"
               checked={notifications.email}
@@ -31,7 +33,7 @@ export default function SettingsTab() {
             />
           </label>
           <label className="flex items-center justify-between p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100">
-            <span className="text-gray-700">Notifications push</span>
+            <span className="text-gray-700">{t('settings.notifications.push')}</span>
             <input
               type="checkbox"
               checked={notifications.push}
@@ -40,7 +42,7 @@ export default function SettingsTab() {
             />
           </label>
           <label className="flex items-center justify-between p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100">
-            <span className="text-gray-700">Newsletter mensuelle</span>
+            <span className="text-gray-700">{t('settings.notifications.newsletter')}</span>
             <input
               type="checkbox"
               checked={notifications.newsletter}
@@ -55,7 +57,7 @@ export default function SettingsTab() {
       <div>
         <h3 className="text-lg font-semibold mb-4 flex items-center">
           <Globe className="w-5 h-5 mr-2" />
-          Langue
+          {t('settings.language')}
         </h3>
         <select
           value={language}
@@ -73,12 +75,12 @@ export default function SettingsTab() {
       <div>
         <h3 className="text-lg font-semibold mb-4 flex items-center">
           <Shield className="w-5 h-5 mr-2" />
-          Sécurité
+          {t('settings.security')}
         </h3>
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Mot de passe actuel
+              {t('settings.currentPassword')}
             </label>
             <div className="relative">
               <input
@@ -101,7 +103,7 @@ export default function SettingsTab() {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Nouveau mot de passe
+              {t('settings.newPassword')}
             </label>
             <input
               type="password"
@@ -111,7 +113,7 @@ export default function SettingsTab() {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Confirmer le mot de passe
+              {t('settings.confirmPassword')}
             </label>
             <input
               type="password"
@@ -120,20 +122,20 @@ export default function SettingsTab() {
             />
           </div>
           <button className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors">
-            Mettre à jour le mot de passe
+            {t('settings.updatePassword')}
           </button>
         </div>
       </div>
 
       {/* Danger Zone */}
       <div className="border-t pt-8">
-        <h3 className="text-lg font-semibold mb-4 text-red-600">Zone de danger</h3>
+        <h3 className="text-lg font-semibold mb-4 text-red-600">{t('settings.dangerZone')}</h3>
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
           <p className="text-sm text-red-700 mb-4">
-            La suppression de votre compte est irréversible. Toutes vos données seront perdues.
+            {t('settings.deleteAccountWarning')}
           </p>
           <button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
-            Supprimer mon compte
+            {t('settings.deleteAccount')}
           </button>
         </div>
       </div>

@@ -2,38 +2,40 @@
 
 import { useState } from 'react'
 import { Check, X, Zap } from 'lucide-react'
+import { useI18n } from '@/lib/i18n-context'
 
 export default function SubscriptionTab() {
+  const { t } = useI18n()
   const [currentPlan] = useState<'free' | 'premium'>('free') // ou 'premium'
 
   const plans = [
     {
       id: 'free',
-      name: 'Gratuit',
+      name: t('subscription.free'),
       price: '0€',
-      period: '/mois',
+      period: t('subscription.perMonth'),
       features: [
-        { name: '10 lettres de motivation par mois', included: true },
-        { name: 'Templates de base', included: true },
-        { name: 'Support par email', included: true },
-        { name: 'Génération multilingue', included: false },
-        { name: 'Templates premium', included: false },
-        { name: 'Support prioritaire', included: false },
+        { name: t('subscription.features.monthlyLetters'), included: true },
+        { name: t('subscription.features.basicTemplates'), included: true },
+        { name: t('subscription.features.emailSupport'), included: true },
+        { name: t('subscription.features.multilingualGeneration'), included: false },
+        { name: t('subscription.features.premiumTemplates'), included: false },
+        { name: t('subscription.features.prioritySupport'), included: false },
       ]
     },
     {
       id: 'premium',
-      name: 'Premium',
+      name: t('subscription.premium'),
       price: '9,99€',
-      period: '/mois',
+      period: t('subscription.perMonth'),
       popular: true,
       features: [
-        { name: 'Lettres illimitées', included: true },
-        { name: 'Tous les templates', included: true },
-        { name: 'Support prioritaire 24/7', included: true },
-        { name: 'Génération multilingue', included: true },
-        { name: 'Templates premium', included: true },
-        { name: 'Exportation avancée', included: true },
+        { name: t('subscription.features.unlimitedLetters'), included: true },
+        { name: t('subscription.features.allTemplates'), included: true },
+        { name: t('subscription.features.prioritySupport247'), included: true },
+        { name: t('subscription.features.multilingualGeneration'), included: true },
+        { name: t('subscription.features.premiumTemplates'), included: true },
+        { name: t('subscription.features.advancedExport'), included: true },
       ]
     }
   ]
@@ -41,8 +43,8 @@ export default function SubscriptionTab() {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-semibold mb-2">Mon abonnement</h3>
-        <p className="text-gray-600">Gérez votre abonnement et découvrez nos offres</p>
+        <h3 className="text-lg font-semibold mb-2">{t('subscription.title')}</h3>
+        <p className="text-gray-600">{t('subscription.subtitle')}</p>
       </div>
 
       {/* Current Plan Status */}
@@ -50,12 +52,12 @@ export default function SubscriptionTab() {
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-medium text-blue-900">Plan Gratuit</p>
-              <p className="text-sm text-blue-700">Il vous reste 7 lettres ce mois-ci</p>
+              <p className="font-medium text-blue-900">{t('subscription.freePlan')}</p>
+              <p className="text-sm text-blue-700">{t('subscription.remainingLetters', { count: '7' })}</p>
             </div>
             <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center">
               <Zap className="w-4 h-4 mr-2" />
-              Passer à Premium
+              {t('subscription.upgradeToPremium')}
             </button>
           </div>
         </div>
@@ -72,7 +74,7 @@ export default function SubscriptionTab() {
             {plan.popular && (
               <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                 <span className="bg-gradient-to-r from-orange-400 to-amber-500 text-white text-sm px-3 py-1 rounded-full">
-                  Populaire
+                  {t('subscription.popular')}
                 </span>
               </div>
             )}
@@ -102,11 +104,11 @@ export default function SubscriptionTab() {
 
             {currentPlan === plan.id ? (
               <button disabled className="w-full py-2 bg-gray-200 text-gray-500 rounded-lg cursor-not-allowed">
-                Plan actuel
+                {t('subscription.currentPlan')}
               </button>
             ) : (
               <button className="w-full py-2 bg-gradient-to-r from-orange-400 to-amber-500 text-white rounded-lg hover:shadow-lg transition-shadow">
-                {plan.id === 'premium' ? 'Passer à Premium' : 'Rétrograder'}
+                {plan.id === 'premium' ? t('subscription.upgradeToPremium') : t('subscription.downgrade')}
               </button>
             )}
           </div>
@@ -116,40 +118,39 @@ export default function SubscriptionTab() {
       {/* Billing History */}
       {currentPlan === 'premium' && (
         <div>
-          <h4 className="font-medium text-gray-900 mb-4">Historique de facturation</h4>
+          <h4 className="font-medium text-gray-900 mb-4">{t('subscription.billingHistory')}</h4>
           <div className="border border-gray-200 rounded-lg overflow-hidden">
             <table className="w-full">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Date</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Description</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Montant</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Facture</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">{t('subscription.table.date')}</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">{t('subscription.table.description')}</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">{t('subscription.table.amount')}</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">{t('subscription.table.invoice')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
                 <tr>
                   <td className="px-4 py-3 text-sm">01/03/2024</td>
-                <td className="px-4 py-3 text-sm">Abonnement Premium</td>
+                <td className="px-4 py-3 text-sm">{t('subscription.premiumSubscription')}</td>
                 <td className="px-4 py-3 text-sm">9,99€</td>
                 <td className="px-4 py-3 text-sm">
-                  <button className="text-orange-600 hover:text-orange-700">Télécharger</button>
+                  <button className="text-orange-600 hover:text-orange-700">{t('common.download')}</button>
                 </td>
               </tr>
               <tr>
                 <td className="px-4 py-3 text-sm">01/02/2024</td>
-                <td className="px-4 py-3 text-sm">Abonnement Premium</td>
+                <td className="px-4 py-3 text-sm">{t('subscription.premiumSubscription')}</td>
                 <td className="px-4 py-3 text-sm">9,99€</td>
                 <td className="px-4 py-3 text-sm">
-                  <button className="text-orange-600 hover:text-orange-700">Télécharger</button>
+                  <button className="text-orange-600 hover:text-orange-700">{t('common.download')}</button>
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
         </div>
-  )
-}
-    </div >
+      )}
+    </div>
   )
 }

@@ -7,9 +7,11 @@ import Header from '@/components/Header'
 import LettersList from '@/components/letters/LettersList'
 import { Skeleton } from '@/components/ui/skeleton'
 import { AlertCircle, FileText } from 'lucide-react'
+import { useI18n } from '@/lib/i18n-context'
 
 export default function LettersPage() {
   const router = useRouter()
+  const { t } = useI18n()
   const [user, setUser] = useState<any>(null)
   const [letters, setLetters] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -48,14 +50,14 @@ export default function LettersPage() {
 
       if (error) {
         console.error('Erreur lors de la récupération des lettres:', error)
-        setError('Impossible de charger les lettres')
+        setError(t('error.cantLoadLetters'))
         return
       }
 
       setLetters(data || [])
     } catch (err) {
       console.error('Erreur lors de la récupération des lettres:', err)
-      setError('Impossible de charger les lettres')
+      setError(t('error.cantLoadLetters'))
     } finally {
       setIsLoading(false)
     }
@@ -65,7 +67,7 @@ export default function LettersPage() {
     return <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <div className="text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
-        <p className="text-gray-600">Chargement...</p>
+        <p className="text-gray-600">{t('common.loading')}</p>
       </div>
     </div>
   }
@@ -81,11 +83,11 @@ export default function LettersPage() {
               <FileText className="w-5 h-5 text-white" />
             </div>
             <h1 className="text-3xl font-bold text-gray-900">
-              Mes Lettres de Motivation
+              {t('dashboard.title')}
             </h1>
           </div>
           <p className="text-gray-600">
-            Retrouvez toutes vos lettres de motivation générées et gérez-les facilement
+            {t('dashboard.subtitle')}
           </p>
         </div>
 

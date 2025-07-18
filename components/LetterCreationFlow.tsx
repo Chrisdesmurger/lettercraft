@@ -9,6 +9,7 @@ import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { useUser } from '@/hooks/useUser'
+import { useI18n } from '@/lib/i18n-context'
 import OnboardingQuestionnaire from '@/components/OnboardingQuestionnaire'
 import CVUpload from '@/components/CVUpload'
 import JobOfferExtractor from '@/components/JobOfferExtractor'
@@ -31,11 +32,11 @@ import toast, { Toaster } from 'react-hot-toast'
 import { cn } from '@/lib/utils'
 
 // Configuration des étapes
-const steps = [
+const getSteps = (t: any) => [
     {
         id: 'profile',
-        title: 'Votre profil',
-        description: 'Parlez-nous de vous et de vos objectifs',
+        title: t('steps.profile.title'),
+        description: t('steps.profile.description'),
         icon: User,
         component: OnboardingQuestionnaire,
         validation: async (data: any) => {
@@ -45,8 +46,8 @@ const steps = [
     },
     {
         id: 'cv',
-        title: 'Votre CV',
-        description: 'Importez votre CV pour extraire vos expériences',
+        title: t('steps.cv.title'),
+        description: t('steps.cv.description'),
         icon: FileText,
         component: CVUpload,
         validation: async (data: any) => {
@@ -55,8 +56,8 @@ const steps = [
     },
     {
         id: 'job',
-        title: "L'offre d'emploi",
-        description: "Ajoutez l'offre qui vous intéresse",
+        title: t('steps.jobOffer.title'),
+        description: t('steps.jobOffer.description'),
         icon: Briefcase,
         component: JobOfferExtractor,
         validation: async (data: any) => {
@@ -65,8 +66,8 @@ const steps = [
     },
     {
         id: 'generate',
-        title: 'Génération',
-        description: 'Personnalisez et générez votre lettre',
+        title: t('steps.generate.title'),
+        description: t('steps.generate.description'),
         icon: Sparkles,
         component: LetterGenerator,
         validation: async (data: any) => {
@@ -75,8 +76,8 @@ const steps = [
     },
     {
         id: 'preview',
-        title: 'Aperçu',
-        description: 'Relisez et téléchargez votre lettre',
+        title: t('steps.preview.title'),
+        description: t('steps.preview.description'),
         icon: Eye,
         component: LetterPreview,
         validation: async (data: any) => {
@@ -110,10 +111,13 @@ interface FlowData {
 export default function LetterCreationFlow() {
     const router = useRouter()
     const { user, isLoading: userLoading } = useUser() // Récupérer loading
+    const { t } = useI18n()
     const [currentStep, setCurrentStep] = useState(0)
     const [flowData, setFlowData] = useState<FlowData>({})
     const [isValidating, setIsValidating] = useState(false)
     const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set())
+    
+    const steps = getSteps(t)
 
     // Rediriger si non connecté
   useEffect(() => {
@@ -341,7 +345,7 @@ export default function LetterCreationFlow() {
                         size="lg"
                     >
                         <ChevronLeft className="mr-2 h-4 w-4" />
-                        Précédent
+                        {t('common.previous')}
                     </Button>
 
                     <Button
@@ -352,11 +356,11 @@ export default function LetterCreationFlow() {
                         {isValidating ? (
                             <>
                                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                                Validation...
+                                {t('common.loading')}
                             </>
                         ) : (
                             <>
-                                {currentStep === steps.length - 2 ? 'Voir l\'aperçu' : 'Suivant'}
+                                {currentStep === steps.length - 2 ? t('steps.preview.title') : t('common.next')}
                                 <ChevronRight className="ml-2 h-4 w-4" />
                             </>
                         )}

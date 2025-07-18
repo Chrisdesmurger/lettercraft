@@ -3,9 +3,11 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase-client'
+import { useI18n } from '@/lib/i18n-context'
 
 export default function RegisterPage() {
   const router = useRouter()
+  const { t } = useI18n()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -25,7 +27,7 @@ export default function RegisterPage() {
 
     const { data, error } = await supabase.auth.signUp({ email, password })
     if (error || !data.user) {
-      setError(error?.message || 'Erreur inconnue')
+      setError(error?.message || t('auth.unknownError'))
       return
     }
 
@@ -41,7 +43,7 @@ export default function RegisterPage() {
       return
     }
 
-    setSuccess("Inscription reussie !")
+    setSuccess(t('auth.registerSuccess'))
     router.push('/')
   }
 
@@ -51,10 +53,10 @@ export default function RegisterPage() {
         onSubmit={handleSubmit}
         className="bg-white p-8 rounded-xl shadow-md space-y-4 w-full max-w-sm"
       >
-        <h1 className="text-2xl font-bold text-center">Inscription</h1>
+        <h1 className="text-2xl font-bold text-center">{t('auth.register')}</h1>
         <input
           type="email"
-          placeholder="Email"
+          placeholder={t('auth.email')}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           className="w-full border rounded px-3 py-2"
@@ -62,7 +64,7 @@ export default function RegisterPage() {
         />
         <input
           type="password"
-          placeholder="Mot de passe"
+          placeholder={t('auth.password')}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           className="w-full border rounded px-3 py-2"
@@ -74,7 +76,7 @@ export default function RegisterPage() {
           type="submit"
           className="w-full bg-gradient-to-r from-orange-400 to-amber-500 text-white px-4 py-2 rounded"
         >
-          S'inscrire
+          {t('auth.signup')}
         </button>
       </form>
     </div>
