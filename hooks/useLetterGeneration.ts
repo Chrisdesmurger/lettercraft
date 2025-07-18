@@ -27,6 +27,7 @@ export interface QuestionnaireData {
   skills_match: string[]
   company_values: string
   additional_context?: string
+  language?: string
 }
 
 export function useLetterGeneration() {
@@ -83,7 +84,8 @@ export function useLetterGeneration() {
           salary_range: analyzedData.salary_range,
           employment_type: analyzedData.employment_type,
           source_url: sourceUrl,
-          extracted_keywords: analyzedData.keywords
+          extracted_keywords: analyzedData.keywords,
+          language: analyzedData.language
         })
         .select()
         .single()
@@ -126,7 +128,8 @@ export function useLetterGeneration() {
           experience_highlight: responses.experience_highlight,
           skills_match: responses.skills_match,
           company_values: responses.company_values,
-          additional_context: responses.additional_context
+          additional_context: responses.additional_context,
+          language: responses.language
         })
         .select()
         .single()
@@ -178,7 +181,12 @@ export function useLetterGeneration() {
           jobOffer: flow.jobOffer,
           questionnaireResponse: questionnaireResponse,
           cvData: activeCV,
-          settings: settings || {}
+          settings: {
+            language: questionnaireResponse.language || settings?.language || 'fr',
+            tone: settings?.tone || 'professionnel',
+            length: settings?.length || 'moyen',
+            ...settings
+          }
         })
       })
 

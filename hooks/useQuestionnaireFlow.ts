@@ -4,12 +4,13 @@ import { motion } from 'framer-motion'
 export interface QuestionnaireQuestion {
   id: string
   title: string
-  type: 'text' | 'textarea' | 'select' | 'multi_select' | 'select_experience' | 'multi_select_skills'
+  type: 'text' | 'textarea' | 'select' | 'multi_select' | 'select_experience' | 'multi_select_skills' | 'select_language'
   placeholder?: string
   options?: Array<{ value: string; label: string }>
   required?: boolean
   validation?: (value: any) => string | null
   dynamic?: boolean
+  defaultValue?: string
 }
 
 export interface QuestionnaireState {
@@ -83,20 +84,35 @@ export const defaultQuestions: QuestionnaireQuestion[] = [
 
 export function useQuestionnaireFlow(questions: QuestionnaireQuestion[] = defaultQuestions) {
   const [state, setState] = useState<QuestionnaireState>(() => {
-    // Charger l'état depuis localStorage
+    // Initialiser avec les valeurs par défaut
+    const initialAnswers: Record<string, any> = {}
+    questions.forEach(question => {
+      if (question.defaultValue !== undefined) {
+        initialAnswers[question.id] = question.defaultValue
+      }
+    })
+    
+    // Charger l'état depuis localStorage mais merger avec les valeurs par défaut
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('questionnaire-progress')
       if (saved) {
         try {
-          return JSON.parse(saved)
+          const savedState = JSON.parse(saved)
+          // Merger les réponses sauvegardées avec les valeurs par défaut
+          const mergedAnswers = { ...initialAnswers, ...savedState.answers }
+          return {
+            ...savedState,
+            answers: mergedAnswers
+          }
         } catch (e) {
           console.error('Erreur lors du chargement du questionnaire:', e)
         }
       }
     }
+    
     return {
       currentQuestion: 0,
-      answers: {},
+      answers: initialAnswers,
       isValid: false,
       isComplete: false
     }
@@ -104,6 +120,23 @@ export function useQuestionnaireFlow(questions: QuestionnaireQuestion[] = defaul
 
   const currentQuestion = questions[state.currentQuestion]
   const isLastQuestion = state.currentQuestion === questions.length - 1
+
+  // Mettre à jour les valeurs par défaut quand les questions changent
+  useEffect(() => {
+    const defaultAnswers: Record<string, any> = {}
+    questions.forEach(question => {
+      if (question.defaultValue !== undefined && !state.answers[question.id]) {
+        defaultAnswers[question.id] = question.defaultValue
+      }
+    })
+    
+    if (Object.keys(defaultAnswers).length > 0) {
+      setState(prev => ({
+        ...prev,
+        answers: { ...prev.answers, ...defaultAnswers }
+      }))
+    }
+  }, [questions])
 
   // Sauvegarder l'état dans localStorage à chaque changement
   useEffect(() => {

@@ -53,7 +53,7 @@ export default function LetterQuestionnaire({
 }: LetterQuestionnaireProps) {
   const { t } = useI18n()
   const [direction, setDirection] = useState(0)
-  const questions = createQuestionnaireQuestions(t)
+  const questions = createQuestionnaireQuestions(t, jobOffer?.language)
   const {
     state,
     currentQuestion,

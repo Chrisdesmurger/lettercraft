@@ -66,13 +66,60 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Générer la lettre de motivation avec OpenAI
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4-turbo",
-      messages: [
-        {
-          role: "system",
-          content: `Tu es un expert en rédaction de lettres de motivation professionnelles en français. Tu dois créer une lettre de motivation personnalisée et convaincante.
+    // Définir les instructions selon la langue
+    const getLanguageInstructions = (language: string) => {
+      switch (language) {
+        case 'en':
+          return {
+            system: `You are an expert in writing professional cover letters in English. You must create a personalized and convincing cover letter.
+
+PRECISE INSTRUCTIONS:
+1. Use the CV and questionnaire information to personalize the letter
+2. Follow the classic English structure: header, subject, body, closing
+3. Adopt a ${context.settings.tone} tone and adapt the length according to: ${context.settings.length}
+4. Highlight the selected experience and matching skills
+5. Naturally integrate the expressed motivation
+6. Show alignment with company values
+7. Avoid clichés and overly generic formulations
+
+EXPECTED STRUCTURE:
+- Header with contact details (if available)
+- Clear subject line
+- Engaging introduction
+- Development in 2-3 paragraphs
+- Conclusion with call to action
+- Professional closing
+
+Generate only the letter content, without additional comments.`,
+            prompt: `Generate a cover letter for:`
+          }
+        case 'es':
+          return {
+            system: `Eres un experto en redacción de cartas de presentación profesionales en español. Debes crear una carta de presentación personalizada y convincente.
+
+INSTRUCCIONES PRECISAS:
+1. Utiliza la información del CV y del cuestionario para personalizar la carta
+2. Respeta la estructura clásica española: encabezado, asunto, cuerpo, fórmula de cortesía
+3. Adopta un tono ${context.settings.tone} y adapta la longitud según: ${context.settings.length}
+4. Destaca la experiencia seleccionada y las competencias que coinciden
+5. Integra naturalmente la motivación expresada
+6. Muestra la alineación con los valores de la empresa
+7. Evita clichés y formulaciones demasiado genéricas
+
+ESTRUCTURA ESPERADA:
+- Encabezado con datos de contacto (si están disponibles)
+- Asunto claro
+- Introducción atractiva
+- Desarrollo en 2-3 párrafos
+- Conclusión con llamada a la acción
+- Fórmula de cortesía
+
+Genera únicamente el contenido de la carta, sin comentarios adicionales.`,
+            prompt: `Genera una carta de presentación para:`
+          }
+        default: // français
+          return {
+            system: `Tu es un expert en rédaction de lettres de motivation professionnelles en français. Tu dois créer une lettre de motivation personnalisée et convaincante.
 
 INSTRUCTIONS PRÉCISES:
 1. Utilise les informations du CV et du questionnaire pour personnaliser la lettre
@@ -91,31 +138,45 @@ STRUCTURE ATTENDUE:
 - Conclusion avec appel à l'action
 - Formule de politesse
 
-Génère uniquement le contenu de la lettre, sans commentaires supplémentaires.`
+Génère uniquement le contenu de la lettre, sans commentaires supplémentaires.`,
+            prompt: `Génère une lettre de motivation pour:`
+          }
+      }
+    }
+
+    const languageInstructions = getLanguageInstructions(context.settings.language)
+
+    // Générer la lettre de motivation avec OpenAI
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4-turbo",
+      messages: [
+        {
+          role: "system",
+          content: languageInstructions.system
         },
         {
           role: "user",
-          content: `Génère une lettre de motivation pour:
+          content: `${languageInstructions.prompt}
 
-OFFRE D'EMPLOI:
-- Poste: ${context.jobOffer.title}
-- Entreprise: ${context.jobOffer.company}
-- Description: ${context.jobOffer.description}
-- Localisation: ${context.jobOffer.location || 'Non spécifiée'}
+${context.settings.language === 'en' ? 'JOB OFFER:' : context.settings.language === 'es' ? 'OFERTA DE EMPLEO:' : 'OFFRE D\'EMPLOI:'}
+- ${context.settings.language === 'en' ? 'Position:' : context.settings.language === 'es' ? 'Puesto:' : 'Poste:'} ${context.jobOffer.title}
+- ${context.settings.language === 'en' ? 'Company:' : context.settings.language === 'es' ? 'Empresa:' : 'Entreprise:'} ${context.jobOffer.company}
+- ${context.settings.language === 'en' ? 'Description:' : context.settings.language === 'es' ? 'Descripción:' : 'Description:'} ${context.jobOffer.description}
+- ${context.settings.language === 'en' ? 'Location:' : context.settings.language === 'es' ? 'Localización:' : 'Localisation:'} ${context.jobOffer.location || (context.settings.language === 'en' ? 'Not specified' : context.settings.language === 'es' ? 'No especificada' : 'Non spécifiée')}
 
-CANDIDAT:
-- Nom: ${context.candidate.name || 'Candidat'}
-- Expériences: ${JSON.stringify(context.candidate.experiences)}
-- Compétences: ${context.candidate.skills.join(', ')}
+${context.settings.language === 'en' ? 'CANDIDATE:' : context.settings.language === 'es' ? 'CANDIDATO:' : 'CANDIDAT:'}
+- ${context.settings.language === 'en' ? 'Name:' : context.settings.language === 'es' ? 'Nombre:' : 'Nom:'} ${context.candidate.name || (context.settings.language === 'en' ? 'Candidate' : context.settings.language === 'es' ? 'Candidato' : 'Candidat')}
+- ${context.settings.language === 'en' ? 'Experiences:' : context.settings.language === 'es' ? 'Experiencias:' : 'Expériences:'} ${JSON.stringify(context.candidate.experiences)}
+- ${context.settings.language === 'en' ? 'Skills:' : context.settings.language === 'es' ? 'Habilidades:' : 'Compétences:'} ${context.candidate.skills.join(', ')}
 
-RÉPONSES DU QUESTIONNAIRE:
-- Motivation: ${context.responses.motivation}
-- Expérience à valoriser: ${JSON.stringify(context.responses.experience_highlight)}
-- Compétences correspondantes: ${context.responses.skills_match.join(', ')}
-- Alignement avec les valeurs: ${context.responses.company_values}
-- Contexte supplémentaire: ${context.responses.additional_context || 'Aucun'}
+${context.settings.language === 'en' ? 'QUESTIONNAIRE RESPONSES:' : context.settings.language === 'es' ? 'RESPUESTAS DEL CUESTIONARIO:' : 'RÉPONSES DU QUESTIONNAIRE:'}
+- ${context.settings.language === 'en' ? 'Motivation:' : context.settings.language === 'es' ? 'Motivación:' : 'Motivation:'} ${context.responses.motivation}
+- ${context.settings.language === 'en' ? 'Experience to highlight:' : context.settings.language === 'es' ? 'Experiencia a destacar:' : 'Expérience à valoriser:'} ${JSON.stringify(context.responses.experience_highlight)}
+- ${context.settings.language === 'en' ? 'Matching skills:' : context.settings.language === 'es' ? 'Habilidades correspondientes:' : 'Compétences correspondantes:'} ${context.responses.skills_match.join(', ')}
+- ${context.settings.language === 'en' ? 'Values alignment:' : context.settings.language === 'es' ? 'Alineación con valores:' : 'Alignement avec les valeurs:'} ${context.responses.company_values}
+- ${context.settings.language === 'en' ? 'Additional context:' : context.settings.language === 'es' ? 'Contexto adicional:' : 'Contexte supplémentaire:'} ${context.responses.additional_context || (context.settings.language === 'en' ? 'None' : context.settings.language === 'es' ? 'Ninguno' : 'Aucun')}
 
-Génère une lettre de motivation professionnelle et personnalisée.`
+${context.settings.language === 'en' ? 'Generate a professional and personalized cover letter.' : context.settings.language === 'es' ? 'Genera una carta de presentación profesional y personalizada.' : 'Génère une lettre de motivation professionnelle et personnalisée.'}`
         }
       ],
       temperature: 0.7,
@@ -128,12 +189,8 @@ Génère une lettre de motivation professionnelle et personnalisée.`
     }
 
     // Générer également la version HTML pour le PDF
-    const htmlCompletion = await openai.chat.completions.create({
-      model: "gpt-4-turbo",
-      messages: [
-        {
-          role: "system",
-          content: `Convertis cette lettre de motivation en HTML bien formaté pour impression PDF. Utilise:
+    const htmlInstructions = {
+      fr: `Convertis cette lettre de motivation en HTML bien formaté pour impression PDF. Utilise:
 - Des balises sémantiques appropriées
 - Une mise en page professionnelle
 - Des espaces et marges correctes
@@ -146,11 +203,47 @@ Structure HTML:
 - Paragraphes bien espacés
 - Signature à la fin
 
-Génère uniquement le code HTML complet, sans commentaires.`
+Génère uniquement le code HTML complet, sans commentaires.`,
+      en: `Convert this cover letter to well-formatted HTML for PDF printing. Use:
+- Appropriate semantic tags
+- Professional layout
+- Correct spacing and margins
+- Readable and professional font
+- No external CSS, use inline CSS
+
+HTML Structure:
+- Header with contact details
+- Subject in bold
+- Well-spaced paragraphs
+- Signature at the end
+
+Generate only the complete HTML code, without comments.`,
+      es: `Convierte esta carta de presentación en HTML bien formateado para impresión PDF. Utiliza:
+- Etiquetas semánticas apropiadas
+- Diseño profesional
+- Espaciado y márgenes correctos
+- Fuente legible y profesional
+- Sin CSS externo, usa CSS inline
+
+Estructura HTML:
+- Encabezado con datos de contacto
+- Asunto en negrita
+- Párrafos bien espaciados
+- Firma al final
+
+Genera únicamente el código HTML completo, sin comentarios.`
+    }
+
+    const htmlCompletion = await openai.chat.completions.create({
+      model: "gpt-4-turbo",
+      messages: [
+        {
+          role: "system",
+          content: htmlInstructions[context.settings.language as keyof typeof htmlInstructions] || htmlInstructions.fr
         },
         {
           role: "user",
-          content: `Convertis cette lettre en HTML:\n\n${letterContent}`
+          content: `${context.settings.language === 'en' ? 'Convert this letter to HTML:' : context.settings.language === 'es' ? 'Convierte esta carta en HTML:' : 'Convertis cette lettre en HTML:'}\n\n${letterContent}`
         }
       ],
       temperature: 0.3,

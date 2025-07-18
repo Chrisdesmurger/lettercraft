@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
@@ -69,7 +69,7 @@ export default function QuestionCard({
     setLocalValue(value)
   }, [value])
 
-  const handleValueChange = (newValue: any) => {
+  const handleValueChange = useCallback((newValue: any) => {
     setLocalValue(newValue)
     onChange(newValue)
     
@@ -80,7 +80,18 @@ export default function QuestionCard({
     } else {
       setError(null)
     }
-  }
+  }, [onChange, question.validation])
+
+  // Auto-sélection de la langue détectée pour la question de langue
+  useEffect(() => {
+    if (question.id === 'language' && jobOfferData?.language && !value) {
+      // Auto-sélectionner la langue détectée si aucune valeur n'est encore définie
+      const detectedLanguage = jobOfferData.language
+      if (question.options?.some(opt => opt.value === detectedLanguage)) {
+        handleValueChange(detectedLanguage)
+      }
+    }
+  }, [question.id, jobOfferData?.language, value, question.options, handleValueChange])
 
   const handleNext = () => {
     if (question.validation) {
@@ -118,19 +129,28 @@ export default function QuestionCard({
 
       case 'select':
         return (
-          <RadioGroup
-            value={localValue}
-            onValueChange={handleValueChange}
-          >
-            {question.options?.map((option) => (
-              <div key={option.value} className="flex items-center space-x-2">
-                <RadioGroupItem value={option.value} id={option.value} />
-                <Label htmlFor={option.value} className="cursor-pointer">
-                  {option.label}
-                </Label>
+          <div className="space-y-4">
+            {question.id === 'language' && jobOfferData?.language && (
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-sm text-blue-800">
+                  {t('questionnaire.question6.detectedLanguage', { language: question.options?.find(opt => opt.value === jobOfferData.language)?.label || jobOfferData.language })}
+                </p>
               </div>
-            ))}
-          </RadioGroup>
+            )}
+            <RadioGroup
+              value={localValue}
+              onValueChange={handleValueChange}
+            >
+              {question.options?.map((option) => (
+                <div key={option.value} className="flex items-center space-x-2">
+                  <RadioGroupItem value={option.value} id={option.value} />
+                  <Label htmlFor={option.value} className="cursor-pointer">
+                    {option.label}
+                  </Label>
+                </div>
+              ))}
+            </RadioGroup>
+          </div>
         )
 
       case 'multi_select':

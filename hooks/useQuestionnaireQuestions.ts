@@ -1,6 +1,6 @@
 import type { QuestionnaireQuestion } from './useQuestionnaireFlow'
 
-export function createQuestionnaireQuestions(t: (key: string) => string): QuestionnaireQuestion[] {
+export function createQuestionnaireQuestions(t: (key: string) => string, detectedLanguage?: string): QuestionnaireQuestion[] {
   return [
     {
       id: 'motivation',
@@ -60,6 +60,25 @@ export function createQuestionnaireQuestions(t: (key: string) => string): Questi
       type: 'textarea',
       placeholder: t('questionnaire.question5.placeholder'),
       required: false
+    },
+    {
+      id: 'language',
+      title: t('questionnaire.question6.title'),
+      type: 'select',
+      placeholder: t('questionnaire.question6.placeholder'),
+      required: true,
+      options: [
+        { value: 'fr', label: t('questionnaire.question6.french') },
+        { value: 'en', label: t('questionnaire.question6.english') },
+        { value: 'es', label: t('questionnaire.question6.spanish') }
+      ],
+      defaultValue: detectedLanguage || 'fr',
+      validation: (value: string) => {
+        if (!value) {
+          return t('questionnaire.validation.required')
+        }
+        return null
+      }
     }
   ]
 }
