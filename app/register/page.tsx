@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase-client'
 import { useI18n } from '@/lib/i18n-context'
+import LanguageSwitcher from '@/components/LanguageSwitcher'
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -48,7 +49,10 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen">
+    <div className="flex items-center justify-center min-h-screen relative">
+      <div className="absolute top-4 right-4">
+        <LanguageSwitcher />
+      </div>
       <form
         onSubmit={handleSubmit}
         className="bg-white p-8 rounded-xl shadow-md space-y-4 w-full max-w-sm"

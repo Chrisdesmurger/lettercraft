@@ -1675,8 +1675,13 @@ const translations = {
     'auth.logout': 'Abmelden',
     'auth.email': 'E-Mail',
     'auth.password': 'Passwort',
-    'auth.loginSuccess': 'Erfolgreich angemeldet',
+    'auth.signin': 'Anmelden',
+    'auth.signup': 'Registrieren',
+    'auth.noAccount': 'Kein Konto?',
+    'auth.loginSuccess': 'Erfolgreich angemeldet!',
+    'auth.registerSuccess': 'Registrierung erfolgreich!',
     'auth.logoutSuccess': 'Erfolgreich abgemeldet',
+    'auth.unknownError': 'Unbekannter Fehler',
     
     // Subscription
     'subscription.title': 'Mein Abonnement',
@@ -1983,8 +1988,13 @@ const translations = {
     'auth.logout': 'Disconnetti',
     'auth.email': 'Email',
     'auth.password': 'Password',
-    'auth.loginSuccess': 'Accesso effettuato con successo',
+    'auth.signin': 'Accedi',
+    'auth.signup': 'Registrati',
+    'auth.noAccount': 'Non hai un account?',
+    'auth.loginSuccess': 'Accesso effettuato con successo!',
+    'auth.registerSuccess': 'Registrazione completata con successo!',
     'auth.logoutSuccess': 'Disconnessione effettuata',
+    'auth.unknownError': 'Errore sconosciuto',
     
     // Subscription
     'subscription.title': 'Il mio abbonamento',
