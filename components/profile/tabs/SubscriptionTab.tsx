@@ -3,51 +3,29 @@
 import { useState, useEffect } from 'react'
 import { Check, X, Zap, CreditCard } from 'lucide-react'
 import { useI18n } from '@/lib/i18n-context'
-import { supabase } from '@/lib/supabase-client'
 import { toast } from 'react-hot-toast'
+import type { User } from '@supabase/supabase-js'
 
-export default function SubscriptionTab() {
+interface UserProfile {
+  user_id: string
+  subscription_tier: 'free' | 'premium'
+}
+
+interface SubscriptionTabProps {
+  user: User | null
+  userProfile: UserProfile | null
+  loading: boolean
+  refreshProfile: () => Promise<void>
+}
+
+export default function SubscriptionTab({ user, userProfile, loading: profileLoading, refreshProfile }: SubscriptionTabProps) {
   const { t } = useI18n()
-  const [currentPlan, setCurrentPlan] = useState<'free' | 'premium'>('free')
-  const [loading, setLoading] = useState(false)
-  const [user, setUser] = useState<any>(null)
+  const [paymentLoading, setPaymentLoading] = useState(false)
+  
+  // Derive current plan from props instead of local state
+  const currentPlan = userProfile?.subscription_tier || 'free'
 
-  const refreshSubscriptionStatus = async () => {
-    const { data: { session } } = await supabase.auth.getSession()
-    if (session?.user) {
-      setUser(session.user)
-      
-      // Get user profile to check subscription
-      const { data: profile } = await supabase
-        .from('user_profiles')
-        .select('subscription_tier')
-        .eq('user_id', session.user.id)
-        .single()
-      
-      console.log('Current subscription status:', profile)
-      
-      if (profile?.subscription_tier === 'premium') {
-        setCurrentPlan('premium')
-      } else {
-        setCurrentPlan('free')
-      }
-    }
-  }
-
-  useEffect(() => {
-    refreshSubscriptionStatus()
-  }, [])
-
-  // Add a method to manually refresh subscription status
-  useEffect(() => {
-    // Listen for storage events to refresh when another tab updates the subscription
-    const handleStorageChange = () => {
-      refreshSubscriptionStatus()
-    }
-    
-    window.addEventListener('storage', handleStorageChange)
-    return () => window.removeEventListener('storage', handleStorageChange)
-  }, [])
+  // Remove all the local subscription fetching logic since it's now provided via props
 
   const handleUpgrade = async () => {
     if (!user) {
@@ -55,7 +33,7 @@ export default function SubscriptionTab() {
       return
     }
 
-    setLoading(true)
+    setPaymentLoading(true)
     try {
       const response = await fetch('/api/create-checkout-session', {
         method: 'POST',
@@ -82,7 +60,7 @@ export default function SubscriptionTab() {
       console.error('Error creating checkout session:', error)
       toast.error(t('subscription.paymentError'))
     } finally {
-      setLoading(false)
+      setPaymentLoading(false)
     }
   }
 
@@ -135,15 +113,15 @@ export default function SubscriptionTab() {
             </div>
             <button 
               onClick={handleUpgrade}
-              disabled={loading}
+              disabled={paymentLoading || profileLoading}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? (
+              {(paymentLoading || profileLoading) ? (
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
               ) : (
                 <Zap className="w-4 h-4 mr-2" />
               )}
-              {loading ? t('common.loading') : t('subscription.upgradeToPremium')}
+              {(paymentLoading || profileLoading) ? t('common.loading') : t('subscription.upgradeToPremium')}
             </button>
           </div>
         </div>
@@ -195,15 +173,15 @@ export default function SubscriptionTab() {
             ) : plan.id === 'premium' ? (
               <button 
                 onClick={handleUpgrade}
-                disabled={loading}
+                disabled={paymentLoading || profileLoading}
                 className="w-full py-2 bg-gradient-to-r from-orange-400 to-amber-500 text-white rounded-lg hover:shadow-lg transition-shadow flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? (
+                {(paymentLoading || profileLoading) ? (
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                 ) : (
                   <CreditCard className="w-4 h-4 mr-2" />
                 )}
-                {loading ? t('common.loading') : t('subscription.payWithStripe')}
+                {(paymentLoading || profileLoading) ? t('common.loading') : t('subscription.payWithStripe')}
               </button>
             ) : (
               <button className="w-full py-2 bg-gray-300 text-gray-600 rounded-lg cursor-not-allowed" disabled>

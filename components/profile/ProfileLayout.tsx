@@ -10,6 +10,7 @@ import CVTab from './tabs/CVTab'
 import SettingsTab from './tabs/SettingsTab'
 import SubscriptionTab from './tabs/SubscriptionTab'
 import { useI18n } from '@/lib/i18n-context'
+import { useUserSubscription } from '@/hooks/useUserSubscription'
 
 type TabType = 'profile' | 'cv' | 'settings' | 'subscription'
 
@@ -17,6 +18,7 @@ export default function ProfileLayout() {
     const { t } = useI18n()
     const [activeTab, setActiveTab] = useState<TabType>('profile')
     const router = useRouter()
+    const { user, userProfile, loading, refreshProfile } = useUserSubscription()
 
     const handleLogout = async () => {
         await supabase.auth.signOut()
@@ -70,7 +72,14 @@ export default function ProfileLayout() {
                         {activeTab === 'profile' && <ProfileTab />}
                         {activeTab === 'cv' && <CVTab />}
                         {activeTab === 'settings' && <SettingsTab />}
-                        {activeTab === 'subscription' && <SubscriptionTab />}
+                        {activeTab === 'subscription' && (
+                            <SubscriptionTab 
+                                user={user}
+                                userProfile={userProfile}
+                                loading={loading}
+                                refreshProfile={refreshProfile}
+                            />
+                        )}
                     </CardContent>
 
                     {/* Footer avec bouton de déconnexion */}
