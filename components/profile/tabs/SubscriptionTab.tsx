@@ -1,12 +1,90 @@
 'use client'
 
-import { useState } from 'react'
-import { Check, X, Zap } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Check, X, Zap, CreditCard } from 'lucide-react'
 import { useI18n } from '@/lib/i18n-context'
+import { supabase } from '@/lib/supabase-client'
+import { toast } from 'react-hot-toast'
 
 export default function SubscriptionTab() {
   const { t } = useI18n()
-  const [currentPlan] = useState<'free' | 'premium'>('free') // ou 'premium'
+  const [currentPlan, setCurrentPlan] = useState<'free' | 'premium'>('free')
+  const [loading, setLoading] = useState(false)
+  const [user, setUser] = useState<any>(null)
+
+  const refreshSubscriptionStatus = async () => {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (session?.user) {
+      setUser(session.user)
+      
+      // Get user profile to check subscription
+      const { data: profile } = await supabase
+        .from('user_profiles')
+        .select('subscription_tier')
+        .eq('user_id', session.user.id)
+        .single()
+      
+      console.log('Current subscription status:', profile)
+      
+      if (profile?.subscription_tier === 'premium') {
+        setCurrentPlan('premium')
+      } else {
+        setCurrentPlan('free')
+      }
+    }
+  }
+
+  useEffect(() => {
+    refreshSubscriptionStatus()
+  }, [])
+
+  // Add a method to manually refresh subscription status
+  useEffect(() => {
+    // Listen for storage events to refresh when another tab updates the subscription
+    const handleStorageChange = () => {
+      refreshSubscriptionStatus()
+    }
+    
+    window.addEventListener('storage', handleStorageChange)
+    return () => window.removeEventListener('storage', handleStorageChange)
+  }, [])
+
+  const handleUpgrade = async () => {
+    if (!user) {
+      toast.error(t('auth.pleaseLogin'))
+      return
+    }
+
+    setLoading(true)
+    try {
+      const response = await fetch('/api/create-checkout-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          email: user.email,
+        }),
+      })
+
+      const { url, error } = await response.json()
+
+      if (error) {
+        toast.error(t('subscription.paymentError'))
+        return
+      }
+
+      if (url) {
+        window.location.href = url
+      }
+    } catch (error) {
+      console.error('Error creating checkout session:', error)
+      toast.error(t('subscription.paymentError'))
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const plans = [
     {
@@ -55,9 +133,17 @@ export default function SubscriptionTab() {
               <p className="font-medium text-blue-900">{t('subscription.freePlan')}</p>
               <p className="text-sm text-blue-700">{t('subscription.remainingLetters', { count: '7' })}</p>
             </div>
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center">
-              <Zap className="w-4 h-4 mr-2" />
-              {t('subscription.upgradeToPremium')}
+            <button 
+              onClick={handleUpgrade}
+              disabled={loading}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+              ) : (
+                <Zap className="w-4 h-4 mr-2" />
+              )}
+              {loading ? t('common.loading') : t('subscription.upgradeToPremium')}
             </button>
           </div>
         </div>
@@ -106,9 +192,22 @@ export default function SubscriptionTab() {
               <button disabled className="w-full py-2 bg-gray-200 text-gray-500 rounded-lg cursor-not-allowed">
                 {t('subscription.currentPlan')}
               </button>
+            ) : plan.id === 'premium' ? (
+              <button 
+                onClick={handleUpgrade}
+                disabled={loading}
+                className="w-full py-2 bg-gradient-to-r from-orange-400 to-amber-500 text-white rounded-lg hover:shadow-lg transition-shadow flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                ) : (
+                  <CreditCard className="w-4 h-4 mr-2" />
+                )}
+                {loading ? t('common.loading') : t('subscription.payWithStripe')}
+              </button>
             ) : (
-              <button className="w-full py-2 bg-gradient-to-r from-orange-400 to-amber-500 text-white rounded-lg hover:shadow-lg transition-shadow">
-                {plan.id === 'premium' ? t('subscription.upgradeToPremium') : t('subscription.downgrade')}
+              <button className="w-full py-2 bg-gray-300 text-gray-600 rounded-lg cursor-not-allowed" disabled>
+                {t('subscription.downgrade')}
               </button>
             )}
           </div>

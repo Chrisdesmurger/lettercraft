@@ -24,6 +24,8 @@ CREATE TABLE user_profiles (
   bio TEXT,
   subscription_tier TEXT DEFAULT 'free' CHECK (subscription_tier IN ('free', 'premium')),
   subscription_end_date TIMESTAMP WITH TIME ZONE,
+  stripe_customer_id TEXT UNIQUE,
+  stripe_subscription_id TEXT UNIQUE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -175,6 +177,8 @@ CREATE TABLE languages (
 -- User profiles indexes
 CREATE INDEX idx_user_profiles_user_id ON user_profiles(user_id);
 CREATE INDEX idx_user_profiles_subscription ON user_profiles(subscription_tier);
+CREATE INDEX idx_user_profiles_stripe_customer ON user_profiles(stripe_customer_id);
+CREATE INDEX idx_user_profiles_stripe_subscription ON user_profiles(stripe_subscription_id);
 
 -- Candidates profile indexes
 CREATE INDEX idx_candidates_profile_user_id ON candidates_profile(user_id);
