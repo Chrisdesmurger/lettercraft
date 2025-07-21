@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase-client'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2023-10-16',
+  apiVersion: '2025-06-30.basil',
 })
 
 export async function POST(request: NextRequest) {
