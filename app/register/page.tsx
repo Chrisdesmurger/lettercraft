@@ -82,6 +82,18 @@ export default function RegisterPage() {
         >
           {t('auth.signup')}
         </button>
+        <div className="text-center mt-4">
+          <p className="text-gray-600">
+            {t('auth.haveAccount')}{' '}
+            <button
+              type="button"
+              onClick={() => router.push('/login')}
+              className="text-orange-500 hover:text-orange-600 font-medium underline"
+            >
+              {t('auth.signin')}
+            </button>
+          </p>
+        </div>
       </form>
     </div>
   )

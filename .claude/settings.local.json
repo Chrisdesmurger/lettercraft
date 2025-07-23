@@ -17,7 +17,11 @@
       "Bash(git checkout:*)",
       "Bash(pnpm install:*)",
       "Bash(powershell:*)",
-      "Bash(npm run type-check:*)"
+      "Bash(npm run type-check:*)",
+      "Bash(pnpm add:*)",
+      "Bash(pnpm run lint:*)",
+      "Bash(timeout 10s pnpm run dev)",
+      "Bash(timeout 30s npm run build)"
     ],
     "deny": []
   }

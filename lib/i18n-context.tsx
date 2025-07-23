@@ -75,9 +75,11 @@ const translations = {
     'auth.email': 'Email',
     'auth.password': 'Mot de passe',
     'auth.signin': 'Se connecter',
+    'auth.pleaseLogin': 'Veuillez vous connecter pour continuer',
     'auth.signup': 'S\'inscrire',
     'auth.logout': 'Déconnexion',
     'auth.noAccount': 'Pas de compte?',
+    'auth.haveAccount': 'Vous avez déjà un compte ?',
     'auth.loginSuccess': 'Connexion reussie !',
     'auth.registerSuccess': 'Inscription reussie !',
     'auth.unknownError': 'Erreur inconnue',
@@ -310,6 +312,8 @@ const translations = {
     'subscription.table.description': 'Description',
     'subscription.table.amount': 'Montant',
     'subscription.table.invoice': 'Facture',
+    'subscription.payWithStripe': 'Payer avec Stripe',
+    'subscription.paymentError': 'Erreur de paiement. Veuillez réessayer.',
     
     // Modern Web App
     'webapp.cvUploaded': 'CV Uploadé',
@@ -555,9 +559,11 @@ const translations = {
     'auth.email': 'Email',
     'auth.password': 'Password',
     'auth.signin': 'Sign In',
+    'auth.pleaseLogin': 'Please log in to continue',
     'auth.signup': 'Sign Up',
     'auth.logout': 'Logout',
     'auth.noAccount': 'No account?',
+    'auth.haveAccount': 'Already have an account?',
     'auth.loginSuccess': 'Login successful!',
     'auth.registerSuccess': 'Registration successful!',
     'auth.unknownError': 'Unknown error',
@@ -790,6 +796,8 @@ const translations = {
     'subscription.table.description': 'Description',
     'subscription.table.amount': 'Amount',
     'subscription.table.invoice': 'Invoice',
+    'subscription.payWithStripe': 'Pay with Stripe',
+    'subscription.paymentError': 'Payment error. Please try again.',
     
     // Modern Web App
     'webapp.cvUploaded': 'CV Uploaded',
@@ -1035,9 +1043,11 @@ const translations = {
     'auth.email': 'Email',
     'auth.password': 'Contraseña',
     'auth.signin': 'Iniciar sesión',
+    'auth.pleaseLogin': 'Por favor, inicia sesión para continuar',
     'auth.signup': 'Registrarse',
     'auth.logout': 'Cerrar sesión',
     'auth.noAccount': '¿No tienes cuenta?',
+    'auth.haveAccount': '¿Ya tienes una cuenta?',
     'auth.loginSuccess': '¡Inicio de sesión exitoso!',
     'auth.registerSuccess': '¡Registro exitoso!',
     'auth.unknownError': 'Error desconocido',
@@ -1270,6 +1280,8 @@ const translations = {
     'subscription.table.description': 'Descripción',
     'subscription.table.amount': 'Cantidad',
     'subscription.table.invoice': 'Factura',
+    'subscription.payWithStripe': 'Pagar con Stripe',
+    'subscription.paymentError': 'Error de pago. Por favor, inténtelo de nuevo.',
     
     // Modern Web App
     'webapp.cvUploaded': 'CV Subido',
@@ -1676,8 +1688,10 @@ const translations = {
     'auth.email': 'E-Mail',
     'auth.password': 'Passwort',
     'auth.signin': 'Anmelden',
+    'auth.pleaseLogin': 'Bitte melden Sie sich an, um fortzufahren',
     'auth.signup': 'Registrieren',
     'auth.noAccount': 'Kein Konto?',
+    'auth.haveAccount': 'Haben Sie bereits ein Konto?',
     'auth.loginSuccess': 'Erfolgreich angemeldet!',
     'auth.registerSuccess': 'Registrierung erfolgreich!',
     'auth.logoutSuccess': 'Erfolgreich abgemeldet',
@@ -1711,6 +1725,8 @@ const translations = {
     'subscription.table.description': 'Beschreibung',
     'subscription.table.amount': 'Betrag',
     'subscription.table.invoice': 'Rechnung',
+    'subscription.payWithStripe': 'Mit Stripe bezahlen',
+    'subscription.paymentError': 'Zahlungsfehler. Bitte versuchen Sie es erneut.',
     
     // Generate page
     'generate.backToProfile': 'Zurück zum Profil',
@@ -1989,8 +2005,10 @@ const translations = {
     'auth.email': 'Email',
     'auth.password': 'Password',
     'auth.signin': 'Accedi',
+    'auth.pleaseLogin': 'Effettua il login per continuare',
     'auth.signup': 'Registrati',
     'auth.noAccount': 'Non hai un account?',
+    'auth.haveAccount': 'Hai già un account?',
     'auth.loginSuccess': 'Accesso effettuato con successo!',
     'auth.registerSuccess': 'Registrazione completata con successo!',
     'auth.logoutSuccess': 'Disconnessione effettuata',
@@ -2024,6 +2042,8 @@ const translations = {
     'subscription.table.description': 'Descrizione',
     'subscription.table.amount': 'Importo',
     'subscription.table.invoice': 'Fattura',
+    'subscription.payWithStripe': 'Paga con Stripe',
+    'subscription.paymentError': 'Errore di pagamento. Si prega di riprovare.',
     
     // Generate page
     'generate.backToProfile': 'Torna al profilo',
