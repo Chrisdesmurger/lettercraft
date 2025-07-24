@@ -20,36 +20,70 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Check if user exists using admin client to bypass RLS
+    // Check if user exists using the view
     const { data: userProfile, error: userError } = await supabaseAdmin
-      .from('user_profiles')
-      .select('user_id, subscription_tier')
-      .eq('user_id', userId)
+      .from('users_with_profiles')
+      .select('id, subscription_tier')
+      .eq('id', userId)
       .single()
-
-    console.log('Database lookup result:', { userProfile, userError })
+    
+    console.log('User profile lookup result:', { userProfile, userError })
 
     if (userError || !userProfile) {
-      // Try to create basic user profile using admin client to bypass RLS
-      console.log('User profile not found, creating basic profile with admin client...')
-      const { data: newProfile, error: createError } = await supabaseAdmin
-        .from('user_profiles')
-        .insert({
-          user_id: userId,
-          subscription_tier: 'free'
+      console.error('User not found:', userError)
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 404 }
+      )
+    }
+
+    // Initialize user profile if needed
+    if (!userProfile.subscription_tier) {
+      console.log('Initializing user profile for subscription...')
+      const { error: updateError } = await supabaseAdmin
+        .rpc('update_user_profile', {
+          p_user_id: userId,
+          p_subscription_tier: 'free'
         })
-        .select()
-        .single()
-
-      console.log('Basic profile creation result:', { newProfile, createError })
-
-      if (createError) {
-        console.error('Failed to create basic user profile:', createError)
+      
+      if (updateError) {
+        console.error('Failed to initialize user profile:', updateError)
         // Continue anyway - we'll handle this in webhooks
-        console.log('Continuing with Stripe checkout despite profile creation failure')
-      } else {
-        console.log('Successfully created user profile with admin client')
       }
+    }
+
+    // Create or retrieve Stripe customer first
+    let customer
+    try {
+      // Try to find existing customer by email
+      const existingCustomers = await stripe.customers.list({
+        email: email,
+        limit: 1
+      })
+
+      if (existingCustomers.data.length > 0) {
+        customer = existingCustomers.data[0]
+        console.log('Found existing Stripe customer:', customer.id)
+      } else {
+        // Create new customer
+        customer = await stripe.customers.create({
+          email: email,
+          metadata: {
+            userId: userId,
+          }
+        })
+        console.log('Created new Stripe customer:', customer.id)
+      }
+
+      // Link customer ID to user profile immediately
+      await supabaseAdmin.rpc('update_user_profile', {
+        p_user_id: userId,
+        p_stripe_customer_id: customer.id
+      })
+
+    } catch (error) {
+      console.error('Error managing Stripe customer:', error)
+      // Continue with session creation even if customer linking fails
     }
 
     const session = await stripe.checkout.sessions.create({
@@ -72,7 +106,7 @@ export async function POST(request: NextRequest) {
       mode: 'subscription',
       success_url: `${request.nextUrl.origin}/profile?payment=success`,
       cancel_url: `${request.nextUrl.origin}/profile?payment=cancelled`,
-      customer_email: email,
+      customer: customer?.id, // Use the customer ID instead of email
       metadata: {
         userId: userId,
       },

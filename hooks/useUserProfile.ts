@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase-client'
 import type { Tables } from '@/lib/supabase-client'
 
-export type UserProfile = Tables<'user_profiles'>
+export type UserProfile = Tables<'users_with_profiles'>
 
 export interface UseUserProfileReturn {
   profile: UserProfile | null
@@ -28,10 +28,11 @@ export function useUserProfile(): UseUserProfileReturn {
         return
       }
 
+      // Utiliser la vue users_with_profiles
       const { data, error: fetchError } = await supabase
-        .from('user_profiles')
+        .from('users_with_profiles')
         .select('*')
-        .eq('user_id', session.user.id)
+        .eq('id', session.user.id)
         .single()
 
       if (fetchError) {
