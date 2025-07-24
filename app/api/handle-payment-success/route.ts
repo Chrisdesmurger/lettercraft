@@ -15,59 +15,37 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // First check if user profile exists using admin client
-    const { data: existingProfile } = await supabaseAdmin
-      .from('user_profiles')
-      .select('user_id, subscription_tier')
-      .eq('user_id', userId)
+    // Check if user exists using the view
+    const { data: userProfile, error: getUserError } = await supabaseAdmin
+      .from('users_with_profiles')
+      .select('id, subscription_tier')
+      .eq('id', userId)
       .single()
+    
+    console.log('User profile lookup result:', { userProfile, getUserError })
 
-    console.log('Existing profile check result:', existingProfile)
-
-    if (!existingProfile) {
-      // Create profile first using admin client
-      console.log('Profile not found, creating with admin client...')
-      const { error: createError } = await supabaseAdmin
-        .from('user_profiles')
-        .insert({
-          user_id: userId,
-          subscription_tier: 'premium'
-        })
-
-      if (createError) {
-        console.error('Error creating profile:', createError)
-        // If profile already exists (race condition), just update it
-        if (createError.code === '23505') {
-          console.log('Profile already exists, proceeding to update...')
-        } else {
-          return NextResponse.json(
-            { error: 'Failed to create user profile' },
-            { status: 500 }
-          )
-        }
-      } else {
-        console.log('Profile created successfully with premium subscription')
-        return NextResponse.json({ 
-          success: true, 
-          message: 'Profile created and subscription set to premium' 
-        })
-      }
+    if (getUserError || !userProfile) {
+      console.error('User not found:', getUserError)
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 404 }
+      )
     }
 
-    // Update existing profile to premium
-    console.log('Updating existing profile to premium...')
-    const { data, error } = await supabaseAdmin
-      .from('user_profiles')
-      .update({
-        subscription_tier: 'premium'
+    // Update subscription_tier immediately for better UX
+    // Webhooks will later add the complete Stripe details (customer_id, subscription_id, exact dates)
+    console.log('Updating user subscription to premium for immediate UI feedback...')
+    const { error: updateError } = await supabaseAdmin
+      .rpc('update_user_profile', {
+        p_user_id: userId,
+        p_subscription_tier: 'premium',
+        p_subscription_end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // 30 days from now (temp)
       })
-      .eq('user_id', userId)
-      .select()
 
-    console.log('Subscription update result:', { data, error })
+    console.log('Subscription update result:', { updateError })
 
-    if (error) {
-      console.error('Error updating subscription:', error)
+    if (updateError) {
+      console.error('Error updating subscription:', updateError)
       return NextResponse.json(
         { error: 'Failed to update subscription' },
         { status: 500 }

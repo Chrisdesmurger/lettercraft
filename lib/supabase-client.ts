@@ -7,6 +7,66 @@ import { createClient } from "@supabase/supabase-js";
 
 // Configuration des types de base de données
 export type Database = {
+  auth: {
+    Tables: {
+      users: {
+        Row: {
+          id: string;
+          email: string;
+          first_name: string | null;
+          last_name: string | null;
+          phone: string | null;
+          country: string | null;
+          language: string | null;
+          birth_date: string | null;
+          avatar_url: string | null;
+          bio: string | null;
+          subscription_tier: 'free' | 'premium';
+          subscription_end_date: string | null;
+          stripe_customer_id: string | null;
+          stripe_subscription_id: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          email: string;
+          first_name?: string | null;
+          last_name?: string | null;
+          phone?: string | null;
+          country?: string | null;
+          language?: string | null;
+          birth_date?: string | null;
+          avatar_url?: string | null;
+          bio?: string | null;
+          subscription_tier?: 'free' | 'premium';
+          subscription_end_date?: string | null;
+          stripe_customer_id?: string | null;
+          stripe_subscription_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          email?: string;
+          first_name?: string | null;
+          last_name?: string | null;
+          phone?: string | null;
+          country?: string | null;
+          language?: string | null;
+          birth_date?: string | null;
+          avatar_url?: string | null;
+          bio?: string | null;
+          subscription_tier?: 'free' | 'premium';
+          subscription_end_date?: string | null;
+          stripe_customer_id?: string | null;
+          stripe_subscription_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+    };
+  };
   public: {
     Tables: {
       onboarding_responses: {
@@ -100,53 +160,6 @@ export type Database = {
           reset_date?: string;
           created_at?: string;
           updated_at?: string;
-        };
-      };
-      user_profiles: {
-        Row: {
-          user_id: string;
-          first_name: string | null;
-          last_name: string | null;
-          phone: string | null;
-          country: string | null;
-          language: string | null;
-          birth_date: string | null;
-          avatar_url: string | null;
-          bio: string | null;
-          subscription_tier: 'free' | 'premium';
-          subscription_end_date: string | null;
-          created_at: string | null;
-          updated_at: string | null;
-        };
-        Insert: {
-          user_id: string;
-          first_name?: string | null;
-          last_name?: string | null;
-          phone?: string | null;
-          country?: string | null;
-          language?: string | null;
-          birth_date?: string | null;
-          avatar_url?: string | null;
-          bio?: string | null;
-          subscription_tier?: 'free' | 'premium';
-          subscription_end_date?: string | null;
-          created_at?: string | null;
-          updated_at?: string | null;
-        };
-        Update: {
-          user_id?: string;
-          first_name?: string | null;
-          last_name?: string | null;
-          phone?: string | null;
-          country?: string | null;
-          language?: string | null;
-          birth_date?: string | null;
-          avatar_url?: string | null;
-          bio?: string | null;
-          subscription_tier?: 'free' | 'premium';
-          subscription_end_date?: string | null;
-          created_at?: string | null;
-          updated_at?: string | null;
         };
       };
       countries: {
@@ -362,6 +375,81 @@ export type Database = {
           updated_at?: string;
         };
       };
+      users_with_profiles: {
+        Row: {
+          id: string;
+          email: string;
+          first_name: string | null;
+          last_name: string | null;
+          profile_phone: string | null;
+          country: string | null;
+          language: string | null;
+          birth_date: string | null;
+          avatar_url: string | null;
+          bio: string | null;
+          subscription_tier: 'free' | 'premium';
+          subscription_end_date: string | null;
+          stripe_customer_id: string | null;
+          stripe_subscription_id: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: never; // Vue en lecture seule
+        Update: never; // Vue en lecture seule
+      };
+      user_profiles: {
+        Row: {
+          user_id: string;
+          first_name: string | null;
+          last_name: string | null;
+          phone: string | null;
+          country: string | null;
+          language: string | null;
+          birth_date: string | null;
+          avatar_url: string | null;
+          bio: string | null;
+          subscription_tier: 'free' | 'premium';
+          subscription_end_date: string | null;
+          stripe_customer_id: string | null;
+          stripe_subscription_id: string | null;
+          created_at: string | null;
+          updated_at: string | null;
+        };
+        Insert: {
+          user_id: string;
+          first_name?: string | null;
+          last_name?: string | null;
+          phone?: string | null;
+          country?: string | null;
+          language?: string | null;
+          birth_date?: string | null;
+          avatar_url?: string | null;
+          bio?: string | null;
+          subscription_tier?: 'free' | 'premium';
+          subscription_end_date?: string | null;
+          stripe_customer_id?: string | null;
+          stripe_subscription_id?: string | null;
+          created_at?: string | null;
+          updated_at?: string | null;
+        };
+        Update: {
+          user_id?: string;
+          first_name?: string | null;
+          last_name?: string | null;
+          phone?: string | null;
+          country?: string | null;
+          language?: string | null;
+          birth_date?: string | null;
+          avatar_url?: string | null;
+          bio?: string | null;
+          subscription_tier?: 'free' | 'premium';
+          subscription_end_date?: string | null;
+          stripe_customer_id?: string | null;
+          stripe_subscription_id?: string | null;
+          created_at?: string | null;
+          updated_at?: string | null;
+        };
+      };
     };
   };
 };
@@ -400,6 +488,7 @@ export const db = {
   onboardingResponses: () => supabase.from("onboarding_responses"),
   savedLetters: () => supabase.from("saved_letters"),
   userQuotas: () => supabase.from("user_quotas"),
+  users: () => supabase.from("users_with_profiles"),
   userProfiles: () => supabase.from("user_profiles"),
   countries: () => supabase.from("countries"),
   languages: () => supabase.from("languages"),

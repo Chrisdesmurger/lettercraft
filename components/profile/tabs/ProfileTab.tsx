@@ -43,13 +43,6 @@ export default function ProfileTab() {
     try {
       const { data: { session } } = await supabase.auth.getSession()
       if (session) {
-        // Charger depuis user_profiles au lieu de users
-        const { data } = await supabase
-          .from('user_profiles')
-          .select('*')
-          .eq('user_id', session.user.id)
-          .single()
-
         // Récupérer le nombre de lettres générées
         const { data: lettersData } = await supabase
           .from('generated_letters')
@@ -58,30 +51,17 @@ export default function ProfileTab() {
 
         const letterCount = lettersData?.length || 0
 
-        if (data) {
-          setProfile({
-            email: session.user.email || '',
-            firstName: data.first_name || '',
-            lastName: data.last_name || '',
-            phone: data.phone || '',
-            bio: data.bio || '',
-            avatar_url: data.avatar_url || '',
-            created_at: data.created_at || '',
-            generation_count: letterCount
-          })
-        } else {
-          // Profil n'existe pas encore, utiliser les données de base
-          setProfile({
-            email: session.user.email || '',
-            firstName: '',
-            lastName: '',
-            phone: '',
-            bio: '',
-            avatar_url: '',
-            created_at: session.user.created_at || '',
-            generation_count: letterCount
-          })
-        }
+        // Utiliser les données directement depuis auth.users avec metadata
+        setProfile({
+          email: session.user.email || '',
+          firstName: session.user.user_metadata?.first_name || '',
+          lastName: session.user.user_metadata?.last_name || '',
+          phone: session.user.user_metadata?.phone || '',
+          bio: session.user.user_metadata?.bio || '',
+          avatar_url: session.user.user_metadata?.avatar_url || '',
+          created_at: session.user.created_at || '',
+          generation_count: letterCount
+        })
       }
     } catch (error) {
       console.error('Error loading profile:', error)
@@ -159,16 +139,12 @@ export default function ProfileTab() {
 
       const { avatar_url } = await response.json()
       
-      // Mettre à jour le profil côté client
-      const { error: updateError } = await supabase
-        .from('user_profiles')
-        .upsert({
-          user_id: session.user.id,
-          avatar_url: avatar_url,
-          updated_at: new Date().toISOString()
-        }, {
-          onConflict: 'user_id'
-        })
+      // Mettre à jour le profil dans auth.users metadata
+      const { error: updateError } = await supabase.auth.updateUser({
+        data: {
+          avatar_url: avatar_url
+        }
+      })
 
       if (updateError) {
         console.error('Error updating profile:', updateError)
