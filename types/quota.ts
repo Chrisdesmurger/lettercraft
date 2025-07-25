@@ -52,7 +52,7 @@ export interface QuotaConfig {
   }
   premium: {
     max_letters: number
-    reset_period: never
+    reset_period: 'monthly'
   }
 }
 
@@ -64,7 +64,7 @@ export const QUOTA_LIMITS: QuotaConfig = {
   },
   premium: {
     max_letters: 1000, // Virtually unlimited
-    reset_period: never
+    reset_period: 'monthly' // Premium users still have a reset period, but with high limit
   }
 }
 

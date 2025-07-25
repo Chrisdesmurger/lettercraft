@@ -181,7 +181,7 @@ export function useLetterGeneration() {
           'Authorization': `Bearer ${session?.access_token}`
         },
         body: JSON.stringify({
-          jobOffer: flow.jobOffer,
+          jobOffer: flow.jobOffer || null,
           questionnaireResponse: questionnaireResponse,
           cvData: activeCV,
           settings: {
@@ -206,7 +206,7 @@ export function useLetterGeneration() {
         .insert({
           user_id: user.id,
           questionnaire_response_id: questionnaireResponse.id,
-          job_offer_id: flow.jobOffer.id,
+          job_offer_id: flow.jobOffer?.id || '',
           cv_id: activeCV.id,
           content: generationResult.content,
           html_content: generationResult.html_content,

@@ -105,12 +105,12 @@ export async function getQuotaStatus(userId: string): Promise<QuotaStatus> {
     }
 
     return {
-      letters_generated: data.letters_generated || 0,
-      max_letters: data.max_letters || 10,
-      remaining_letters: data.remaining_letters || 10,
-      reset_date: data.reset_date,
-      can_generate: data.can_generate || false,
-      subscription_tier: data.subscription_tier || 'free'
+      letters_generated: (data as any).letters_generated || 0,
+      max_letters: (data as any).max_letters || 10,
+      remaining_letters: (data as any).remaining_letters || 10,
+      reset_date: (data as any).reset_date,
+      can_generate: (data as any).can_generate || false,
+      subscription_tier: (data as any).subscription_tier || 'free'
     }
   } catch (error) {
     if (error instanceof QuotaSystemError) {
