@@ -1,35 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import OpenAI from 'openai'
+import { withQuotaCheck } from '@/lib/middleware/quota-middleware'
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 })
 
-// Vérifier l'authentification
-async function getAuthenticatedUser(request: NextRequest) {
-  const authHeader = request.headers.get('authorization')
-  if (!authHeader) {
-    return null
-  }
-
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
-
-  const token = authHeader.replace('Bearer ', '')
-  const { data: { user } } = await supabase.auth.getUser(token)
-  
-  return user
-}
-
-export async function POST(request: NextRequest) {
+async function generatePersonalizedLetterHandler(request: NextRequest, userId: string) {
   try {
-    const user = await getAuthenticatedUser(request)
-    if (!user) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-    }
 
     const { jobOffer, questionnaireResponse, cvData, settings } = await request.json()
 
@@ -258,6 +237,7 @@ Genera únicamente el código HTML completo, sin comentarios.`
       metadata: {
         generated_at: new Date().toISOString(),
         model: 'gpt-4-turbo',
+        user_id: userId,
         context_used: {
           job_title: context.jobOffer.title,
           company: context.jobOffer.company,
@@ -275,6 +255,10 @@ Genera únicamente el código HTML completo, sin comentarios.`
       details: error instanceof Error ? error.message : 'Erreur inconnue'
     }, { status: 500 })
   }
+}
+
+export async function POST(request: NextRequest) {
+  return withQuotaCheck(request, generatePersonalizedLetterHandler)
 }
 
 // Méthode GET pour vérifier le statut de l'API

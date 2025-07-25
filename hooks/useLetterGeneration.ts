@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase-client'
 import { useUser } from '@/hooks/useUser'
 import { useUserCVs } from '@/hooks/useUserCVs'
+import { usePreGenerationQuotaCheck } from '@/hooks/useQuota'
 import type { Tables } from '@/lib/supabase-client'
 
 export type JobOffer = Tables<'job_offers'>
@@ -33,6 +34,7 @@ export interface QuestionnaireData {
 export function useLetterGeneration() {
   const { user } = useUser()
   const { cvs } = useUserCVs()
+  const { executeWithQuotaCheck } = usePreGenerationQuotaCheck()
   const [flow, setFlow] = useState<LetterGenerationFlow>({
     step: 'job_offer',
     isLoading: false,
@@ -167,7 +169,8 @@ export function useLetterGeneration() {
 
     setFlow(prev => ({ ...prev, isLoading: true, error: null }))
 
-    try {
+    // Utiliser executeWithQuotaCheck pour vérifier les quotas et incrémenter automatiquement
+    const success = await executeWithQuotaCheck(async () => {
       // Générer la lettre via OpenAI
       const { data: { session } } = await supabase.auth.getSession()
       
@@ -178,7 +181,7 @@ export function useLetterGeneration() {
           'Authorization': `Bearer ${session?.access_token}`
         },
         body: JSON.stringify({
-          jobOffer: flow.jobOffer,
+          jobOffer: flow.jobOffer || null,
           questionnaireResponse: questionnaireResponse,
           cvData: activeCV,
           settings: {
@@ -203,7 +206,7 @@ export function useLetterGeneration() {
         .insert({
           user_id: user.id,
           questionnaire_response_id: questionnaireResponse.id,
-          job_offer_id: flow.jobOffer.id,
+          job_offer_id: flow.jobOffer?.id || '',
           cv_id: activeCV.id,
           content: generationResult.content,
           html_content: generationResult.html_content,
@@ -221,15 +224,18 @@ export function useLetterGeneration() {
         generatedLetter,
         isLoading: false
       }))
+    })
 
-    } catch (error) {
+    // Si la génération a échoué (quota ou autre erreur)
+    if (!success) {
       setFlow(prev => ({
         ...prev,
         isLoading: false,
-        error: error instanceof Error ? error.message : 'Erreur inconnue'
+        error: 'Génération annulée ou quota dépassé'
       }))
     }
-  }, [user, flow.jobOffer, flow.questionnaireResponse, activeCV])
+
+  }, [user, flow.jobOffer, flow.questionnaireResponse, activeCV, executeWithQuotaCheck])
 
   const generatePDF = useCallback(async (letterId: string) => {
     if (!user) return

@@ -22,6 +22,7 @@ import {
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useI18n } from '@/lib/i18n-context'
+import { QuotaGuard, usePreGenerationQuotaCheck } from '@/components/quota'
 
 interface LetterGeneratorProps {
     data?: any
@@ -38,6 +39,7 @@ const languages = [
 
 export default function LetterGenerator({ data, onUpdate, onNext }: LetterGeneratorProps) {
     const { t } = useI18n()
+    const { executeWithQuotaCheck } = usePreGenerationQuotaCheck()
     
     const tones = [
         { value: 'professional', label: t('letter.tones.professional'), description: t('letter.tones.professionalDesc') },
@@ -58,7 +60,7 @@ export default function LetterGenerator({ data, onUpdate, onNext }: LetterGenera
     const generateLetter = async () => {
         setGenerating(true)
 
-        try {
+        const success = await executeWithQuotaCheck(async () => {
             // Generation simulation (replace with your OpenAI API call)
             await new Promise(resolve => setTimeout(resolve, 3000))
 
@@ -93,16 +95,60 @@ ${data?.userName || 'Votre nom'}`
             }
 
             toast.success(t('letter.generateSuccess'))
-        } catch (error) {
+        })
+
+        if (!success) {
             toast.error(t('letter.generateError'))
-        } finally {
-            setGenerating(false)
         }
+        
+        setGenerating(false)
     }
 
     const regenerateLetter = async () => {
         setRegenerating(true)
-        await generateLetter()
+        
+        // Réutiliser la même logique que generateLetter mais avec l'état de régénération
+        const success = await executeWithQuotaCheck(async () => {
+            // Generation simulation (replace with your OpenAI API call)
+            await new Promise(resolve => setTimeout(resolve, 3000))
+
+            // Generated letter (implement with your logic)
+            const letter = `Madame, Monsieur,
+
+C'est avec un grand intérêt que je vous adresse ma candidature pour le poste de ${data?.jobOffer?.title} au sein de ${data?.jobOffer?.company}.
+
+Fort de mon expérience en développement web et de ma maîtrise des technologies ${data?.responses?.stack_expertise || 'React et Node.js'}, je suis convaincu de pouvoir apporter une réelle valeur ajoutée à votre équipe.
+
+${data?.responses?.project_proud || 'Au cours de mes précédentes expériences, j\'ai eu l\'opportunité de mener à bien plusieurs projets d\'envergure qui ont significativement amélioré les performances et l\'expérience utilisateur.'}
+
+${data?.responses?.problem_solving || 'Ma capacité à résoudre des problèmes complexes et mon approche méthodique me permettent d\'aborder chaque défi avec créativité et rigueur.'}
+
+${emphasizeExperience ? `Ce qui me distingue particulièrement, c'est ${data?.responses?.career_goals || 'ma passion pour l\'innovation technologique et mon désir constant d\'apprentissage'}.` : ''}
+
+Je serais ravi de pouvoir discuter plus en détail de la manière dont mes compétences et mon expérience peuvent contribuer au succès de ${data?.jobOffer?.company}.
+
+Je vous prie d'agréer, Madame, Monsieur, l'expression de mes salutations distinguées.
+
+${data?.userName || 'Votre nom'}`
+
+            setGeneratedLetter(letter)
+
+            if (onUpdate) {
+                onUpdate({
+                    generatedLetter: letter,
+                    letterLanguage: language,
+                    letterTone: tone,
+                    letterLength: length[0]
+                })
+            }
+
+            toast.success(t('letter.generateSuccess'))
+        })
+
+        if (!success) {
+            toast.error(t('letter.generateError'))
+        }
+        
         setRegenerating(false)
     }
 
@@ -238,15 +284,17 @@ ${data?.userName || 'Votre nom'}`
                             </div>
                         </div>
 
-                        <Button
-                            onClick={generateLetter}
-                            className="w-full"
-                            size="lg"
-                            disabled={generating}
-                        >
-                            <Sparkles className="mr-2 h-4 w-4" />
-                            {t('letter.generate')}
-                        </Button>
+                        <QuotaGuard showQuotaStatus={true}>
+                            <Button
+                                onClick={generateLetter}
+                                className="w-full"
+                                size="lg"
+                                disabled={generating}
+                            >
+                                <Sparkles className="mr-2 h-4 w-4" />
+                                {t('letter.generate')}
+                            </Button>
+                        </QuotaGuard>
                     </div>
                 </Card>
             ) : (
@@ -267,19 +315,21 @@ ${data?.userName || 'Votre nom'}`
                                     <Settings className="h-4 w-4 mr-2" />
                                     {t('letter.settings')}
                                 </Button>
-                                <Button
-                                    onClick={regenerateLetter}
-                                    variant="outline"
-                                    size="sm"
-                                    disabled={regenerating}
-                                >
-                                    {regenerating ? (
-                                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                    ) : (
-                                        <RefreshCw className="h-4 w-4 mr-2" />
-                                    )}
-                                    {t('letter.regenerate')}
-                                </Button>
+                                <QuotaGuard showQuotaStatus={false}>
+                                    <Button
+                                        onClick={regenerateLetter}
+                                        variant="outline"
+                                        size="sm"
+                                        disabled={regenerating}
+                                    >
+                                        {regenerating ? (
+                                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                        ) : (
+                                            <RefreshCw className="h-4 w-4 mr-2" />
+                                        )}
+                                        {t('letter.regenerate')}
+                                    </Button>
+                                </QuotaGuard>
                             </div>
                             <div className="text-sm text-gray-500">
                                 {length[0]} mots • {language.toUpperCase()}

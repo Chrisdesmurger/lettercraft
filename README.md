@@ -10,7 +10,7 @@ Une application web moderne pour générer des lettres de motivation personnalis
 - **Génération IA** - Utilise GPT-4 pour créer des lettres personnalisées
 - **Historique des lettres** - Sauvegarde et consultation des lettres générées
 - **Interface moderne** - Design épuré avec animations fluides et responsive
-- **Système de quotas** - Gestion des limites de génération par utilisateur
+- **Système de quotas avancé** - Contrôle des limites dès la première étape avec protection complète
 
 ## 📋 Prérequis
 
@@ -78,6 +78,7 @@ lettercraft/
 ├── components/              # Composants React
 │   ├── ui/                 # Composants UI réutilisables
 │   ├── profile/            # Composants du profil
+│   ├── quota/              # Composants du système de quotas
 │   └── letters/            # Composants des lettres
 ├── hooks/                  # Hooks React personnalisés
 ├── lib/                    # Utilitaires et configuration
@@ -173,8 +174,9 @@ CREATE TABLE user_quotas (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES auth.users(id),
   letters_generated INTEGER DEFAULT 0,
-  max_letters INTEGER DEFAULT 5,
-  reset_date TIMESTAMP WITH TIME ZONE DEFAULT (NOW() + INTERVAL '30 days'),
+  max_letters INTEGER DEFAULT 10, -- 10 gratuit, 1000 premium
+  reset_date TIMESTAMP WITH TIME ZONE, -- Calculé dynamiquement après première génération
+  first_generation_date TIMESTAMP WITH TIME ZONE, -- Date de première génération
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -280,7 +282,7 @@ NEXT_PUBLIC_APP_URL=https://votre-domaine.com
 - **Extraction automatique de CV** - Utilise OpenAI pour extraire les informations
 - **Génération contextuelle** - Adapte la lettre selon le profil et l'offre
 - **Sauvegarde automatique** - Toutes les lettres sont sauvegardées
-- **Système de quotas** - Gestion des limites par utilisateur
+- **Système de quotas intelligent** - Protection complète dès la première étape du flux
 
 ## 🛡️ Sécurité
 
@@ -339,9 +341,37 @@ Ce projet est sous licence MIT - voir le fichier [LICENSE](LICENSE) pour plus de
 - [Lucide](https://lucide.dev/) - Icônes modernes
 - [Framer Motion](https://www.framer.com/motion/) - Animations
 
+## 🔄 Système de Quotas Avancé
+
+### Protection Complète du Flux
+Le système de quotas protège maintenant **dès la première étape** :
+
+#### Vérification Préventive
+- ✅ **Analyse d'offre bloquée** si quota épuisé
+- ✅ **Messages informatifs** avec redirection Premium
+- ✅ **Interface adaptative** selon le tier d'abonnement
+
+#### Composants Intégrés
+- `QuotaBanner` - Affichage du statut en temps réel
+- `QuotaGuard` - Protection des actions sensibles  
+- `QuotaStatus` - Détails complets des quotas
+- `useQuota` - Hook de gestion centralisée
+
+#### Flux Utilisateur Protégé
+1. **Étape 1** : Vérification quota lors du clic "Analyser l'offre"
+2. **Si quota épuisé** : Blocage immédiat avec message toast
+3. **Si quota OK** : Poursuite normale du flux
+4. **Génération finale** : Consommation effective du quota
+
+### Gestion Automatique Personnalisée
+- **Reset personnalisé** : 30 jours après la première génération, puis cycles mensuels
+- **Synchronisation temps réel** avec la base de données
+- **Adaptation Premium** : quotas illimités
+- **Messages contextuels** selon le tier et l'historique utilisateur
+- **Migration transparente** pour les utilisateurs existants
+
 ## 🐛 Problèmes connus
 
-- Le système de quotas necessite une configuration manuelle
 - L'extraction de CV fonctionne mieux avec des PDF structurés
 - Les notifications toast peuvent se superposer
 
