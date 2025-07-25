@@ -3,19 +3,15 @@ import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
+import { withQuotaCheck } from '@/lib/middleware/quota-middleware'
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY
 })
 
-export async function POST(request: NextRequest) {
+async function generateLetterHandler(request: NextRequest, userId: string) {
     try {
         const supabase = createRouteHandlerClient({ cookies })
-        const { data: { user } } = await supabase.auth.getUser()
-
-        if (!user) {
-            return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-        }
 
         const body = await request.json()
         const { profile, cv, jobOffer, settings } = body
@@ -68,7 +64,7 @@ export async function POST(request: NextRequest) {
         const { data: savedLetter, error: saveError } = await supabase
             .from('generated_letters')
             .insert({
-                user_id: user.id,
+                user_id: userId,
                 content: letter || '',
                 html_content: null,
                 pdf_url: null,
@@ -87,14 +83,7 @@ export async function POST(request: NextRequest) {
             // Continuer même si la sauvegarde échoue
         }
 
-        // Sauvegarder le quota utilisé
-        await supabase.from('user_quotas').upsert({
-            user_id: user.id,
-            letters_generated: 1
-        }, {
-            onConflict: 'user_id',
-            ignoreDuplicates: false
-        })
+        // Le quota sera automatiquement incrémenté par le middleware après succès
 
         return NextResponse.json({ letter, letterId: savedLetter?.id })
     } catch (error) {
@@ -104,4 +93,8 @@ export async function POST(request: NextRequest) {
             { status: 500 }
         )
     }
+}
+
+export async function POST(request: NextRequest) {
+    return withQuotaCheck(request, generateLetterHandler)
 }

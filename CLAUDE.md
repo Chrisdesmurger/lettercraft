@@ -39,19 +39,41 @@ This is a Next.js 15 application for AI-powered cover letter generation in Frenc
 - `LetterPreview` - Final output with PDF export
 
 ### Data Layer
-- **Supabase Tables**: `user_profiles`, `candidates_profile`, `saved_letters`, `user_quotas`, `onboarding_responses`
+- **Supabase Tables**: `user_profiles`, `candidates_profile`, `saved_letters`, `user_quotas`, `onboarding_responses`, `stripe_subscriptions`, `stripe_invoices`
 - **Type Safety**: Full TypeScript types in `lib/supabase-client.ts`
 - **Database Helpers**: Typed query helpers in `db` object
 
 ### API Routes
+
+#### Core Application
 - `/api/extract-cv` - Uses OpenAI File API for CV text extraction
 - `/api/generate-letter` - Letter generation endpoint
 - `/api/generate` - Generic generation endpoint
 
+#### Stripe & Subscriptions
+- `/api/create-checkout-session` - Creates Stripe checkout sessions with customer linking
+- `/api/handle-payment-success` - Immediate subscription tier update after payment
+- `/api/webhooks/stripe` - Processes all Stripe webhook events for subscription management
+
+#### Debug & Development (temporary)
+- `/api/debug-subscription` - Manual subscription testing
+- `/api/debug-users` - User lookup and email debugging
+- `/api/test-webhook` - Simulates webhook events for testing
+- `/api/test-invoice-webhook` - Tests invoice webhook functionality
+- `/api/test-ui-invoices` - Creates test invoices for UI testing
+
 ### State Management
-- React hooks for local state (`useLetterFlow`, `useUser`, `useExtractCVData`)
+- React hooks for local state (`useLetterFlow`, `useUser`, `useExtractCVData`, `useUserInvoices`)
 - Local storage for flow persistence
 - Supabase client for server state
+
+#### Invoice Management UI
+- **SubscriptionTab component**: Displays real invoice data from database
+- **useUserInvoices hook**: Fetches and manages user invoice data
+- **Real-time data**: Invoice dates, descriptions, amounts, and PDF links
+- **Download functionality**: Direct links to `invoice_pdf` URLs from Stripe
+- **Status indicators**: Visual status (paid, open, failed) with color coding
+- **Responsive table**: Mobile-friendly invoice history display
 
 ### Styling
 - Tailwind CSS with custom components in `components/ui/`
@@ -71,6 +93,84 @@ This is a Next.js 15 application for AI-powered cover letter generation in Frenc
 
 ### Database Migrations
 Supabase migrations are in `supabase/migrations/`. Always run `npm run db:migrate` after pulling migration changes.
+
+### Stripe Integration & Subscription Management
+
+#### Architecture
+The application uses a dedicated Stripe subscriptions system with automatic user tier synchronization:
+
+- **`stripe_subscriptions` table**: Centralized storage for all Stripe subscription data
+- **Automatic synchronization**: Triggers automatically update `user_profiles.subscription_tier` based on active subscriptions
+- **Webhook processing**: Comprehensive handling of Stripe events for real-time updates
+
+#### Key Components
+
+**Stripe Webhooks** (`/api/webhooks/stripe`):
+- **Subscription events**: `created`, `updated`, `deleted`
+- **Invoice events**: `created`, `updated`, `payment_succeeded`, `payment_failed`
+- Automatic user linking by customer ID or email
+- Comprehensive logging for debugging
+
+**Subscription Table** (`stripe_subscriptions`):
+- Stores complete Stripe subscription data (customer_id, subscription_id, status, periods, etc.)
+- Includes trial information, cancellation details, and metadata
+- Row Level Security (RLS) for data protection
+- Automatic `updated_at` timestamps
+
+**Invoice Table** (`stripe_invoices`):
+- **Complete invoice data**: amount, currency, description, invoice number
+- **Important URLs**: `hosted_invoice_url` (lien Stripe), `invoice_pdf` (PDF)
+- **Payment tracking**: dates, status, attempt count
+- **Period information**: billing period start/end dates
+- Linked to subscriptions via `stripe_subscription_id`
+
+**Auto-Synchronization**:
+- `sync_user_subscription_tier()` trigger function
+- Updates `user_profiles.subscription_tier` when subscriptions change
+- Handles multiple active subscriptions and grace periods
+- Sets tier to 'premium' for active subscriptions, 'free' otherwise
+
+#### Subscription Workflow
+
+1. **Checkout Session Creation** (`/api/create-checkout-session`):
+   - Creates/finds Stripe customer by email
+   - Links `stripe_customer_id` to user profile immediately
+   - Creates checkout session with customer ID
+
+2. **Payment Success** (`/api/handle-payment-success`):
+   - Provides immediate UI feedback by setting `subscription_tier: 'premium'`
+   - Temporary `subscription_end_date` (30 days)
+
+3. **Webhook Processing**:
+   - **Subscription events**: Uses `upsert_stripe_subscription()` to store subscription data
+   - **Invoice events**: Uses `upsert_stripe_invoice()` to store invoice data (amount, description, PDF URL)
+   - Trigger automatically updates user tier based on subscription status
+   - **Data captured**: invoice date, amount, description, hosted_invoice_url, invoice_pdf
+
+#### Database Functions
+
+**Subscription Management**:
+- `upsert_stripe_subscription()`: Creates or updates subscription records from webhooks
+- `sync_user_subscription_tier()`: Trigger function that maintains user tier consistency
+
+**Invoice Management**:
+- `upsert_stripe_invoice()`: Creates or updates invoice records with all billing data
+- `invoices_with_subscription_details`: View combining invoice and subscription data
+
+**User Lookup**:
+- `get_user_by_stripe_customer_id()`: Finds users by Stripe customer ID
+- `get_user_by_email()`: Finds users by email for webhook processing
+
+#### Environment Variables Required
+```env
+STRIPE_SECRET_KEY=sk_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+```
+
+#### Monitoring & Debugging
+- Comprehensive console logging in webhook processing
+- Debug endpoints: `/api/debug-subscription`, `/api/debug-users`
+- Structured error handling and event logging
 
 ### CV Extraction
 Uses OpenAI File API with GPT-4-turbo model. Files are temporarily stored in `/tmp` and cleaned up after processing.

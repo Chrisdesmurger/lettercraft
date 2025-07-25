@@ -6,6 +6,8 @@ import { useI18n } from '@/lib/i18n-context'
 import { toast } from 'react-hot-toast'
 import type { User } from '@supabase/supabase-js'
 import { useUserInvoices, formatAmount, formatInvoiceDate, getInvoiceStatusLabel, getInvoiceStatusColor } from '@/hooks/useUserInvoices'
+import { useQuota } from '@/hooks/useQuota'
+import QuotaStatus from '@/components/quota/QuotaStatus'
 
 interface UserProfile {
   id: string
@@ -26,7 +28,8 @@ export default function SubscriptionTab({ user, userProfile, loading: profileLoa
   // Derive current plan from props instead of local state
   const currentPlan = userProfile?.subscription_tier || 'free'
 
-  // Fetch user invoices
+  // Fetch user quotas and invoices
+  const { quota, loading: quotaLoading } = useQuota()
   const { invoices, loading: invoicesLoading, error: invoicesError, refreshInvoices } = useUserInvoices(user)
 
   // Handle invoice download
@@ -86,7 +89,7 @@ export default function SubscriptionTab({ user, userProfile, loading: profileLoa
       price: '0€',
       period: t('subscription.perMonth'),
       features: [
-        { name: t('subscription.features.monthlyLetters'), included: true },
+        { name: `10 ${t('subscription.features.monthlyLetters')}`, included: true },
         { name: t('subscription.features.basicTemplates'), included: true },
         { name: t('subscription.features.emailSupport'), included: true },
         { name: t('subscription.features.multilingualGeneration'), included: false },
@@ -118,13 +121,22 @@ export default function SubscriptionTab({ user, userProfile, loading: profileLoa
         <p className="text-gray-600">{t('subscription.subtitle')}</p>
       </div>
 
-      {/* Current Plan Status */}
+      {/* Quota Status Card */}
+      <QuotaStatus showUpgrade={true} />
+
+      {/* Current Plan Status - Simplified for Free users */}
       {currentPlan === 'free' && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="font-medium text-blue-900">{t('subscription.freePlan')}</p>
-              <p className="text-sm text-blue-700">{t('subscription.remainingLetters', { count: '7' })}</p>
+              <p className="text-sm text-blue-700">
+                {quota && !quotaLoading ? (
+                  t('subscription.remainingLetters', { count: quota.remaining_letters.toString() })
+                ) : (
+                  t('common.loading')
+                )}
+              </p>
             </div>
             <button 
               onClick={handleUpgrade}

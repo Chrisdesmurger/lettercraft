@@ -20,6 +20,8 @@ import { cn } from '@/lib/utils'
 import { useLetterGeneration } from '@/hooks/useLetterGeneration'
 import { useUserCVs } from '@/hooks/useUserCVs'
 import LetterQuestionnaire from './LetterQuestionnaire'
+import { QuotaGuard, QuotaBanner } from '@/components/quota'
+import { usePreGenerationQuotaCheck } from '@/hooks/useQuota'
 import toast from 'react-hot-toast'
 import { useI18n } from '@/lib/i18n-context'
 
@@ -30,6 +32,7 @@ interface LetterGenerationFlowProps {
 export default function LetterGenerationFlow({ onBack }: LetterGenerationFlowProps) {
   const { t } = useI18n()
   const { cvs } = useUserCVs()
+  const { checkAndShowQuotaStatus } = usePreGenerationQuotaCheck()
   const {
     flow,
     activeCV,
@@ -53,6 +56,12 @@ export default function LetterGenerationFlow({ onBack }: LetterGenerationFlowPro
     if (!activeCV) {
       toast.error(t('flow.selectActiveCv'))
       return
+    }
+
+    // Vérifier les quotas avant de procéder à l'analyse
+    const hasQuotaAvailable = await checkAndShowQuotaStatus()
+    if (!hasQuotaAvailable) {
+      return // L'utilisateur est bloqué par le quota
     }
 
     await analyzeJobOffer(jobOfferInput, sourceUrl)
@@ -99,6 +108,9 @@ export default function LetterGenerationFlow({ onBack }: LetterGenerationFlowPro
           <ArrowLeft className="w-4 h-4 mr-2" />
           {t('flow.back')}
         </Button>
+
+        {/* Bannière des quotas */}
+        <QuotaBanner className="mb-6" />
 
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -275,15 +287,17 @@ export default function LetterGenerationFlow({ onBack }: LetterGenerationFlowPro
                   {t('flow.copyText')}
                 </Button>
 
-                <Button
-                  onClick={handleRegenerate}
-                  variant="outline"
-                  disabled={flow.isLoading}
-                  className="w-full"
-                >
-                  <RefreshCw className="w-4 h-4 mr-2" />
-                  {t('flow.regenerate')}
-                </Button>
+                <QuotaGuard showQuotaStatus={false}>
+                  <Button
+                    onClick={handleRegenerate}
+                    variant="outline"
+                    disabled={flow.isLoading}
+                    className="w-full"
+                  >
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    {t('flow.regenerate')}
+                  </Button>
+                </QuotaGuard>
               </CardContent>
             </Card>
 
