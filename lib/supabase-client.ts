@@ -362,6 +362,224 @@ export type Database = {
           updated_at?: string;
         };
       };
+      brevo_contacts_sync: {
+        Row: {
+          id: string;
+          user_id: string;
+          brevo_contact_id: number | null;
+          email: string;
+          sync_status: 'pending' | 'synced' | 'failed' | 'outdated';
+          last_synced_at: string | null;
+          sync_attempts: number;
+          error_message: string | null;
+          brevo_attributes: any | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          brevo_contact_id?: number | null;
+          email: string;
+          sync_status?: 'pending' | 'synced' | 'failed' | 'outdated';
+          last_synced_at?: string | null;
+          sync_attempts?: number;
+          error_message?: string | null;
+          brevo_attributes?: any | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          brevo_contact_id?: number | null;
+          email?: string;
+          sync_status?: 'pending' | 'synced' | 'failed' | 'outdated';
+          last_synced_at?: string | null;
+          sync_attempts?: number;
+          error_message?: string | null;
+          brevo_attributes?: any | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      brevo_lists: {
+        Row: {
+          id: string;
+          brevo_list_id: number;
+          name: string;
+          type: 'manual' | 'dynamic';
+          criteria: any | null;
+          contact_count: number;
+          is_active: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          brevo_list_id: number;
+          name: string;
+          type?: 'manual' | 'dynamic';
+          criteria?: any | null;
+          contact_count?: number;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          brevo_list_id?: number;
+          name?: string;
+          type?: 'manual' | 'dynamic';
+          criteria?: any | null;
+          contact_count?: number;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      brevo_contact_lists: {
+        Row: {
+          id: string;
+          contact_sync_id: string;
+          list_id: string;
+          added_at: string;
+        };
+        Insert: {
+          id?: string;
+          contact_sync_id: string;
+          list_id: string;
+          added_at?: string;
+        };
+        Update: {
+          id?: string;
+          contact_sync_id?: string;
+          list_id?: string;
+          added_at?: string;
+        };
+      };
+      brevo_sync_jobs: {
+        Row: {
+          id: string;
+          job_type: 'import_single' | 'import_batch' | 'update_contact' | 'delete_contact' | 'sync_lists' | 'full_sync';
+          status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+          total_items: number | null;
+          processed_items: number;
+          failed_items: number;
+          data: any | null;
+          error_details: any | null;
+          started_at: string | null;
+          completed_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          job_type: 'import_single' | 'import_batch' | 'update_contact' | 'delete_contact' | 'sync_lists' | 'full_sync';
+          status?: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+          total_items?: number | null;
+          processed_items?: number;
+          failed_items?: number;
+          data?: any | null;
+          error_details?: any | null;
+          started_at?: string | null;
+          completed_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          job_type?: 'import_single' | 'import_batch' | 'update_contact' | 'delete_contact' | 'sync_lists' | 'full_sync';
+          status?: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+          total_items?: number | null;
+          processed_items?: number;
+          failed_items?: number;
+          data?: any | null;
+          error_details?: any | null;
+          started_at?: string | null;
+          completed_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      brevo_contact_events: {
+        Row: {
+          id: string;
+          user_id: string;
+          event_type: string;
+          event_data: any;
+          source: string;
+          processed: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          event_type: string;
+          event_data: any;
+          source?: string;
+          processed?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          event_type?: string;
+          event_data?: any;
+          source?: string;
+          processed?: boolean;
+          created_at?: string;
+        };
+      };
+      brevo_api_config: {
+        Row: {
+          id: string;
+          key_name: string;
+          value: string;
+          is_encrypted: boolean;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          key_name: string;
+          value: string;
+          is_encrypted?: boolean;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          key_name?: string;
+          value?: string;
+          is_encrypted?: boolean;
+          updated_at?: string;
+        };
+      };
+      brevo_rate_limits: {
+        Row: {
+          id: string;
+          endpoint: string;
+          requests_made: number;
+          window_start: string;
+          last_request_at: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          endpoint: string;
+          requests_made?: number;
+          window_start?: string;
+          last_request_at?: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          endpoint?: string;
+          requests_made?: number;
+          window_start?: string;
+          last_request_at?: string;
+          created_at?: string;
+        };
+      };
     };
   };
 };
@@ -407,4 +625,12 @@ export const db = {
   jobOffers: () => supabase.from("job_offers"),
   letterQuestionnaireResponses: () => supabase.from("letter_questionnaire_responses"),
   generatedLetters: () => supabase.from("generated_letters"),
+  // Brevo sync tables
+  brevoContactsSync: () => supabase.from("brevo_contacts_sync"),
+  brevoLists: () => supabase.from("brevo_lists"),
+  brevoContactLists: () => supabase.from("brevo_contact_lists"),
+  brevoSyncJobs: () => supabase.from("brevo_sync_jobs"),
+  brevoContactEvents: () => supabase.from("brevo_contact_events"),
+  brevoApiConfig: () => supabase.from("brevo_api_config"),
+  brevoRateLimits: () => supabase.from("brevo_rate_limits"),
 };

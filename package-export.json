@@ -1,0 +1,16 @@
+{
+  "name": "supabase-schema-exporter",
+  "version": "1.0.0",
+  "description": "Export complet du schéma Supabase pour LetterCraft",
+  "main": "export-db-schema.js",
+  "scripts": {
+    "export": "node export-db-schema.js",
+    "export:with-data": "node export-db-schema.js --with-data"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0"
+  },
+  "devDependencies": {},
+  "keywords": ["supabase", "export", "schema", "migration"],
+  "author": "LetterCraft Team"
+}
