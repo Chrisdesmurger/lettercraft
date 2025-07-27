@@ -521,6 +521,23 @@
     "selectCvInSettings": "Wählen Sie einen aktiven Lebenslauf in Ihren Einstellungen aus",
     "analyzing": "Analysiere...",
     "analyzeJobOffer": "Stellenausschreibung analysieren",
-    "analyzeOffer": "Angebot analysieren"
+    "analyzeOffer": "Angebot analysieren",
+    "generating": "Generierung",
+    "generatingDesc": "Ihr personalisiertes Bewerbungsschreiben wird erstellt...",
+    "pleaseWait": "Bitte warten...",
+    "newLetter": "Neuer Brief",
+    "completed": "Abgeschlossen",
+    "letterReady": "Ihr Brief ist fertig!",
+    "letterGeneratedFor": "Brief erstellt für {title} bei {company}",
+    "preview": "Vorschau",
+    "actions": "Aktionen",
+    "downloadPdf": "PDF herunterladen",
+    "copyText": "Text kopieren",
+    "regenerate": "Neu generieren",
+    "details": "Details",
+    "position": "Position",
+    "company": "Unternehmen",
+    "cvUsed": "Verwendeter Lebenslauf",
+    "generatedOn": "Erstellt am"
   }
 }

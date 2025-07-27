@@ -92,6 +92,25 @@ export default function RegisterPage() {
       return
     }
 
+    // Envoyer l'email de bienvenue
+    try {
+      await fetch('/api/send-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'welcome',
+          userEmail: email,
+          userName: `${firstName} ${lastName}`,
+          userLanguage: locale
+        })
+      })
+    } catch (emailError) {
+      console.warn('Erreur envoi email de bienvenue:', emailError)
+      // Ne pas bloquer l'inscription si l'email échoue
+    }
+
     setSuccess(t('auth.registerSuccess'))
     router.push('/')
   }

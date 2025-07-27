@@ -513,6 +513,23 @@
     "selectCvInSettings": "Sélectionnez un CV actif dans vos paramètres",
     "analyzing": "Analyse en cours...",
     "analyzeJobOffer": "Analyser l'offre d'emploi",
-    "analyzeOffer": "Analyser l'offre"
+    "analyzeOffer": "Analyser l'offre",
+    "generating": "Génération en cours",
+    "generatingDesc": "Votre lettre de motivation personnalisée est en cours de création...",
+    "pleaseWait": "Veuillez patienter...",
+    "newLetter": "Nouvelle lettre",
+    "completed": "Terminé",
+    "letterReady": "Votre lettre est prête !",
+    "letterGeneratedFor": "Lettre générée pour {title} chez {company}",
+    "preview": "Aperçu",
+    "actions": "Actions",
+    "downloadPdf": "Télécharger PDF",
+    "copyText": "Copier le texte",
+    "regenerate": "Régénérer",
+    "details": "Détails",
+    "position": "Poste",
+    "company": "Entreprise",
+    "cvUsed": "CV utilisé",
+    "generatedOn": "Généré le"
   }
 }

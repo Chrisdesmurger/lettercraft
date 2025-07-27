@@ -521,6 +521,23 @@
     "selectCvInSettings": "Seleziona un CV attivo nelle tue impostazioni",
     "analyzing": "Analisi in corso...",
     "analyzeJobOffer": "Analizza offerta di lavoro",
-    "analyzeOffer": "Analizza offerta"
+    "analyzeOffer": "Analizza offerta",
+    "generating": "Generazione",
+    "generatingDesc": "La tua lettera di presentazione personalizzata è in fase di creazione...",
+    "pleaseWait": "Attendere prego...",
+    "newLetter": "Nuova lettera",
+    "completed": "Completato",
+    "letterReady": "La tua lettera è pronta!",
+    "letterGeneratedFor": "Lettera generata per {title} presso {company}",
+    "preview": "Anteprima",
+    "actions": "Azioni",
+    "downloadPdf": "Scarica PDF",
+    "copyText": "Copia testo",
+    "regenerate": "Rigenera",
+    "details": "Dettagli",
+    "position": "Posizione",
+    "company": "Azienda",
+    "cvUsed": "CV utilizzato",
+    "generatedOn": "Generato il"
   }
 }

@@ -12,3 +12,8 @@ STRIPE_WEBHOOK_SECRET=whsec_your-webhook-secret
 
 # Application
 NEXT_PUBLIC_APP_URL=http://localhost:3000
+
+# Brevo (ex-Sendinblue)
+BREVO_API_KEY=xkeysib-your-brevo-api-key
+BREVO_SENDER_EMAIL=noreply@lettercraft.fr
+BREVO_SENDER_NAME=LetterCraft

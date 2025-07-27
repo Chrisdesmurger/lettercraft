@@ -256,10 +256,14 @@ export function useQuota(): UseQuotaResult {
 
       const now = new Date()
       const isFirstGeneration = quota.letters_generated === 0
+      const newLettersGenerated = quota.letters_generated + 1
+      const willReachLimit = newLettersGenerated >= quota.max_letters
+      const shouldSendWarning = quota.subscription_tier === 'free' && 
+                               (newLettersGenerated === quota.max_letters - 2 || newLettersGenerated === quota.max_letters - 1)
 
       // Préparer les données de mise à jour
       const updateData: any = {
-        letters_generated: quota.letters_generated + 1,
+        letters_generated: newLettersGenerated,
         updated_at: now.toISOString()
       }
 
@@ -294,6 +298,64 @@ export function useQuota(): UseQuotaResult {
         first_generation_date: data.first_generation_date,
         reset_date: data.reset_date || prev.reset_date
       } : null)
+
+      // Envoyer emails de notification si nécessaire
+      if (quota.subscription_tier === 'free') {
+        try {
+          // Récupérer les infos utilisateur pour l'email
+          const { data: profileData } = await supabase
+            .from('user_profiles')
+            .select('first_name, last_name, language')
+            .eq('user_id', user.id)
+            .single()
+
+          const userName = profileData ? `${profileData.first_name} ${profileData.last_name}` : 'Utilisateur'
+          const userLanguage = profileData?.language || 'fr'
+
+          // Email d'avertissement quand il reste 1 ou 2 générations
+          if (shouldSendWarning) {
+            const remainingQuota = quota.max_letters - newLettersGenerated
+            await fetch('/api/send-email', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                type: 'quota_warning',
+                userEmail: user.email,
+                userName: userName,
+                userLanguage: userLanguage,
+                remainingQuota: remainingQuota
+              })
+            })
+            console.log('📧 Email d\'avertissement quota envoyé')
+          }
+
+          // Email de limite atteinte
+          if (willReachLimit) {
+            const resetDate = data.reset_date || updateData.reset_date
+            await fetch('/api/send-email', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                type: 'quota_limit',
+                userEmail: user.email,
+                userName: userName,
+                userLanguage: userLanguage,
+                currentQuota: newLettersGenerated,
+                maxQuota: quota.max_letters,
+                resetDate: resetDate
+              })
+            })
+            console.log('📧 Email de limite quota envoyé')
+          }
+        } catch (emailError) {
+          console.warn('Erreur envoi email quota:', emailError)
+          // Ne pas bloquer si l'email échoue
+        }
+      }
 
       return true
     } catch (error) {

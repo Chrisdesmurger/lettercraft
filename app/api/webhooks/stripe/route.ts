@@ -415,6 +415,37 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
       // Continue même si la mise à jour de l'abonnement échoue
     }
   }
+
+  // Envoyer l'email de confirmation d'abonnement
+  if (invoiceResult && subscriptionId) {
+    try {
+      // Récupérer les infos utilisateur
+      const { data: userData } = await supabaseAdmin
+        .from('users_with_profiles')
+        .select('email, first_name, last_name, language')
+        .eq('stripe_customer_id', customerId)
+        .single()
+
+      if (userData) {
+        await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/send-email`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            type: 'subscription_confirmed',
+            userEmail: userData.email,
+            userName: `${userData.first_name} ${userData.last_name}`,
+            userLanguage: userData.language || 'fr',
+            invoiceUrl: invoiceData.hosted_invoice_url
+          })
+        })
+        console.log('📧 Email de confirmation d\'abonnement envoyé à:', userData.email)
+      }
+    } catch (emailError) {
+      console.warn('Erreur envoi email confirmation abonnement:', emailError)
+    }
+  }
   
   return invoiceResult
 }
@@ -471,6 +502,37 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
 
   // Sauvegarder la facture (même si le paiement a échoué)
   const invoiceResult = await upsertStripeInvoice(customerId, invoiceData)
+  
+  // Envoyer l'email d'échec de paiement
+  if (invoiceResult) {
+    try {
+      // Récupérer les infos utilisateur
+      const { data: userData } = await supabaseAdmin
+        .from('users_with_profiles')
+        .select('email, first_name, last_name, language')
+        .eq('stripe_customer_id', customerId)
+        .single()
+
+      if (userData) {
+        await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/send-email`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            type: 'payment_failed',
+            userEmail: userData.email,
+            userName: `${userData.first_name} ${userData.last_name}`,
+            userLanguage: userData.language || 'fr',
+            invoiceUrl: invoiceData.hosted_invoice_url
+          })
+        })
+        console.log('📧 Email d\'échec de paiement envoyé à:', userData.email)
+      }
+    } catch (emailError) {
+      console.warn('Erreur envoi email échec paiement:', emailError)
+    }
+  }
   
   // Log for monitoring but don't change subscription status immediately
   // Stripe will send subscription.updated events if the subscription changes status

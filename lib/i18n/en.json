@@ -488,6 +488,23 @@
     "selectCvInSettings": "Select an active CV in your settings",
     "analyzing": "Analyzing...",
     "analyzeJobOffer": "Analyze job offer",
-    "analyzeOffer": "Analyze offer"
+    "analyzeOffer": "Analyze offer",
+    "generating": "Generating",
+    "generatingDesc": "Your personalized cover letter is being created...",
+    "pleaseWait": "Please wait...",
+    "newLetter": "New letter",
+    "completed": "Completed",
+    "letterReady": "Your letter is ready!",
+    "letterGeneratedFor": "Letter generated for {title} at {company}",
+    "preview": "Preview",
+    "actions": "Actions",
+    "downloadPdf": "Download PDF",
+    "copyText": "Copy text",
+    "regenerate": "Regenerate",
+    "details": "Details",
+    "position": "Position",
+    "company": "Company",
+    "cvUsed": "CV used",
+    "generatedOn": "Generated on"
   }
 }
