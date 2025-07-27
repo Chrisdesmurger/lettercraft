@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { useQuota, quotaUtils } from '@/hooks/useQuota'
 import { Crown, Zap, AlertTriangle, RefreshCw } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useI18n } from '@/lib/i18n-context'
 
 interface QuotaStatusProps {
   showUpgrade?: boolean
@@ -17,6 +18,7 @@ interface QuotaStatusProps {
 
 export function QuotaStatus({ showUpgrade = true, compact = false, className }: QuotaStatusProps) {
   const { quota, loading, error, refreshQuota } = useQuota()
+  const { t } = useI18n()
 
   if (loading) {
     return (
@@ -43,7 +45,7 @@ export function QuotaStatus({ showUpgrade = true, compact = false, className }: 
           <div className="text-center space-y-3">
             <AlertTriangle className="h-8 w-8 text-orange-500 mx-auto" />
             <p className="text-sm text-muted-foreground">
-              {error || 'Impossible de charger les informations de quota'}
+              {error || t('quota.loadError')}
             </p>
             <Button 
               variant="outline" 
@@ -52,7 +54,7 @@ export function QuotaStatus({ showUpgrade = true, compact = false, className }: 
               className="mx-auto"
             >
               <RefreshCw className="h-4 w-4 mr-2" />
-              Réessayer
+              {t('quota.retry')}
             </Button>
           </div>
         </CardContent>
@@ -75,14 +77,14 @@ export function QuotaStatus({ showUpgrade = true, compact = false, className }: 
             ) : (
               <Zap className="h-5 w-5 text-blue-500" />
             )}
-            Quota de génération
+            {t('quota.generationQuota')}
           </CardTitle>
           
           <Badge 
             variant={isPremium ? 'default' : 'secondary'}
             className={isPremium ? 'bg-yellow-500 hover:bg-yellow-600' : undefined}
           >
-            {isPremium ? 'Premium' : 'Gratuit'}
+            {isPremium ? t('quota.premium') : t('quota.free')}
           </Badge>
         </div>
       </CardHeader>
@@ -103,10 +105,10 @@ export function QuotaStatus({ showUpgrade = true, compact = false, className }: 
               
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">
-                  {quota.letters_generated} / {quota.max_letters} utilisées
+                  {quota.letters_generated} / {quota.max_letters} {t('quota.used')}
                 </span>
                 <span className={`font-medium ${isNearLimit ? 'text-red-600' : 'text-muted-foreground'}`}>
-                  {quota.remaining_letters} restantes
+                  {quota.remaining_letters} {t('quota.remaining')}
                 </span>
               </div>
             </div>
@@ -116,7 +118,7 @@ export function QuotaStatus({ showUpgrade = true, compact = false, className }: 
           {isPremium && (
             <div className="text-center py-2">
               <p className="text-sm text-muted-foreground">
-                ✨ Générations illimitées avec votre abonnement Premium
+                {t('quota.unlimitedGenerations')}
               </p>
             </div>
           )}
@@ -124,9 +126,9 @@ export function QuotaStatus({ showUpgrade = true, compact = false, className }: 
           {/* Informations de reset */}
           <div className="text-xs text-muted-foreground text-center">
             {isPremium ? (
-              'Votre quota ne se remet jamais à zéro'
+              t('quota.neverResets')
             ) : (
-              `Quota remis à zéro le ${quotaUtils.formatResetDate(quota.reset_date)}`
+              t('quota.resetDate', { date: quotaUtils.formatResetDate(quota.reset_date) })
             )}
           </div>
 
@@ -136,7 +138,7 @@ export function QuotaStatus({ showUpgrade = true, compact = false, className }: 
               {isNearLimit && (
                 <div className="mb-3 p-2 bg-orange-50 border border-orange-200 rounded-lg">
                   <p className="text-xs text-orange-800 text-center">
-                    ⚠️ Vous approchez de votre limite mensuelle !
+                    {t('quota.approachingLimit')}
                   </p>
                 </div>
               )}
@@ -150,7 +152,7 @@ export function QuotaStatus({ showUpgrade = true, compact = false, className }: 
                 }}
               >
                 <Crown className="h-4 w-4 mr-2" />
-                Passer à Premium
+                {t('quota.upgradeToPremium')}
               </Button>
             </div>
           )}
@@ -159,10 +161,10 @@ export function QuotaStatus({ showUpgrade = true, compact = false, className }: 
           {!quota.can_generate && !isPremium && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
               <p className="text-sm text-red-800 text-center font-medium">
-                🚫 Quota mensuel dépassé
+                {t('quota.quotaExceeded')}
               </p>
               <p className="text-xs text-red-600 text-center mt-1">
-                Revenez {quotaUtils.getTimeUntilReset(quota.reset_date)} ou passez à Premium
+                {t('quota.quotaExceededMessage', { time: quotaUtils.getTimeUntilReset(quota.reset_date) })}
               </p>
             </div>
           )}

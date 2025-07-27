@@ -44,6 +44,11 @@ export function useLetterGeneration() {
   const activeCV = cvs.find(cv => cv.is_active)
 
   const resetFlow = useCallback(() => {
+    // Nettoyer le localStorage du questionnaire pour éviter les conflits
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('questionnaire-progress')
+    }
+    
     setFlow({
       step: 'job_offer',
       isLoading: false,

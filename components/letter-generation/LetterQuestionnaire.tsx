@@ -23,9 +23,9 @@ function transformCVData(cvData: any, t: (key: string) => string) {
     id: `exp-${index}`,
     title: exp,
     position: exp,
-    company: t('questionnaire.professionalExperience'),
+    company: '',
     duration: '',
-    description: exp,
+    description: '', // Ne pas répéter le titre dans la description
     key_points: []
   })) || []
 
@@ -39,6 +39,7 @@ function transformCVData(cvData: any, t: (key: string) => string) {
 interface LetterQuestionnaireProps {
   jobOffer: any
   cvData: any
+  userProfile: any
   onSubmit: (data: QuestionnaireData) => void
   onBack: () => void
   isLoading?: boolean
@@ -47,13 +48,15 @@ interface LetterQuestionnaireProps {
 export default function LetterQuestionnaire({
   jobOffer,
   cvData,
+  userProfile,
   onSubmit,
   onBack,
   isLoading = false
 }: LetterQuestionnaireProps) {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const [direction, setDirection] = useState(0)
-  const questions = createQuestionnaireQuestions(t, jobOffer?.language)
+  const subscriptionTier = userProfile?.subscription_tier || 'free'
+  const questions = createQuestionnaireQuestions(t, jobOffer?.language, subscriptionTier)
   const {
     state,
     currentQuestion,
@@ -71,7 +74,14 @@ export default function LetterQuestionnaire({
     setDirection(1)
     if (isLastQuestion) {
       if (completeQuestionnaire()) {
-        onSubmit(state.answers as QuestionnaireData)
+        const answers = { ...state.answers } as QuestionnaireData
+        
+        // Pour les utilisateurs gratuits, ajouter automatiquement la langue de l'interface
+        if (subscriptionTier === 'free') {
+          answers.language = userProfile?.language || locale || 'fr'
+        }
+        
+        onSubmit(answers)
       }
     } else {
       nextQuestion()
@@ -84,11 +94,25 @@ export default function LetterQuestionnaire({
   }
 
   const canGoNext = () => {
+    if (!currentQuestion) return false
     const answer = state.answers[currentQuestion.id]
     return validateAnswer(currentQuestion.id, answer) === null
   }
 
   const completedQuestions = getCompletedQuestions()
+
+  // Protection contre les questions non définies
+  if (!currentQuestion || questions.length === 0) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-white p-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center">
+            <p>Chargement du questionnaire...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-white p-4">

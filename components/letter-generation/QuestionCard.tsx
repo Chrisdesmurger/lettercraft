@@ -197,15 +197,19 @@ export default function QuestionCard({
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <h4 className="font-semibold text-gray-900">
+                      <h4 className="font-normal text-gray-900">
                         {experience.title || experience.position || t('questionnaire.experience')}
                       </h4>
-                      <p className="text-sm text-gray-600 mt-1">
-                        {experience.company} • {experience.duration}
-                      </p>
-                      <p className="text-sm text-gray-500 mt-2 line-clamp-2">
-                        {experience.description}
-                      </p>
+                      {(experience.company || experience.duration) && (
+                        <p className="text-sm text-gray-600 mt-1">
+                          {[experience.company, experience.duration].filter(Boolean).join(' • ')}
+                        </p>
+                      )}
+                      {experience.description && (
+                        <p className="text-sm text-gray-500 mt-2 line-clamp-2">
+                          {experience.description}
+                        </p>
+                      )}
                     </div>
                     {localValue?.experience_id === (experience.id || `exp-${index}`) && (
                       <CheckCircle className="w-5 h-5 text-orange-500 flex-shrink-0" />

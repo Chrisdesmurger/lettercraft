@@ -223,6 +223,20 @@
   "quota": {
     "title": "Mis cuotas",
     "subtitle": "Seguimiento de tu uso mensual",
+    "generationQuota": "Cuota de generación",
+    "free": "Gratuito",
+    "premium": "Premium",
+    "used": "utilizadas",
+    "remaining": "restantes",
+    "unlimitedGenerations": "✨ Generaciones ilimitadas con tu suscripción Premium",
+    "neverResets": "Tu cuota nunca se reinicia",
+    "resetDate": "Cuota reiniciada el {date}",
+    "approachingLimit": "⚠️ ¡Te estás acercando a tu límite mensual!",
+    "quotaExceeded": "🚫 Cuota mensual excedida",
+    "quotaExceededMessage": "Vuelve {time} o actualiza a Premium",
+    "upgradeToPremium": "Actualizar a Premium",
+    "loadError": "No se puede cargar la información de cuota",
+    "retry": "Reintentar",
     "status": {
       "available": "Disponibles",
       "used": "Utilizadas",
@@ -376,7 +390,8 @@
     "uploadButton": "Enviar",
     "uploading": "Enviando...",
     "uploadSuccess": "¡Documento subido con éxito!",
-    "uploadError": "Error durante la subida"
+    "uploadError": "Error durante la subida",
+    "generateLetter": "Generar mi carta de presentación"
   },
   "job": {
     "analysisSuccess": "Análisis de la oferta completado con éxito",

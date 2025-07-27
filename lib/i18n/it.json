@@ -223,6 +223,20 @@
   "quota": {
     "title": "Le mie quote",
     "subtitle": "Tieni traccia del tuo utilizzo mensile",
+    "generationQuota": "Quota di generazione",
+    "free": "Gratuito",
+    "premium": "Premium",
+    "used": "utilizzate",
+    "remaining": "rimanenti",
+    "unlimitedGenerations": "✨ Generazioni illimitate con il tuo abbonamento Premium",
+    "neverResets": "La tua quota non si resetta mai",
+    "resetDate": "Quota resettata il {date}",
+    "approachingLimit": "⚠️ Ti stai avvicinando al tuo limite mensile!",
+    "quotaExceeded": "🚫 Quota mensile superata",
+    "quotaExceededMessage": "Torna {time} o passa a Premium",
+    "upgradeToPremium": "Passa a Premium",
+    "loadError": "Impossibile caricare le informazioni delle quote",
+    "retry": "Riprova",
     "status": {
       "available": "Disponibili",
       "used": "Utilizzate",
@@ -376,7 +390,8 @@
     "uploadButton": "Invia",
     "uploading": "Invio...",
     "uploadSuccess": "Documento caricato con successo!",
-    "uploadError": "Errore durante il caricamento"
+    "uploadError": "Errore durante il caricamento",
+    "generateLetter": "Genera la mia lettera di presentazione"
   },
   "job": {
     "analysisSuccess": "Analisi dell'offerta completata con successo",

@@ -216,6 +216,20 @@
   "quota": {
     "title": "Mes quotas",
     "subtitle": "Suivez votre utilisation mensuelle",
+    "generationQuota": "Quota de génération",
+    "free": "Gratuit",
+    "premium": "Premium",
+    "used": "utilisées",
+    "remaining": "restantes",
+    "unlimitedGenerations": "Générations illimitées avec votre abonnement Premium",
+    "neverResets": "Votre quota ne se remet jamais à zéro",
+    "resetDate": "Quota remis à zéro le {date}",
+    "approachingLimit": "Vous approchez de votre limite mensuelle !",
+    "quotaExceeded": "Quota mensuel dépassé",
+    "quotaExceededMessage": "Revenez {time} ou passez à Premium",
+    "upgradeToPremium": "Passer à Premium",
+    "loadError": "Impossible de charger les informations de quota",
+    "retry": "Réessayer",
     "status": {
       "available": "Disponibles",
       "used": "Utilisées",
@@ -368,7 +382,8 @@
     "uploadButton": "Envoyer",
     "uploading": "Envoi...",
     "uploadSuccess": "Document téléversé avec succès!",
-    "uploadError": "Erreur lors du téléversement"
+    "uploadError": "Erreur lors du téléversement",
+    "generateLetter": "Générer ma lettre de motivation"
   },
   "job": {
     "analysisSuccess": "Analyse de l'offre terminée avec succès",

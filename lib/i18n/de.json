@@ -223,6 +223,20 @@
   "quota": {
     "title": "Meine Kontingente",
     "subtitle": "Verfolgen Sie Ihre monatliche Nutzung",
+    "generationQuota": "Generierungskontingent",
+    "free": "Kostenlos",
+    "premium": "Premium",
+    "used": "verwendet",
+    "remaining": "verbleibend",
+    "unlimitedGenerations": "✨ Unbegrenzte Generierungen mit Ihrem Premium-Abonnement",
+    "neverResets": "Ihr Kontingent wird nie zurückgesetzt",
+    "resetDate": "Kontingent zurückgesetzt am {date}",
+    "approachingLimit": "⚠️ Sie nähern sich Ihrem monatlichen Limit!",
+    "quotaExceeded": "🚫 Monatliches Kontingent überschritten",
+    "quotaExceededMessage": "Kommen Sie {time} zurück oder upgraden Sie auf Premium",
+    "upgradeToPremium": "Auf Premium upgraden",
+    "loadError": "Kontingent-Informationen können nicht geladen werden",
+    "retry": "Wiederholen",
     "status": {
       "available": "Verfügbar",
       "used": "Verwendet",
@@ -376,7 +390,8 @@
     "uploadButton": "Senden",
     "uploading": "Senden...",
     "uploadSuccess": "Dokument erfolgreich hochgeladen!",
-    "uploadError": "Fehler beim Hochladen"
+    "uploadError": "Fehler beim Hochladen",
+    "generateLetter": "Mein Bewerbungsschreiben generieren"
   },
   "job": {
     "analysisSuccess": "Stellenausschreibungs-Analyse erfolgreich abgeschlossen",
