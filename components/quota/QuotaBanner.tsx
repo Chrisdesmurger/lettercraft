@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { useQuota, quotaUtils } from '@/hooks/useQuota'
 import { AlertTriangle, Crown, X, RefreshCw } from 'lucide-react'
 import { useState } from 'react'
+import { useI18n } from '@/lib/i18n-context'
 
 interface QuotaBannerProps {
   showOnlyWhenRelevant?: boolean
@@ -23,6 +24,7 @@ export function QuotaBanner({
   className 
 }: QuotaBannerProps) {
   const { quota, loading, error, refreshQuota, isNearLimit } = useQuota()
+  const { t } = useI18n()
   const [dismissed, setDismissed] = useState(false)
 
   // Ne pas afficher si dismissed ou en cours de chargement
@@ -50,29 +52,36 @@ export function QuotaBanner({
 
   if (isExceeded) {
     variant = 'destructive'
-    title = 'Quota mensuel dépassé'
-    description = `Vous avez utilisé toutes vos ${quota.max_letters} générations ce mois. Votre quota sera remis à zéro ${quotaUtils.getTimeUntilReset(quota.reset_date)}.`
+    title = t('quota.guard.quotaExceededTitle')
+    description = t('quota.messages.quotaExceeded', { max: quota.max_letters }) + '. ' + 
+                 t('quota.messages.comeBackIn', { time: quotaUtils.getTimeUntilReset(quota.reset_date, quota.first_generation_date) })
     actionButton = (
       <Button size="sm" className="ml-auto">
         <Crown className="h-4 w-4 mr-2" />
-        Passer à Premium
+        {t('quota.actions.upgrade')}
       </Button>
     )
   } else if (nearLimit) {
-    title = 'Attention - Quota bientôt épuisé'
-    description = `Il vous reste ${quota.remaining_letters} génération${quota.remaining_letters > 1 ? 's' : ''} ce mois (${quota.letters_generated}/${quota.max_letters} utilisées).`
+    title = t('quota.messages.approachingLimit')
+    const pluralS = quota.remaining_letters > 1 ? 's' : ''
+    description = t('quota.messages.remainingGenerations', { 
+      count: quota.remaining_letters, 
+      s: pluralS,
+      used: quota.letters_generated,
+      max: quota.max_letters
+    })
     actionButton = (
       <Button variant="outline" size="sm" className="ml-auto">
         <Crown className="h-4 w-4 mr-2" />
-        Voir Premium
+        {t('quota.actions.upgrade')}
       </Button>
     )
   } else if (!isPremium) {
-    title = 'Plan Gratuit'
-    description = `Vous avez ${quota.remaining_letters} générations restantes ce mois.`
+    title = t('quota.free')
+    description = t('quota.messages.freePlanInfo', { count: quota.remaining_letters })
     actionButton = (
       <Button variant="ghost" size="sm" className="ml-auto">
-        Découvrir Premium
+        {t('quota.actions.upgrade')}
       </Button>
     )
   }
@@ -88,7 +97,7 @@ export function QuotaBanner({
             <div className="flex items-center gap-2">
               <h4 className="font-medium text-sm">{title}</h4>
               <Badge variant={isPremium ? 'default' : 'secondary'} className="text-xs">
-                {isPremium ? 'Premium' : 'Gratuit'}
+                {isPremium ? t('quota.premium') : t('quota.free')}
               </Badge>
             </div>
             <AlertDescription className="text-sm">
@@ -125,6 +134,7 @@ export function QuotaBanner({
  */
 export function QuotaHeaderBanner() {
   const { quota, loading } = useQuota()
+  const { t } = useI18n()
 
   if (loading || !quota) return null
 
@@ -135,7 +145,7 @@ export function QuotaHeaderBanner() {
     return (
       <Badge variant="default" className="bg-yellow-500 hover:bg-yellow-600">
         <Crown className="h-3 w-3 mr-1" />
-        Premium
+        {t('quota.premium')}
       </Badge>
     )
   }
@@ -144,14 +154,14 @@ export function QuotaHeaderBanner() {
     return (
       <Badge variant="destructive">
         <AlertTriangle className="h-3 w-3 mr-1" />
-        Quota dépassé
+        {t('quota.status.exceeded')}
       </Badge>
     )
   }
 
   return (
     <Badge variant="secondary">
-      {quota.remaining_letters} restantes
+      {quota.remaining_letters} {t('quota.remaining')}
     </Badge>
   )
 }

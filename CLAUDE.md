@@ -172,6 +172,40 @@ STRIPE_WEBHOOK_SECRET=whsec_...
 - Debug endpoints: `/api/debug-subscription`, `/api/debug-users`
 - Structured error handling and event logging
 
+### Email System (Brevo Integration)
+
+The application uses Brevo (ex-Sendinblue) for transactional emails with comprehensive multilingual support:
+
+#### Email Types
+- **Welcome Email**: Sent on user registration
+- **Subscription Confirmation**: Sent when premium subscription payment succeeds
+- **Payment Failed**: Sent when subscription payment fails
+- **Quota Warning**: Sent when user approaches their generation limit
+- **Quota Limit Reached**: Sent when user reaches their generation limit
+
+#### Architecture
+- **Service Layer**: `lib/brevo-client.ts` - Core Brevo integration
+- **API Route**: `/api/send-email` - REST endpoint for sending emails
+- **Client Helper**: `lib/email-client.ts` - Frontend wrapper for email sending
+- **Integration Points**: Registration, Stripe webhooks, quota system
+
+#### Configuration
+Environment variables required:
+```env
+BREVO_API_KEY=xkeysib-your-brevo-api-key
+BREVO_SENDER_EMAIL=noreply@lettercraft.fr
+BREVO_SENDER_NAME=LetterCraft
+```
+
+#### Multilingual Support
+All email templates support French (fr) and English (en) with automatic language detection from user profiles.
+
+#### Integration Points
+1. **User Registration** (`app/register/page.tsx`): Welcome email after successful signup
+2. **Stripe Webhooks** (`app/api/webhooks/stripe/route.ts`): Subscription and payment emails
+3. **Quota System** (`hooks/useQuota.ts`): Automatic quota notifications
+4. **Error Handling**: Non-blocking email failures to ensure user experience
+
 ### CV Extraction
 Uses OpenAI File API with GPT-4-turbo model. Files are temporarily stored in `/tmp` and cleaned up after processing.
 
