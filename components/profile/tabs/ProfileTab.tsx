@@ -162,16 +162,8 @@ export default function ProfileTab() {
       
       // Synchroniser les données mises à jour avec Brevo
       try {
-        await fetch('/api/sync-contact', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            userId: session.user.id,
-            action: 'update'
-          })
-        })
+        const { autoSyncUser } = await import('@/lib/internal-api')
+        await autoSyncUser(session.user.id, 'avatar-update')
       } catch (syncError) {
         console.warn('Erreur synchronisation contact Brevo:', syncError)
         // Ne pas bloquer la mise à jour si la sync échoue
@@ -224,16 +216,8 @@ export default function ProfileTab() {
 
       // Synchroniser les données mises à jour avec Brevo
       try {
-        await fetch('/api/sync-contact', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            userId: session.user.id,
-            action: 'update'
-          })
-        })
+        const { autoSyncUser } = await import('@/lib/internal-api')
+        await autoSyncUser(session.user.id, 'profile-update')
       } catch (syncError) {
         console.warn('Erreur synchronisation contact Brevo:', syncError)
         // Ne pas bloquer la mise à jour du profil si la sync échoue

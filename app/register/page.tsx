@@ -113,20 +113,13 @@ export default function RegisterPage() {
 
     // Synchroniser le contact avec Brevo
     try {
-      await fetch('/api/sync-contact', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId: data.user?.id,
-          email: email,
-          firstName: firstName,
-          lastName: lastName,
-          language: locale,
-          action: 'create'
-        })
-      })
+      const { autoCreateContact } = await import('@/lib/internal-api')
+      await autoCreateContact({
+        email: email,
+        firstName: firstName,
+        lastName: lastName,
+        language: locale
+      }, 'registration')
     } catch (syncError) {
       console.warn('Erreur synchronisation contact Brevo:', syncError)
       // Ne pas bloquer l'inscription si la sync échoue

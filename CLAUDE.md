@@ -389,6 +389,27 @@ BREVO_LIST_CHURNED_USERS=5
 
 **Script utilitaire** : `scripts/brevo-sync.js` pour l'utilisation en ligne de commande.
 
+**Sécurité** : Voir `docs/SECURITY.md` pour la documentation de sécurité complète.
+
+#### Sécurité
+
+L'API Brevo implémente plusieurs couches de protection :
+
+**Authentification & Autorisation :**
+- JWT tokens Supabase requis pour tous les appels externes
+- Contrôle d'accès basé sur les rôles (utilisateur/admin)
+- Vérification des permissions par action
+
+**Protection contre les abus :**
+- Rate limiting adaptatif (10-1000 req/min selon l'action)
+- Validation stricte des données avec schémas TypeScript
+- Audit des actions sensibles
+
+**Appels internes sécurisés :**
+- Secret interne pour les synchronisations automatiques
+- Bypass sécurisé pour les opérations système
+- Logging détaillé des sources d'appels
+
 ### CV Extraction
 Uses OpenAI File API with GPT-4-turbo model. Files are temporarily stored in `/tmp` and cleaned up after processing.
 
