@@ -43,5 +43,7 @@ next-env.d.ts
 /CLAUDE.md
 
 # Claude folder
-/.claude/
-
+.claude/*
+# Docs folder
+/docs
+/.claude/settings.local.json
