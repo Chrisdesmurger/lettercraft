@@ -13,9 +13,11 @@ import { uploadDocument } from '@/services/supabase'
 import { supabase } from '@/lib/supabase-client'
 import ProfileTable from '@/components/ProfileTable'
 import { extractResumeDataFromFile, ExtractedProfile } from '@/services/resumeExtractor'
+import { useI18n } from '@/lib/i18n-context'
 
 export default function DocumentUploadPage() {
   const router = useRouter()
+  const { t } = useI18n()
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
@@ -44,6 +46,12 @@ export default function DocumentUploadPage() {
     try {
       const userId = user.id
       
+      // Désactiver tous les autres CV de l'utilisateur
+      await supabase
+        .from('candidates_profile')
+        .update({ is_active: false })
+        .eq('user_id', userId)
+
       const { id } = await uploadDocument({
         userId,
         file,
@@ -51,17 +59,21 @@ export default function DocumentUploadPage() {
         language,
         description,
       })
+      
       const data = await extractResumeDataFromFile(file)
+      
+      // Mettre à jour le CV avec les données extraites ET l'activer
       await supabase
         .from('candidates_profile')
-        .update(data)
+        .update({ ...data, is_active: true })
         .eq('id', id)
+      
       setExtracted(data)
 
-      toast.success('Document téléversé avec succès!')
+      toast.success(t('upload.uploadSuccess'))
     } catch (error) {
       console.error(error)
-      toast.error('Erreur lors du téléversement')
+      toast.error(t('upload.uploadError'))
     } finally {
       setUploading(false)
     }
@@ -84,7 +96,7 @@ export default function DocumentUploadPage() {
       <div className="container py-10">
         <Card className="max-w-xl mx-auto">
           <CardHeader>
-            <CardTitle>Téléverser un document</CardTitle>
+            <CardTitle>{t('upload.title')}</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -96,7 +108,7 @@ export default function DocumentUploadPage() {
               <Input
                 type="text"
                 name="title"
-                placeholder="Titre du document"
+                placeholder={t('upload.titlePlaceholder')}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
               />
@@ -106,7 +118,7 @@ export default function DocumentUploadPage() {
                 onChange={(e) => setLanguage(e.target.value)}
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
               >
-                <option value="">-- Langue --</option>
+                <option value="">{t('upload.languageSelect')}</option>
                 {languages.map((l) => (
                   <option key={l.code} value={l.code}>
                     {l.flag} {l.label}
@@ -115,17 +127,25 @@ export default function DocumentUploadPage() {
               </select>
               <Textarea
                 name="description"
-                placeholder="Description (optionnel)"
+                placeholder={t('upload.descriptionPlaceholder')}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
               />
               <Button type="submit" disabled={uploading}>
-                {uploading ? 'Envoi...' : 'Envoyer'}
+                {uploading ? t('upload.uploading') : t('upload.uploadButton')}
               </Button>
             </form>
             {extracted && (
-              <div className="mt-8">
+              <div className="mt-8 space-y-6">
                 <ProfileTable data={extracted} />
+                <div className="flex justify-center pt-4">
+                  <Button 
+                    onClick={() => router.push('/generate-letter')}
+                    className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white px-8 py-3 text-lg font-semibold"
+                  >
+                    {t('upload.generateLetter')}
+                  </Button>
+                </div>
               </div>
             )}
           </CardContent>

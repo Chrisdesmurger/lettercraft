@@ -1,7 +1,11 @@
 import type { QuestionnaireQuestion } from './useQuestionnaireFlow'
 
-export function createQuestionnaireQuestions(t: (key: string) => string, detectedLanguage?: string): QuestionnaireQuestion[] {
-  return [
+export function createQuestionnaireQuestions(
+  t: (key: string) => string, 
+  detectedLanguage?: string, 
+  subscriptionTier?: string
+): QuestionnaireQuestion[] {
+  const questions: QuestionnaireQuestion[] = [
     {
       id: 'motivation',
       title: t('questionnaire.question1.title'),
@@ -60,8 +64,12 @@ export function createQuestionnaireQuestions(t: (key: string) => string, detecte
       type: 'textarea',
       placeholder: t('questionnaire.question5.placeholder'),
       required: false
-    },
-    {
+    }
+  ]
+
+  // Ajouter la question de langue seulement pour les utilisateurs premium
+  if (subscriptionTier === 'premium') {
+    questions.push({
       id: 'language',
       title: t('questionnaire.question6.title'),
       type: 'select',
@@ -79,6 +87,8 @@ export function createQuestionnaireQuestions(t: (key: string) => string, detecte
         }
         return null
       }
-    }
-  ]
+    })
+  }
+
+  return questions
 }

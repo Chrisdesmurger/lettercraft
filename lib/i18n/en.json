@@ -216,6 +216,20 @@
   "quota": {
     "title": "My quotas",
     "subtitle": "Track your monthly usage",
+    "generationQuota": "Generation quota",
+    "free": "Free",
+    "premium": "Premium",
+    "used": "used",
+    "remaining": "remaining",
+    "unlimitedGenerations": "✨ Unlimited generations with your Premium subscription",
+    "neverResets": "Your quota never resets",
+    "resetDate": "Quota resets on {date}",
+    "approachingLimit": "⚠️ You are approaching your monthly limit!",
+    "quotaExceeded": "🚫 Monthly quota exceeded",
+    "quotaExceededMessage": "Come back {time} or upgrade to Premium",
+    "upgradeToPremium": "Upgrade to Premium",
+    "loadError": "Unable to load quota information",
+    "retry": "Retry",
     "status": {
       "available": "Available",
       "used": "Used",
@@ -369,7 +383,8 @@
     "uploadButton": "Send",
     "uploading": "Sending...",
     "uploadSuccess": "Document uploaded successfully!",
-    "uploadError": "Error during upload"
+    "uploadError": "Error during upload",
+    "generateLetter": "Generate my cover letter"
   },
   "job": {
     "analysisSuccess": "Job offer analysis completed successfully",

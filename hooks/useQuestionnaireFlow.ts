@@ -100,8 +100,14 @@ export function useQuestionnaireFlow(questions: QuestionnaireQuestion[] = defaul
           const savedState = JSON.parse(saved)
           // Merger les réponses sauvegardées avec les valeurs par défaut
           const mergedAnswers = { ...initialAnswers, ...savedState.answers }
+          
+          // Vérifier que l'index de la question courante est valide
+          const validCurrentQuestion = Math.min(savedState.currentQuestion || 0, questions.length - 1)
+          const safeCurrentQuestion = Math.max(0, validCurrentQuestion)
+          
           return {
             ...savedState,
+            currentQuestion: safeCurrentQuestion,
             answers: mergedAnswers
           }
         } catch (e) {
@@ -118,8 +124,10 @@ export function useQuestionnaireFlow(questions: QuestionnaireQuestion[] = defaul
     }
   })
 
-  const currentQuestion = questions[state.currentQuestion]
-  const isLastQuestion = state.currentQuestion === questions.length - 1
+  // S'assurer que l'index est valide et que la question existe
+  const safeCurrentQuestionIndex = questions.length > 0 ? Math.min(Math.max(0, state.currentQuestion), questions.length - 1) : 0
+  const currentQuestion = questions.length > 0 ? (questions[safeCurrentQuestionIndex] || questions[0]) : null
+  const isLastQuestion = questions.length > 0 ? safeCurrentQuestionIndex === questions.length - 1 : false
 
   // Mettre à jour les valeurs par défaut quand les questions changent
   useEffect(() => {
@@ -130,13 +138,17 @@ export function useQuestionnaireFlow(questions: QuestionnaireQuestion[] = defaul
       }
     })
     
-    if (Object.keys(defaultAnswers).length > 0) {
+    // Corriger l'index de la question courante si nécessaire
+    const needsUpdate = Object.keys(defaultAnswers).length > 0 || state.currentQuestion >= questions.length
+    
+    if (needsUpdate) {
       setState(prev => ({
         ...prev,
+        currentQuestion: Math.min(Math.max(0, prev.currentQuestion), questions.length - 1),
         answers: { ...prev.answers, ...defaultAnswers }
       }))
     }
-  }, [questions])
+  }, [questions, state.currentQuestion, state.answers])
 
   // Sauvegarder l'état dans localStorage à chaque changement
   useEffect(() => {

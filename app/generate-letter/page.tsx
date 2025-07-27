@@ -121,7 +121,7 @@ function GenerateLetterContent() {
 
               <div className="flex gap-3">
                 <Button
-                  onClick={() => router.push('/profile?tab=cv')}
+                  onClick={() => router.push('/upload')}
                   className="flex-1"
                 >
                   <Upload className="w-4 h-4 mr-2" />

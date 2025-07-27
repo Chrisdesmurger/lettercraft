@@ -19,6 +19,7 @@ import {
 import { cn } from '@/lib/utils'
 import { useLetterGeneration } from '@/hooks/useLetterGeneration'
 import { useUserCVs } from '@/hooks/useUserCVs'
+import { useUserProfile } from '@/hooks/useUserProfile'
 import LetterQuestionnaire from './LetterQuestionnaire'
 import { QuotaGuard, QuotaBanner } from '@/components/quota'
 import { usePreGenerationQuotaCheck } from '@/hooks/useQuota'
@@ -32,6 +33,7 @@ interface LetterGenerationFlowProps {
 export default function LetterGenerationFlow({ onBack }: LetterGenerationFlowProps) {
   const { t } = useI18n()
   const { cvs } = useUserCVs()
+  const { profile } = useUserProfile()
   const { checkAndShowQuotaStatus } = usePreGenerationQuotaCheck()
   const {
     flow,
@@ -359,6 +361,7 @@ export default function LetterGenerationFlow({ onBack }: LetterGenerationFlowPro
           <LetterQuestionnaire
             jobOffer={flow.jobOffer}
             cvData={activeCV}
+            userProfile={profile}
             onSubmit={handleQuestionnaireSubmit}
             onBack={() => resetFlow()}
             isLoading={flow.isLoading}
