@@ -206,6 +206,210 @@ All email templates support French (fr) and English (en) with automatic language
 3. **Quota System** (`hooks/useQuota.ts`): Automatic quota notifications
 4. **Error Handling**: Non-blocking email failures to ensure user experience
 
+### Contact Synchronization with Brevo
+
+The application includes a comprehensive contact synchronization system with Brevo for email marketing:
+
+#### Architecture
+- **`lib/brevo-contacts.ts`**: Core service managing all Brevo API interactions
+- **Automatic sync**: Triggers during user registration, profile updates, and subscription changes
+- **Manual sync**: API endpoint for bulk operations and maintenance
+- **List management**: Dynamic assignment to lists based on user attributes
+
+#### Key Features
+
+**Contact Management**:
+- Create/update contacts with custom attributes
+- Automatic list assignment based on user tier and activity
+- Profile synchronization on changes (name, language, avatar, etc.)
+- Subscription tier updates via Stripe webhooks
+
+**Custom Attributes**:
+- `USER_ID`: LetterCraft user identifier
+- `SUBSCRIPTION_TIER`: free | premium
+- `LANGUAGE`: User's preferred language
+- `COUNTRY`: User's country
+- `LETTERS_GENERATED`: Number of letters created
+- `PROFILE_COMPLETE`: Boolean indicating complete profile
+- `LAST_LOGIN`: Last sign-in timestamp
+
+**List Segmentation**:
+- `ALL_USERS`: Every registered user
+- `FREE_USERS`: Users on free plan
+- `PREMIUM_USERS`: Users with premium subscription
+- `ACTIVE_USERS`: Users who have generated letters
+- `CHURNED_USERS`: Inactive users (30+ days, no letters)
+
+#### API Endpoints
+
+**`/api/sync-contact`** - Endpoint principal pour la gestion des contacts Brevo
+
+**Actions disponibles :**
+
+| Action | Description | Paramètres requis | Paramètres optionnels |
+|--------|-------------|-------------------|----------------------|
+| `create` | Créer un nouveau contact | `email`, `firstName`, `lastName` | `language` |
+| `update` | Mettre à jour un contact existant | `userId` OU `email` | `firstName`, `lastName`, `language` |
+| `delete` | Supprimer un contact de Brevo | `email` | - |
+| `bulk` | Synchroniser plusieurs utilisateurs | `userIds` (array) | - |
+| `sync` | Synchronisation complète d'un utilisateur | `userId` | - |
+| `update-lists` | Mettre à jour les listes d'un contact | `email`, `listIds` (array) | - |
+| `sync-all-lists` | Synchroniser toutes les listes (maintenance) | - | - |
+| `create-missing` | Créer tous les contacts manquants | - | - |
+
+**Exemples d'utilisation :**
+
+```javascript
+// 1. Créer un nouveau contact
+const createResponse = await fetch('/api/sync-contact', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    action: 'create',
+    email: 'user@example.com',
+    firstName: 'Jean',
+    lastName: 'Dupont',
+    language: 'fr'
+  })
+})
+
+// 2. Synchroniser un utilisateur existant
+const updateResponse = await fetch('/api/sync-contact', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    action: 'update',
+    userId: 'user-uuid-here'
+  })
+})
+
+// 3. Synchronisation en lot
+const bulkResponse = await fetch('/api/sync-contact', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    action: 'bulk',
+    userIds: ['uuid1', 'uuid2', 'uuid3']
+  })
+})
+
+// 4. Mettre à jour les listes d'un contact
+const listsResponse = await fetch('/api/sync-contact', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    action: 'update-lists',
+    email: 'user@example.com',
+    listIds: [1, 2, 4] // ALL_USERS, FREE_USERS, ACTIVE_USERS
+  })
+})
+
+// 5. Créer tous les contacts manquants (migration initiale)
+const createMissingResponse = await fetch('/api/sync-contact', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    action: 'create-missing'
+  })
+})
+
+// 6. Synchroniser toutes les listes (maintenance)
+const syncAllResponse = await fetch('/api/sync-contact', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    action: 'sync-all-lists'
+  })
+})
+
+// 7. Supprimer un contact
+const deleteResponse = await fetch('/api/sync-contact', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    action: 'delete',
+    email: 'user@example.com'
+  })
+})
+```
+
+**Récupération d'un contact :**
+```javascript
+// GET - Récupérer les informations d'un contact
+const getResponse = await fetch('/api/sync-contact?email=user@example.com')
+const contactData = await getResponse.json()
+```
+
+**Réponses API :**
+
+Format de réponse standard :
+```json
+{
+  "success": true,
+  "message": "Description du résultat",
+  "contactId": 12345,  // Pour les actions create/update
+  "created": 15,       // Pour create-missing
+  "already_exists": 5, // Pour create-missing
+  "failed": 0,         // Pour les actions en lot
+  "updated": 10        // Pour sync-all-lists
+}
+```
+
+**Gestion d'erreurs :**
+- Erreurs de validation : status 400 avec message explicite
+- Erreurs internes : status 500 avec détails d'erreur
+- Toutes les opérations sont non-bloquantes pour l'expérience utilisateur
+
+#### Environment Variables
+
+Required in `.env.local`:
+```env
+BREVO_API_KEY=your-brevo-api-key
+BREVO_LIST_ALL_USERS=1
+BREVO_LIST_FREE_USERS=2
+BREVO_LIST_PREMIUM_USERS=3
+BREVO_LIST_ACTIVE_USERS=4
+BREVO_LIST_CHURNED_USERS=5
+```
+
+#### Sync Triggers
+
+**Automatic synchronization occurs during**:
+- User registration (`app/register/page.tsx`)
+- Profile updates (`components/profile/tabs/ProfileTab.tsx`)
+- Language changes (`components/profile/tabs/SettingsTab.tsx`)
+- Subscription changes (`app/api/webhooks/stripe/route.ts`)
+
+**Error Handling**:
+- Non-blocking: Sync failures don't interrupt user operations
+- Comprehensive logging for debugging
+- Retry logic built into API service
+
+**Documentation complète** : Voir `docs/BREVO_API.md` pour la documentation détaillée de l'API.
+
+**Script utilitaire** : `scripts/brevo-sync.js` pour l'utilisation en ligne de commande.
+
+**Sécurité** : Voir `docs/SECURITY.md` pour la documentation de sécurité complète.
+
+#### Sécurité
+
+L'API Brevo implémente plusieurs couches de protection :
+
+**Authentification & Autorisation :**
+- JWT tokens Supabase requis pour tous les appels externes
+- Contrôle d'accès basé sur les rôles (utilisateur/admin)
+- Vérification des permissions par action
+
+**Protection contre les abus :**
+- Rate limiting adaptatif (10-1000 req/min selon l'action)
+- Validation stricte des données avec schémas TypeScript
+- Audit des actions sensibles
+
+**Appels internes sécurisés :**
+- Secret interne pour les synchronisations automatiques
+- Bypass sécurisé pour les opérations système
+- Logging détaillé des sources d'appels
+
 ### CV Extraction
 Uses OpenAI File API with GPT-4-turbo model. Files are temporarily stored in `/tmp` and cleaned up after processing.
 

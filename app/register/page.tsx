@@ -92,7 +92,7 @@ export default function RegisterPage() {
       return
     }
 
-    // Envoyer l'email de bienvenue
+    // Envoyer l'email de bienvenue et synchroniser avec Brevo
     try {
       await fetch('/api/send-email', {
         method: 'POST',
@@ -109,6 +109,20 @@ export default function RegisterPage() {
     } catch (emailError) {
       console.warn('Erreur envoi email de bienvenue:', emailError)
       // Ne pas bloquer l'inscription si l'email échoue
+    }
+
+    // Synchroniser le contact avec Brevo
+    try {
+      const { autoCreateContact } = await import('@/lib/internal-api')
+      await autoCreateContact({
+        email: email,
+        firstName: firstName,
+        lastName: lastName,
+        language: locale
+      }, 'registration')
+    } catch (syncError) {
+      console.warn('Erreur synchronisation contact Brevo:', syncError)
+      // Ne pas bloquer l'inscription si la sync échoue
     }
 
     setSuccess(t('auth.registerSuccess'))

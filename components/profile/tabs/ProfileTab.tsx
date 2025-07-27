@@ -160,6 +160,15 @@ export default function ProfileTab() {
         return
       }
       
+      // Synchroniser les données mises à jour avec Brevo
+      try {
+        const { autoSyncUser } = await import('@/lib/internal-api')
+        await autoSyncUser(session.user.id, 'avatar-update')
+      } catch (syncError) {
+        console.warn('Erreur synchronisation contact Brevo:', syncError)
+        // Ne pas bloquer la mise à jour si la sync échoue
+      }
+      
       // Mettre à jour l'état local
       setProfile(prev => ({ ...prev, avatar_url }))
       
@@ -203,6 +212,15 @@ export default function ProfileTab() {
         console.error('Error updating profile:', error)
         toast.error(t('profile.updateError'))
         return
+      }
+
+      // Synchroniser les données mises à jour avec Brevo
+      try {
+        const { autoSyncUser } = await import('@/lib/internal-api')
+        await autoSyncUser(session.user.id, 'profile-update')
+      } catch (syncError) {
+        console.warn('Erreur synchronisation contact Brevo:', syncError)
+        // Ne pas bloquer la mise à jour du profil si la sync échoue
       }
 
       toast.success(t('profile.updateSuccess'))
