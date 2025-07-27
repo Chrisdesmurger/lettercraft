@@ -64,7 +64,8 @@
     "yes": "Ja",
     "no": "Nein",
     "retry": "Wiederholen",
-    "refreshing": "Aktualisieren..."
+    "refreshing": "Aktualisieren...",
+    "optional": "optional"
   },
   "auth": {
     "login": "Anmelden",
@@ -99,6 +100,9 @@
     "bio": "Biografie",
     "bioPlaceholder": "Erzählen Sie uns ein wenig über sich...",
     "saveChanges": "Änderungen speichern",
+    "updateSuccess": "Profil erfolgreich aktualisiert!",
+    "updateError": "Fehler beim Aktualisieren des Profils",
+    "selectCountry": "Wählen Sie Ihr Land *",
     "changePhoto": "Profilbild ändern",
     "photoUpdateSuccess": "Profilbild aktualisiert!",
     "photoUpdateError": "Fehler beim Hochladen des Bildes",
@@ -133,6 +137,9 @@
     "bio": "Biografie",
     "bioPlaceholder": "Erzählen Sie uns ein wenig über sich...",
     "saveChanges": "Änderungen speichern",
+    "updateSuccess": "Profil erfolgreich aktualisiert!",
+    "updateError": "Fehler beim Aktualisieren des Profils",
+    "selectCountry": "Wählen Sie Ihr Land *",
     "changePhoto": "Profilbild ändern",
     "photoUpdateSuccess": "Profilbild aktualisiert!",
     "photoUpdateError": "Fehler beim Hochladen des Bildes",
@@ -153,6 +160,8 @@
     "newPassword": "Neues Passwort",
     "confirmPassword": "Passwort bestätigen",
     "updatePassword": "Passwort aktualisieren",
+    "updateError": "Fehler beim Aktualisieren",
+    "languageUpdateSuccess": "Sprache erfolgreich aktualisiert!",
     "dangerZone": "Gefahrenbereich",
     "deleteAccountWarning": "Das Löschen Ihres Kontos ist unumkehrbar. Alle Ihre Daten gehen verloren.",
     "deleteAccount": "Mein Konto löschen"
@@ -311,6 +320,7 @@
       "retry": "Wiederholen",
       "refresh": "Rechnungen aktualisieren",
       "refreshing": "Aktualisieren...",
+    "optional": "optional",
       "download": "Rechnung herunterladen",
       "downloadTitle": "Rechnung herunterladen",
       "viewOnStripe": "Auf Stripe anzeigen",

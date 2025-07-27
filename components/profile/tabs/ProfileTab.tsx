@@ -51,14 +51,20 @@ export default function ProfileTab() {
 
         const letterCount = lettersData?.length || 0
 
-        // Utiliser les données directement depuis auth.users avec metadata
+        // Récupérer les données du profil depuis user_profiles
+        const { data: profileData } = await supabase
+          .from('user_profiles')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .single()
+
         setProfile({
           email: session.user.email || '',
-          firstName: session.user.user_metadata?.first_name || '',
-          lastName: session.user.user_metadata?.last_name || '',
-          phone: session.user.user_metadata?.phone || '',
-          bio: session.user.user_metadata?.bio || '',
-          avatar_url: session.user.user_metadata?.avatar_url || '',
+          firstName: profileData?.first_name || '',
+          lastName: profileData?.last_name || '',
+          phone: profileData?.phone || '',
+          bio: profileData?.bio || '',
+          avatar_url: profileData?.avatar_url || '',
           created_at: session.user.created_at || '',
           generation_count: letterCount
         })
@@ -139,16 +145,19 @@ export default function ProfileTab() {
 
       const { avatar_url } = await response.json()
       
-      // Mettre à jour le profil dans auth.users metadata
-      const { error: updateError } = await supabase.auth.updateUser({
-        data: {
-          avatar_url: avatar_url
-        }
-      })
+      // Mettre à jour le profil dans user_profiles
+      const { error: updateError } = await supabase
+        .from('user_profiles')
+        .update({
+          avatar_url: avatar_url,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', session.user.id)
 
       if (updateError) {
         console.error('Error updating profile:', updateError)
-        // Continuer même si la mise à jour échoue
+        toast.error(t('profile.photoUpdateError'))
+        return
       }
       
       // Mettre à jour l'état local
@@ -170,7 +179,37 @@ export default function ProfileTab() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Logique de mise à jour du profil
+    
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        toast.error(t('auth.mustBeLoggedIn'))
+        return
+      }
+
+      // Mettre à jour les données dans user_profiles
+      const { error } = await supabase
+        .from('user_profiles')
+        .update({
+          first_name: profile.firstName,
+          last_name: profile.lastName,
+          phone: profile.phone,
+          bio: profile.bio,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', session.user.id)
+
+      if (error) {
+        console.error('Error updating profile:', error)
+        toast.error(t('profile.updateError'))
+        return
+      }
+
+      toast.success(t('profile.updateSuccess'))
+    } catch (error) {
+      console.error('Error saving profile:', error)
+      toast.error(t('profile.updateError'))
+    }
   }
 
   if (loading) {

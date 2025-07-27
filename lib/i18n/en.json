@@ -64,7 +64,8 @@
     "yes": "Yes",
     "no": "No",
     "retry": "Retry",
-    "refreshing": "Refreshing..."
+    "refreshing": "Refreshing...",
+    "optional": "optional"
   },
   "auth": {
     "login": "Login",
@@ -99,6 +100,9 @@
     "bio": "Bio",
     "bioPlaceholder": "Tell us a bit about yourself...",
     "saveChanges": "Save changes",
+    "updateSuccess": "Profile updated successfully!",
+    "updateError": "Error updating profile",
+    "selectCountry": "Select your country *",
     "changePhoto": "Change profile photo",
     "photoUpdateSuccess": "Profile photo updated!",
     "photoUpdateError": "Error uploading photo",
@@ -128,6 +132,8 @@
     "newPassword": "New password",
     "confirmPassword": "Confirm password",
     "updatePassword": "Update password",
+    "updateError": "Update error",
+    "languageUpdateSuccess": "Language updated successfully!",
     "dangerZone": "Danger zone",
     "deleteAccountWarning": "Deleting your account is irreversible. All your data will be lost.",
     "deleteAccount": "Delete my account"
@@ -307,6 +313,7 @@
       "retry": "Retry",
       "refresh": "Refresh invoices",
       "refreshing": "Refreshing...",
+    "optional": "optional",
       "download": "Download invoice",
       "downloadTitle": "Download invoice",
       "viewOnStripe": "View on Stripe",

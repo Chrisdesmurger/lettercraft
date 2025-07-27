@@ -1,18 +1,83 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Bell, Globe, Shield, Eye, EyeOff } from 'lucide-react'
 import { useI18n } from '@/lib/i18n-context'
+import { supabase } from '@/lib/supabase-client'
+import { locales, localeNames, type Locale } from '@/lib/i18n'
+import toast from 'react-hot-toast'
 
 export default function SettingsTab() {
-  const { t } = useI18n()
+  const { t, locale, setLocale } = useI18n()
   const [notifications, setNotifications] = useState({
     email: true,
     push: false,
     newsletter: true
   })
-  const [language, setLanguage] = useState('fr')
+  const [language, setLanguage] = useState<Locale>(locale)
   const [showPassword, setShowPassword] = useState(false)
+  const [loading, setLoading] = useState(true)
+
+  // Charger la langue depuis user_profiles au montage
+  useEffect(() => {
+    async function loadUserLanguage() {
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (session) {
+          const { data: profileData } = await supabase
+            .from('user_profiles')
+            .select('language')
+            .eq('user_id', session.user.id)
+            .single()
+
+          if (profileData?.language && locales.includes(profileData.language as Locale)) {
+            setLanguage(profileData.language as Locale)
+          }
+        }
+      } catch (error) {
+        console.error('Error loading user language:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadUserLanguage()
+  }, [])
+
+  // Fonction pour mettre à jour la langue
+  const handleLanguageChange = async (newLanguage: Locale) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        toast.error(t('auth.mustBeLoggedIn'))
+        return
+      }
+
+      // Mettre à jour dans user_profiles
+      const { error } = await supabase
+        .from('user_profiles')
+        .update({ 
+          language: newLanguage,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', session.user.id)
+
+      if (error) {
+        console.error('Error updating language:', error)
+        toast.error(t('settings.updateError'))
+        return
+      }
+
+      // Mettre à jour le contexte i18n
+      setLocale(newLanguage)
+      setLanguage(newLanguage)
+      
+      toast.success(t('settings.languageUpdateSuccess'))
+    } catch (error) {
+      console.error('Error saving language:', error)
+      toast.error(t('settings.updateError'))
+    }
+  }
 
   return (
     <div className="space-y-8">
@@ -20,7 +85,7 @@ export default function SettingsTab() {
       <div>
         <h3 className="text-lg font-semibold mb-4 flex items-center">
           <Bell className="w-5 h-5 mr-2" />
-          {t('settings.notifications')}
+          {t('settings.notifications.title')}
         </h3>
         <div className="space-y-3">
           <label className="flex items-center justify-between p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100">
@@ -61,13 +126,15 @@ export default function SettingsTab() {
         </h3>
         <select
           value={language}
-          onChange={(e) => setLanguage(e.target.value)}
+          onChange={(e) => handleLanguageChange(e.target.value as Locale)}
           className="w-full md:w-64 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+          disabled={loading}
         >
-          <option value="fr">Français</option>
-          <option value="en">English</option>
-          <option value="es">Español</option>
-          <option value="de">Deutsch</option>
+          {locales.map((localeCode) => (
+            <option key={localeCode} value={localeCode}>
+              {localeNames[localeCode]}
+            </option>
+          ))}
         </select>
       </div>
 

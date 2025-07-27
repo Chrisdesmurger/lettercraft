@@ -64,7 +64,8 @@
     "yes": "Sì",
     "no": "No",
     "retry": "Riprova",
-    "refreshing": "Aggiornamento..."
+    "refreshing": "Aggiornamento...",
+    "optional": "opzionale"
   },
   "auth": {
     "login": "Accedi",
@@ -99,6 +100,9 @@
     "bio": "Bio",
     "bioPlaceholder": "Parlaci un po' di te...",
     "saveChanges": "Salva modifiche",
+    "updateSuccess": "Profilo aggiornato con successo!",
+    "updateError": "Errore nell'aggiornamento del profilo",
+    "selectCountry": "Seleziona il tuo paese *",
     "changePhoto": "Cambia foto profilo",
     "photoUpdateSuccess": "Foto profilo aggiornata!",
     "photoUpdateError": "Errore nel caricamento della foto",
@@ -133,6 +137,9 @@
     "bio": "Bio",
     "bioPlaceholder": "Parlaci un po' di te...",
     "saveChanges": "Salva modifiche",
+    "updateSuccess": "Profilo aggiornato con successo!",
+    "updateError": "Errore nell'aggiornamento del profilo",
+    "selectCountry": "Seleziona il tuo paese *",
     "changePhoto": "Cambia foto profilo",
     "photoUpdateSuccess": "Foto profilo aggiornata!",
     "photoUpdateError": "Errore nel caricamento della foto",
@@ -153,6 +160,8 @@
     "newPassword": "Nuova password",
     "confirmPassword": "Conferma password",
     "updatePassword": "Aggiorna password",
+    "updateError": "Errore durante l'aggiornamento",
+    "languageUpdateSuccess": "Lingua aggiornata con successo!",
     "dangerZone": "Zona pericolosa",
     "deleteAccountWarning": "L'eliminazione del tuo account è irreversibile. Tutti i tuoi dati andranno persi.",
     "deleteAccount": "Elimina il mio account"
@@ -311,6 +320,7 @@
       "retry": "Riprova",
       "refresh": "Aggiorna fatture",
       "refreshing": "Aggiornamento...",
+    "optional": "opzionale",
       "download": "Scarica fattura",
       "downloadTitle": "Scarica fattura",
       "viewOnStripe": "Visualizza su Stripe",

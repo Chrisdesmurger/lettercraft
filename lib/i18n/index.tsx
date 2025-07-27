@@ -32,6 +32,40 @@ export const localeNames = {
   it: 'Italiano',
 } as const
 
+// Mapping des langues vers les pays les plus probables
+export const localeToCountry: Record<Locale, string> = {
+  fr: 'FR',
+  en: 'US',
+  es: 'ES', 
+  de: 'DE',
+  it: 'IT',
+}
+
+// Mapping étendu des codes de langues vers nos locales supportées
+export const languageCodeToLocale: Record<string, Locale> = {
+  'fr': 'fr',
+  'fr-FR': 'fr',
+  'fr-CA': 'fr',
+  'fr-BE': 'fr',
+  'fr-CH': 'fr',
+  'en': 'en',
+  'en-US': 'en',
+  'en-GB': 'en',
+  'en-CA': 'en',
+  'en-AU': 'en',
+  'es': 'es',
+  'es-ES': 'es',
+  'es-MX': 'es',
+  'es-AR': 'es',
+  'de': 'de',
+  'de-DE': 'de',
+  'de-AT': 'de',
+  'de-CH': 'de',
+  'it': 'it',
+  'it-IT': 'it',
+  'it-CH': 'it',
+}
+
 // Fonction utilitaire pour obtenir une traduction
 export function getTranslation(
   locale: Locale,
@@ -72,6 +106,85 @@ export function getTranslation(
   return value
 }
 
+// Fonctions de détection automatique
+export function detectLanguageFromBrowser(): Locale {
+  try {
+    // 1. Essayer navigator.languages (ordre de préférence)
+    if (typeof navigator !== 'undefined' && navigator.languages) {
+      for (const lang of navigator.languages) {
+        const cleanLang = lang.toLowerCase()
+        if (languageCodeToLocale[cleanLang]) {
+          return languageCodeToLocale[cleanLang]
+        }
+        // Essayer avec seulement le code de langue (fr au lieu de fr-FR)
+        const baseLang = cleanLang.split('-')[0]
+        if (languageCodeToLocale[baseLang]) {
+          return languageCodeToLocale[baseLang]
+        }
+      }
+    }
+
+    // 2. Fallback sur navigator.language
+    if (typeof navigator !== 'undefined' && navigator.language) {
+      const cleanLang = navigator.language.toLowerCase()
+      if (languageCodeToLocale[cleanLang]) {
+        return languageCodeToLocale[cleanLang]
+      }
+      const baseLang = cleanLang.split('-')[0]
+      if (languageCodeToLocale[baseLang]) {
+        return languageCodeToLocale[baseLang]
+      }
+    }
+
+    // 3. Défaut
+    return defaultLocale
+  } catch (error) {
+    console.log('Error detecting language:', error)
+    return defaultLocale
+  }
+}
+
+export function detectCountryFromLanguage(locale: Locale): string {
+  // Utiliser le mapping langue -> pays
+  return localeToCountry[locale] || 'FR'
+}
+
+export function detectCountryFromBrowserLanguage(): string {
+  try {
+    // 1. Essayer d'extraire le pays depuis navigator.language
+    if (typeof navigator !== 'undefined' && navigator.language) {
+      const parts = navigator.language.split('-')
+      if (parts.length > 1) {
+        const countryCode = parts[1].toUpperCase()
+        // Vérifier que c'est un code pays valide (2 lettres)
+        if (countryCode.length === 2) {
+          return countryCode
+        }
+      }
+    }
+
+    // 2. Essayer d'extraire depuis navigator.languages
+    if (typeof navigator !== 'undefined' && navigator.languages) {
+      for (const lang of navigator.languages) {
+        const parts = lang.split('-')
+        if (parts.length > 1) {
+          const countryCode = parts[1].toUpperCase()
+          if (countryCode.length === 2) {
+            return countryCode
+          }
+        }
+      }
+    }
+
+    // 3. Fallback: utiliser le mapping langue détectée -> pays
+    const detectedLanguage = detectLanguageFromBrowser()
+    return detectCountryFromLanguage(detectedLanguage)
+  } catch (error) {
+    console.log('Error detecting country from language:', error)
+    return 'FR'
+  }
+}
+
 // React Context pour i18n
 
 interface I18nContextType {
@@ -85,11 +198,16 @@ const I18nContext = createContext<I18nContextType | undefined>(undefined)
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>(defaultLocale)
 
-  // Charger la langue depuis localStorage au montage
+  // Charger la langue depuis localStorage ou détecter automatiquement
   useEffect(() => {
     const savedLocale = localStorage.getItem('locale') as Locale
     if (savedLocale && savedLocale in translations) {
       setLocaleState(savedLocale)
+    } else {
+      // Si pas de langue sauvegardée, détecter automatiquement
+      const detectedLocale = detectLanguageFromBrowser()
+      setLocaleState(detectedLocale)
+      localStorage.setItem('locale', detectedLocale)
     }
   }, [])
 

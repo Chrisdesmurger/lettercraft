@@ -64,7 +64,8 @@
     "yes": "Oui",
     "no": "Non",
     "retry": "Réessayer",
-    "refreshing": "Actualisation..."
+    "refreshing": "Actualisation...",
+    "optional": "optionnel"
   },
   "auth": {
     "login": "Connexion",
@@ -99,6 +100,9 @@
     "bio": "Bio",
     "bioPlaceholder": "Parlez-nous un peu de vous...",
     "saveChanges": "Sauvegarder les modifications",
+    "updateSuccess": "Profil mis à jour avec succès !",
+    "updateError": "Erreur lors de la mise à jour du profil",
+    "selectCountry": "Sélectionnez votre pays *",
     "changePhoto": "Changer la photo de profil",
     "photoUpdateSuccess": "Photo de profil mise à jour !",
     "photoUpdateError": "Erreur lors du téléchargement de la photo",
@@ -128,6 +132,8 @@
     "newPassword": "Nouveau mot de passe",
     "confirmPassword": "Confirmer le mot de passe",
     "updatePassword": "Mettre à jour le mot de passe",
+    "updateError": "Erreur lors de la mise à jour",
+    "languageUpdateSuccess": "Langue mise à jour avec succès !",
     "dangerZone": "Zone dangereuse",
     "deleteAccountWarning": "La suppression de votre compte est irréversible. Toutes vos données seront perdues.",
     "deleteAccount": "Supprimer mon compte"

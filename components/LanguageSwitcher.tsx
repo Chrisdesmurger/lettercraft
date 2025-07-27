@@ -9,13 +9,14 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Globe } from 'lucide-react'
 import { useI18n } from '@/lib/i18n-context'
+import { locales, localeNames } from '@/lib/i18n'
 
 const languages = [
-  { code: 'fr', name: 'Français', flag: '🇫🇷' },
-  { code: 'en', name: 'English', flag: '🇺🇸' },
-  { code: 'es', name: 'Español', flag: '🇪🇸' },
-  { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
-  { code: 'it', name: 'Italiano', flag: '🇮🇹' },
+  { code: 'fr' as const, name: 'Français', flag: '🇫🇷' },
+  { code: 'en' as const, name: 'English', flag: '🇺🇸' },
+  { code: 'es' as const, name: 'Español', flag: '🇪🇸' },
+  { code: 'de' as const, name: 'Deutsch', flag: '🇩🇪' },
+  { code: 'it' as const, name: 'Italiano', flag: '🇮🇹' },
 ] as const
 
 export default function LanguageSwitcher() {
