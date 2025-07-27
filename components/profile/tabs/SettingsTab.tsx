@@ -68,6 +68,23 @@ export default function SettingsTab() {
         return
       }
 
+      // Synchroniser les données mises à jour avec Brevo
+      try {
+        await fetch('/api/sync-contact', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId: session.user.id,
+            action: 'update'
+          })
+        })
+      } catch (syncError) {
+        console.warn('Erreur synchronisation contact Brevo:', syncError)
+        // Ne pas bloquer la mise à jour de la langue si la sync échoue
+      }
+
       // Mettre à jour le contexte i18n
       setLocale(newLanguage)
       setLanguage(newLanguage)

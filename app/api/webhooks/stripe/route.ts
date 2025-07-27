@@ -136,6 +136,24 @@ async function upsertStripeSubscription(customerId: string, subscriptionData: St
     }
 
     console.log(`✅ Successfully upserted subscription for user ${foundUser.id} (${foundUser.first_name} ${foundUser.last_name})`)
+    
+    // Synchroniser le contact avec Brevo après la mise à jour de l'abonnement
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/sync-contact`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: foundUser.id,
+          action: 'update'
+        })
+      })
+      console.log(`🔄 Contact Brevo synchronisé pour l'utilisateur ${foundUser.id}`)
+    } catch (syncError) {
+      console.warn('Erreur synchronisation contact Brevo après mise à jour abonnement:', syncError)
+      // Ne pas faire échouer le webhook si la sync échoue
+    }
     console.log(`🎯 Subscription ${subscriptionData.stripe_subscription_id} status: ${subscriptionData.status}`)
     
     return true
