@@ -107,7 +107,8 @@ export async function POST(request: NextRequest) {
         
         return NextResponse.json({
           success: bulkResult.success > 0,
-          ...bulkResult,
+          successCount: bulkResult.success,
+          failed: bulkResult.failed,
           message: `${bulkResult.success} contacts synchronisés, ${bulkResult.failed} échecs`
         })
 

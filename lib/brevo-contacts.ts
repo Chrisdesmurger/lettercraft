@@ -530,7 +530,7 @@ class BrevoContactsService {
           // Petite pause pour éviter de surcharger l'API
           await new Promise(resolve => setTimeout(resolve, 200))
         } catch (error) {
-          console.error(`❌ Erreur sync listes pour ${user.email}:`, error)
+          console.error(`❌ Erreur sync listes pour ${profile.user_id}:`, error)
           failed++
         }
       }
