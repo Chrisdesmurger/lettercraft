@@ -169,25 +169,31 @@ async function upsertStripeSubscription(customerId: string, subscriptionData: St
       console.warn('Erreur synchronisation contact Brevo après mise à jour abonnement:', syncError)
       // Ne pas faire échouer le webhook si la sync échoue
     }
-    // Envoyer l'email de confirmation d'abonnement premium si c'est un nouvel abonnement actif
-    // Éviter les doublons : l'email sera envoyé via la facture payée
-    if (subscriptionData.status === 'active' && !foundUser.stripe_subscription_id) {
+    // Envoyer l'email de confirmation d'abonnement premium pour tous les abonnements actifs
+    console.log(`📧 [EMAIL CHECK] Status: ${subscriptionData.status}, User: ${foundUser.email}`)
+    
+    if (subscriptionData.status === 'active') {
       try {
         const userName = `${foundUser.first_name || ''} ${foundUser.last_name || ''}`.trim() || 'utilisateur'
         const userLanguage = foundUser.language || 'fr'
         
-        await brevoEmailService.sendSubscriptionConfirmationEmail(
+        console.log(`📧 [EMAIL SENDING] Tentative d'envoi à ${foundUser.email}, nom: ${userName}, langue: ${userLanguage}`)
+        
+        const emailResult = await brevoEmailService.sendSubscriptionConfirmationEmail(
           foundUser.email,
           userName,
-          undefined, // invoiceUrl - sera géré via les factures
+          undefined, // invoiceUrl - sera géré via les factures si disponible
           userLanguage
         )
         
-        console.log(`📧 Email de confirmation d'abonnement premium envoyé à ${foundUser.email} (nouvel abonnement)`)
+        console.log(`📧 [EMAIL RESULT] Résultat envoi: ${emailResult}`)
+        console.log(`📧 Email de confirmation d'abonnement premium envoyé à ${foundUser.email}`)
       } catch (emailError) {
         // Ne pas faire échouer le webhook si l'email échoue
-        console.warn('Erreur lors de l\'envoi de l\'email de confirmation d\'abonnement:', emailError)
+        console.error('❌ [EMAIL ERROR] Erreur lors de l\'envoi de l\'email de confirmation d\'abonnement:', emailError)
       }
+    } else {
+      console.log(`📧 [EMAIL SKIP] Email ignoré - Status: ${subscriptionData.status} (pas actif)`)
     }
     
     console.log(`🎯 Subscription ${subscriptionData.stripe_subscription_id} status: ${subscriptionData.status}`)
@@ -298,25 +304,33 @@ async function upsertStripeInvoice(customerId: string, invoiceData: StripeInvoic
     console.log(`💰 Invoice amount: ${invoiceData.amount_due / 100} ${invoiceData.currency.toUpperCase()}`)
     
     // Envoyer un email pour les factures payées (confirmation de paiement)
+    console.log(`💰 [INVOICE EMAIL CHECK] Status: ${invoiceData.status}, Description: ${invoiceData.description}`)
+    
     if (invoiceData.status === 'paid') {
       try {
         const userName = `${foundUser.first_name || ''} ${foundUser.last_name || ''}`.trim() || 'utilisateur'
         const userLanguage = foundUser.language || 'fr'
         
         // Pour les nouveaux abonnements (première facture), envoyer l'email de confirmation premium
-        if (invoiceData.description && invoiceData.description.toLowerCase().includes('subscription')) {
-          await brevoEmailService.sendSubscriptionConfirmationEmail(
+        const isSubscriptionInvoice = invoiceData.description && invoiceData.description.toLowerCase().includes('subscription')
+        console.log(`💰 [INVOICE EMAIL] IsSubscriptionInvoice: ${isSubscriptionInvoice}`)
+        
+        if (isSubscriptionInvoice) {
+          console.log(`💰 [INVOICE EMAIL SENDING] Tentative d'envoi à ${foundUser.email}`)
+          
+          const emailResult = await brevoEmailService.sendSubscriptionConfirmationEmail(
             foundUser.email,
             userName,
             invoiceData.hosted_invoice_url || undefined,
             userLanguage
           )
           
+          console.log(`💰 [INVOICE EMAIL RESULT] Résultat: ${emailResult}`)
           console.log(`📧 Email de confirmation premium envoyé à ${foundUser.email} (via facture payée)`)
         }
       } catch (emailError) {
         // Ne pas faire échouer le webhook si l'email échoue
-        console.warn('Erreur lors de l\'envoi de l\'email de confirmation de facture:', emailError)
+        console.error('❌ [INVOICE EMAIL ERROR] Erreur lors de l\'envoi de l\'email de confirmation de facture:', emailError)
       }
     }
     
