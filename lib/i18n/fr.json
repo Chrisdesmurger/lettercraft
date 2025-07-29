@@ -38,6 +38,7 @@
     "loading": "Chargement...",
     "save": "Enregistrer",
     "cancel": "Annuler",
+    "processing": "Traitement en cours...",
     "continue": "Continuer",
     "finish": "Terminer",
     "error": "Erreur",
@@ -311,7 +312,42 @@
       "status": "Statut"
     },
     "payWithStripe": "Payer avec Stripe",
+    "cancelSubscription": "Annuler l'abonnement",
+    "alreadyCanceled": "Abonnement annulé",
+    "activePremium": "Abonnement Premium Actif",
+    "canceledPremium": "Abonnement Premium Annulé",
+    "expiresOn": "Expire le",
+    "activeUntil": "Actif jusqu'au {date}",
+    "alreadyExpired": "Abonnement expiré",
+    "noAutoRenewal": "Pas de renouvellement automatique",
     "paymentError": "Erreur de paiement. Veuillez réessayer.",
+    "cancel": {
+      "title": "Annuler l'abonnement",
+      "warning": {
+        "title": "Attention",
+        "description": "Votre abonnement sera annulé à la fin de la période actuelle. Vous conserverez l'accès jusqu'à cette date."
+      },
+      "effectiveDate": "Date d'annulation effective",
+      "consequences": {
+        "title": "Conséquences de l'annulation :",
+        "accessUntil": "Vous garderez l'accès Premium jusqu'à la fin de votre période payée",
+        "revertToFree": "Votre compte passera automatiquement au plan gratuit",
+        "canResubscribe": "Vous pourrez vous réabonner à tout moment"
+      },
+      "reasonTitle": "Pourquoi annulez-vous votre abonnement ?",
+      "reasons": {
+        "too_expensive": "Trop cher",
+        "not_using_enough": "Je n'utilise pas assez le service",
+        "found_alternative": "J'ai trouvé une alternative",
+        "technical_issues": "Problèmes techniques",
+        "temporary_pause": "Pause temporaire",
+        "other": "Autre raison"
+      },
+      "customReasonPlaceholder": "Veuillez préciser la raison...",
+      "selectReason": "Veuillez sélectionner une raison",
+      "provideCustomReason": "Veuillez préciser votre raison",
+      "confirm": "Confirmer l'annulation"
+    },
     "invoice": {
       "status": {
         "draft": "Brouillon",

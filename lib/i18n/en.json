@@ -38,6 +38,7 @@
     "loading": "Loading...",
     "save": "Save",
     "cancel": "Cancel",
+    "processing": "Processing...",
     "continue": "Continue",
     "finish": "Finish",
     "error": "Error",
@@ -311,7 +312,42 @@
       "status": "Status"
     },
     "payWithStripe": "Pay with Stripe",
+    "cancelSubscription": "Cancel Subscription",
+    "alreadyCanceled": "Subscription Canceled",
+    "activePremium": "Active Premium Subscription",
+    "canceledPremium": "Canceled Premium Subscription",
+    "expiresOn": "Expires on",
+    "activeUntil": "Active until {date}",
+    "alreadyExpired": "Subscription expired",
+    "noAutoRenewal": "No automatic renewal",
     "paymentError": "Payment error. Please try again.",
+    "cancel": {
+      "title": "Cancel Subscription",
+      "warning": {
+        "title": "Warning",
+        "description": "Your subscription will be cancelled at the end of the current period. You will retain access until that date."
+      },
+      "effectiveDate": "Effective cancellation date",
+      "consequences": {
+        "title": "Consequences of cancellation:",
+        "accessUntil": "You will keep Premium access until the end of your paid period",
+        "revertToFree": "Your account will automatically switch to the free plan",
+        "canResubscribe": "You can resubscribe at any time"
+      },
+      "reasonTitle": "Why are you cancelling your subscription?",
+      "reasons": {
+        "too_expensive": "Too expensive",
+        "not_using_enough": "Not using the service enough",
+        "found_alternative": "Found an alternative",
+        "technical_issues": "Technical issues",
+        "temporary_pause": "Temporary pause",
+        "other": "Other reason"
+      },
+      "customReasonPlaceholder": "Please specify your reason...",
+      "selectReason": "Please select a reason",
+      "provideCustomReason": "Please specify your reason",
+      "confirm": "Confirm Cancellation"
+    },
     "invoice": {
       "status": {
         "draft": "Draft",

@@ -1,17 +1,21 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Check, X, Zap, CreditCard, Download, ExternalLink } from 'lucide-react'
+import { Check, X, Zap, CreditCard, Download, ExternalLink, AlertTriangle } from 'lucide-react'
 import { useI18n } from '@/lib/i18n-context'
 import { toast } from 'react-hot-toast'
 import type { User } from '@supabase/supabase-js'
 import { useUserInvoices, formatAmount, formatInvoiceDate, getInvoiceStatusLabel, getInvoiceStatusColor } from '@/hooks/useUserInvoices'
 import { useQuota } from '@/hooks/useQuota'
+import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus'
 import QuotaStatus from '@/components/quota/QuotaStatus'
+import CancelSubscriptionModal from '@/components/subscription/CancelSubscriptionModal'
+import { supabase } from '@/lib/supabase-client'
 
 interface UserProfile {
   id: string
   subscription_tier: 'free' | 'premium'
+  subscription_end_date?: string | null
 }
 
 interface SubscriptionTabProps {
@@ -24,13 +28,16 @@ interface SubscriptionTabProps {
 export default function SubscriptionTab({ user, userProfile, loading: profileLoading, refreshProfile }: SubscriptionTabProps) {
   const { t, locale } = useI18n()
   const [paymentLoading, setPaymentLoading] = useState(false)
+  const [cancelModalOpen, setCancelModalOpen] = useState(false)
+  const [cancelLoading, setCancelLoading] = useState(false)
   
   // Derive current plan from props instead of local state
   const currentPlan = userProfile?.subscription_tier || 'free'
 
-  // Fetch user quotas and invoices
+  // Fetch user quotas, invoices, and subscription status
   const { quota, loading: quotaLoading } = useQuota()
   const { invoices, loading: invoicesLoading, error: invoicesError, refreshInvoices } = useUserInvoices(user)
+  const { subscriptionStatus, loading: statusLoading, refreshStatus } = useSubscriptionStatus(user)
 
   // Handle invoice download
   const handleDownloadInvoice = (invoicePdfUrl: string | null, hostedUrl: string | null, invoiceNumber: string | null) => {
@@ -79,6 +86,58 @@ export default function SubscriptionTab({ user, userProfile, loading: profileLoa
       toast.error(t('subscription.paymentError'))
     } finally {
       setPaymentLoading(false)
+    }
+  }
+
+  const handleCancelSubscription = async (reason: string) => {
+    if (!user) {
+      toast.error(t('auth.pleaseLogin'))
+      return
+    }
+
+    setCancelLoading(true)
+    try {
+      // Obtenir la session actuelle pour récupérer le token d'authentification
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (!session) {
+        toast.error(t('auth.pleaseLogin'))
+        setCancelLoading(false)
+        return
+      }
+
+      const response = await fetch('/api/cancel-subscription', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          cancellationReason: reason,
+        }),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Erreur lors de l\'annulation')
+      }
+
+      if (result.success) {
+        toast.success('Votre abonnement sera annulé à la fin de la période actuelle')
+        // Refresh user profile to get updated subscription status
+        await refreshProfile()
+        // Refresh invoices to get updated data
+        await refreshInvoices()
+        // Refresh subscription status to show cancellation state
+        await refreshStatus()
+      }
+    } catch (error) {
+      console.error('Error cancelling subscription:', error)
+      toast.error(error instanceof Error ? error.message : 'Erreur lors de l\'annulation')
+    } finally {
+      setCancelLoading(false)
     }
   }
 
@@ -154,6 +213,48 @@ export default function SubscriptionTab({ user, userProfile, loading: profileLoa
         </div>
       )}
 
+      {/* Premium Plan Status with Cancellation Info */}
+      {currentPlan === 'premium' && subscriptionStatus && (
+        <div className={`border rounded-lg p-4 ${subscriptionStatus.is_canceled ? 'bg-orange-50 border-orange-200' : 'bg-green-50 border-green-200'}`}>
+          <div className="flex items-start justify-between">
+            <div>
+              <p className={`font-medium ${subscriptionStatus.is_canceled ? 'text-orange-900' : 'text-green-900'}`}>
+                {subscriptionStatus.is_canceled ? t('subscription.canceledPremium') : t('subscription.activePremium')}
+              </p>
+              <p className={`text-sm ${subscriptionStatus.is_canceled ? 'text-orange-700' : 'text-green-700'}`}>
+                {subscriptionStatus.is_canceled ? (
+                  subscriptionStatus.will_expire ? (
+                    <>
+                      {t('subscription.expiresOn')} {subscriptionStatus.expiration_date ? new Date(subscriptionStatus.expiration_date).toLocaleDateString(locale) : 'unknown'}
+                    </>
+                  ) : (
+                    t('subscription.alreadyExpired')
+                  )
+                ) : (
+                  t('subscription.activeUntil', { 
+                    date: subscriptionStatus.expiration_date ? new Date(subscriptionStatus.expiration_date).toLocaleDateString(locale) : 'unknown' 
+                  })
+                )}
+              </p>
+              {subscriptionStatus.is_canceled && subscriptionStatus.will_expire && (
+                <p className="text-xs text-orange-600 mt-1">
+                  {t('subscription.noAutoRenewal')}
+                </p>
+              )}
+            </div>
+            {subscriptionStatus.is_canceled ? (
+              <div className="text-orange-600">
+                <AlertTriangle className="w-5 h-5" />
+              </div>
+            ) : (
+              <div className="text-green-600">
+                <Check className="w-5 h-5" />
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Plans */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {plans.map((plan) => (
@@ -214,6 +315,29 @@ export default function SubscriptionTab({ user, userProfile, loading: profileLoa
               <button className="w-full py-2 bg-gray-300 text-gray-600 rounded-lg cursor-not-allowed" disabled>
                 {t('subscription.downgrade')}
               </button>
+            )}
+            
+            {/* Cancel Subscription Button for Premium Users */}
+            {currentPlan === 'premium' && plan.id === 'premium' && (
+              subscriptionStatus?.is_canceled ? (
+                <div className="w-full mt-2 py-2 bg-orange-100 text-orange-700 rounded-lg flex items-center justify-center border border-orange-200">
+                  <AlertTriangle className="w-4 h-4 mr-2" />
+                  {t('subscription.alreadyCanceled')}
+                </div>
+              ) : (
+                <button 
+                  onClick={() => setCancelModalOpen(true)}
+                  disabled={cancelLoading || profileLoading || statusLoading}
+                  className="w-full mt-2 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {cancelLoading ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  ) : (
+                    <AlertTriangle className="w-4 h-4 mr-2" />
+                  )}
+                  {cancelLoading ? t('common.processing') : t('subscription.cancelSubscription')}
+                </button>
+              )
             )}
           </div>
         ))}
@@ -340,6 +464,15 @@ export default function SubscriptionTab({ user, userProfile, loading: profileLoa
           )}
         </div>
       )}
+
+      {/* Cancel Subscription Modal */}
+      <CancelSubscriptionModal
+        isOpen={cancelModalOpen}
+        onClose={() => setCancelModalOpen(false)}
+        onConfirm={handleCancelSubscription}
+        currentPeriodEnd={userProfile?.subscription_end_date}
+        loading={cancelLoading}
+      />
     </div>
   )
 }

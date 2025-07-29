@@ -38,6 +38,7 @@
     "loading": "Laden...",
     "save": "Speichern",
     "cancel": "Abbrechen",
+    "processing": "Verarbeitung...",
     "continue": "Fortfahren",
     "finish": "Beenden",
     "error": "Fehler",
@@ -318,7 +319,35 @@
       "status": "Status"
     },
     "payWithStripe": "Mit Stripe bezahlen",
+    "cancelSubscription": "Abonnement kündigen",
     "paymentError": "Zahlungsfehler. Bitte versuchen Sie es erneut.",
+    "cancel": {
+      "title": "Abonnement kündigen",
+      "warning": {
+        "title": "Warnung",
+        "description": "Ihr Abonnement wird am Ende der aktuellen Periode gekündigt. Sie behalten den Zugang bis zu diesem Datum."
+      },
+      "effectiveDate": "Wirksames Kündigungsdatum",
+      "consequences": {
+        "title": "Folgen der Kündigung:",
+        "accessUntil": "Sie behalten Premium-Zugang bis zum Ende Ihrer bezahlten Periode",
+        "revertToFree": "Ihr Konto wechselt automatisch zum kostenlosen Plan",
+        "canResubscribe": "Sie können jederzeit wieder abonnieren"
+      },
+      "reasonTitle": "Warum kündigen Sie Ihr Abonnement?",
+      "reasons": {
+        "too_expensive": "Zu teuer",
+        "not_using_enough": "Nutze den Service nicht genug",
+        "found_alternative": "Habe eine Alternative gefunden",
+        "technical_issues": "Technische Probleme",
+        "temporary_pause": "Temporäre Pause",
+        "other": "Anderer Grund"
+      },
+      "customReasonPlaceholder": "Bitte geben Sie Ihren Grund an...",
+      "selectReason": "Bitte wählen Sie einen Grund",
+      "provideCustomReason": "Bitte geben Sie Ihren Grund an",
+      "confirm": "Kündigung bestätigen"
+    },
     "invoice": {
       "status": {
         "draft": "Entwurf",
