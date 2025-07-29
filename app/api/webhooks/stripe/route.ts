@@ -137,6 +137,18 @@ async function upsertStripeSubscription(customerId: string, subscriptionData: St
 
     console.log(`✅ Successfully upserted subscription for user ${foundUser.id} (${foundUser.first_name} ${foundUser.last_name})`)
     
+    // TEMPORARY FIX: Manually sync stripe IDs to user_profiles until migration is applied
+    try {
+      await supabaseAdmin.rpc('update_user_profile', {
+        p_user_id: foundUser.id,
+        p_stripe_customer_id: subscriptionData.stripe_customer_id,
+        p_stripe_subscription_id: subscriptionData.stripe_subscription_id
+      })
+      console.log(`🔄 [TEMP FIX] Synced Stripe IDs to user_profiles for user ${foundUser.id}`)
+    } catch (tempSyncError) {
+      console.warn('Temporary sync error (non-critical):', tempSyncError)
+    }
+    
     // Synchroniser le contact avec Brevo après la mise à jour de l'abonnement
     try {
       await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/sync-contact`, {
@@ -270,6 +282,12 @@ async function upsertStripeInvoice(customerId: string, invoiceData: StripeInvoic
 
 async function handleCustomerSubscriptionCreated(subscription: Stripe.Subscription) {
   console.log('🎯 [WEBHOOK] Processing subscription created:', subscription.id)
+  console.log('📅 [DEBUG] Subscription period data:', {
+    current_period_start: (subscription as any).current_period_start,
+    current_period_end: (subscription as any).current_period_end,
+    status: subscription.status,
+    cancel_at_period_end: subscription.cancel_at_period_end
+  })
   
   const customerId = subscription.customer as string
   const priceId = subscription.items.data[0]?.price.id || null
@@ -304,6 +322,12 @@ async function handleCustomerSubscriptionCreated(subscription: Stripe.Subscripti
 
 async function handleCustomerSubscriptionUpdated(subscription: Stripe.Subscription) {
   console.log('🎯 [WEBHOOK] Processing subscription updated:', subscription.id, 'Status:', subscription.status)
+  console.log('📅 [DEBUG] Subscription period data:', {
+    current_period_start: (subscription as any).current_period_start,
+    current_period_end: (subscription as any).current_period_end,
+    status: subscription.status,
+    cancel_at_period_end: subscription.cancel_at_period_end
+  })
   
   const customerId = subscription.customer as string
   const priceId = subscription.items.data[0]?.price.id || null

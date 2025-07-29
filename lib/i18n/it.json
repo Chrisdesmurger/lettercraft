@@ -38,6 +38,7 @@
     "loading": "Caricamento...",
     "save": "Salva",
     "cancel": "Annulla",
+    "processing": "Elaborazione...",
     "continue": "Continua",
     "finish": "Termina",
     "error": "Errore",
@@ -318,7 +319,35 @@
       "status": "Stato"
     },
     "payWithStripe": "Paga con Stripe",
+    "cancelSubscription": "Annulla Abbonamento",
     "paymentError": "Errore di pagamento. Si prega di riprovare.",
+    "cancel": {
+      "title": "Annulla Abbonamento",
+      "warning": {
+        "title": "Avviso",
+        "description": "Il tuo abbonamento sarà annullato alla fine del periodo attuale. Manterrai l'accesso fino a quella data."
+      },
+      "effectiveDate": "Data effettiva di annullamento",
+      "consequences": {
+        "title": "Conseguenze dell'annullamento:",
+        "accessUntil": "Manterrai l'accesso Premium fino alla fine del tuo periodo pagato",
+        "revertToFree": "Il tuo account passerà automaticamente al piano gratuito",
+        "canResubscribe": "Puoi riabbonarti in qualsiasi momento"
+      },
+      "reasonTitle": "Perché annulli il tuo abbonamento?",
+      "reasons": {
+        "too_expensive": "Troppo costoso",
+        "not_using_enough": "Non uso abbastanza il servizio",
+        "found_alternative": "Ho trovato un'alternativa",
+        "technical_issues": "Problemi tecnici",
+        "temporary_pause": "Pausa temporanea",
+        "other": "Altra ragione"
+      },
+      "customReasonPlaceholder": "Per favore, specifica la tua ragione...",
+      "selectReason": "Per favore, seleziona una ragione",
+      "provideCustomReason": "Per favore, specifica la tua ragione",
+      "confirm": "Conferma Annullamento"
+    },
     "invoice": {
       "status": {
         "draft": "Bozza",

@@ -38,6 +38,7 @@
     "loading": "Cargando...",
     "save": "Guardar",
     "cancel": "Cancelar",
+    "processing": "Procesando...",
     "continue": "Continuar",
     "finish": "Terminar",
     "error": "Error",
@@ -318,7 +319,35 @@
       "status": "Estado"
     },
     "payWithStripe": "Pagar con Stripe",
+    "cancelSubscription": "Cancelar Suscripción",
     "paymentError": "Error de pago. Por favor, inténtelo de nuevo.",
+    "cancel": {
+      "title": "Cancelar Suscripción",
+      "warning": {
+        "title": "Advertencia",
+        "description": "Su suscripción será cancelada al final del período actual. Mantendrá el acceso hasta esa fecha."
+      },
+      "effectiveDate": "Fecha efectiva de cancelación",
+      "consequences": {
+        "title": "Consecuencias de la cancelación:",
+        "accessUntil": "Mantendrá el acceso Premium hasta el final de su período pagado",
+        "revertToFree": "Su cuenta cambiará automáticamente al plan gratuito",
+        "canResubscribe": "Puede volver a suscribirse en cualquier momento"
+      },
+      "reasonTitle": "¿Por qué cancela su suscripción?",
+      "reasons": {
+        "too_expensive": "Demasiado caro",
+        "not_using_enough": "No uso suficiente el servicio",
+        "found_alternative": "Encontré una alternativa",
+        "technical_issues": "Problemas técnicos",
+        "temporary_pause": "Pausa temporal",
+        "other": "Otra razón"
+      },
+      "customReasonPlaceholder": "Por favor, especifique su razón...",
+      "selectReason": "Por favor, seleccione una razón",
+      "provideCustomReason": "Por favor, especifique su razón",
+      "confirm": "Confirmar Cancelación"
+    },
     "invoice": {
       "status": {
         "draft": "Borrador",
