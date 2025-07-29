@@ -9,7 +9,7 @@ interface CancelSubscriptionModalProps {
   isOpen: boolean
   onClose: () => void
   onConfirm: (reason: string) => Promise<void>
-  currentPeriodEnd?: string
+  currentPeriodEnd?: string | null
   loading?: boolean
 }
 
@@ -34,7 +34,7 @@ export default function CancelSubscriptionModal({
   const [customReason, setCustomReason] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const formatEndDate = (dateString?: string) => {
+  const formatEndDate = (dateString?: string | null) => {
     if (!dateString) return ''
     
     const date = new Date(dateString)

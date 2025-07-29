@@ -15,6 +15,7 @@ import { supabase } from '@/lib/supabase-client'
 interface UserProfile {
   id: string
   subscription_tier: 'free' | 'premium'
+  subscription_end_date?: string | null
 }
 
 interface SubscriptionTabProps {

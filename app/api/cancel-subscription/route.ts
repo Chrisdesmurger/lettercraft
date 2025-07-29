@@ -126,7 +126,7 @@ export async function POST(request: NextRequest) {
     console.log(`   - Subscription ID: ${userProfile.stripe_subscription_id}`)
     console.log(`   - User ID: ${userId}`)
     console.log(`   - Email: ${userProfile.email}`)
-    console.log(`   - End date: ${updatedSubscription.current_period_end ? new Date(updatedSubscription.current_period_end * 1000).toISOString() : 'unknown'}`)
+    console.log(`   - End date: ${(updatedSubscription as any).current_period_end ? new Date((updatedSubscription as any).current_period_end * 1000).toISOString() : 'unknown'}`)
     console.log(`   - Reason: ${sanitizedReason}`)
     console.log(`   - IP: ${request.headers.get('x-forwarded-for') || 'unknown'}`)
 
@@ -142,8 +142,8 @@ export async function POST(request: NextRequest) {
             metadata: {
               subscription_id: userProfile.stripe_subscription_id,
               cancelled_at: new Date().toISOString(),
-              end_date: updatedSubscription.current_period_end 
-                ? new Date(updatedSubscription.current_period_end * 1000).toISOString()
+              end_date: (updatedSubscription as any).current_period_end 
+                ? new Date((updatedSubscription as any).current_period_end * 1000).toISOString()
                 : null
             },
             created_at: new Date().toISOString()
@@ -155,8 +155,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Ne pas exposer d'informations sensibles dans la réponse
-    const cancellationDate = updatedSubscription.current_period_end 
-      ? new Date(updatedSubscription.current_period_end * 1000).toISOString()
+    const cancellationDate = (updatedSubscription as any).current_period_end 
+      ? new Date((updatedSubscription as any).current_period_end * 1000).toISOString()
       : null
 
     return NextResponse.json({
@@ -165,7 +165,7 @@ export async function POST(request: NextRequest) {
       cancellationDate,
       subscription: {
         cancel_at_period_end: true,
-        current_period_end: updatedSubscription.current_period_end
+        current_period_end: (updatedSubscription as any).current_period_end
       }
     })
 
