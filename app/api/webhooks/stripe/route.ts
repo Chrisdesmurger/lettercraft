@@ -155,10 +155,12 @@ async function upsertStripeSubscription(customerId: string, subscriptionData: St
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-Internal-Secret': process.env.INTERNAL_API_SECRET || 'lettercraft-internal-secret-2025',
+          'X-Internal-Source': 'stripe-webhook'
         },
         body: JSON.stringify({
           userId: foundUser.id,
-          action: 'update'
+          action: 'sync'
         })
       })
       console.log(`🔄 Contact Brevo synchronisé pour l'utilisateur ${foundUser.id}`)
