@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { supabase } from '@/lib/supabase-client'
 import { supabaseAdmin } from '@/lib/supabase-admin'
+import { brevoEmailService } from '@/lib/brevo-client'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2025-06-30.basil',
@@ -168,6 +169,27 @@ async function upsertStripeSubscription(customerId: string, subscriptionData: St
       console.warn('Erreur synchronisation contact Brevo après mise à jour abonnement:', syncError)
       // Ne pas faire échouer le webhook si la sync échoue
     }
+    // Envoyer l'email de confirmation d'abonnement premium si c'est un nouvel abonnement actif
+    // Éviter les doublons : l'email sera envoyé via la facture payée
+    if (subscriptionData.status === 'active' && !foundUser.stripe_subscription_id) {
+      try {
+        const userName = `${foundUser.first_name || ''} ${foundUser.last_name || ''}`.trim() || 'utilisateur'
+        const userLanguage = foundUser.language || 'fr'
+        
+        await brevoEmailService.sendSubscriptionConfirmationEmail(
+          foundUser.email,
+          userName,
+          undefined, // invoiceUrl - sera géré via les factures
+          userLanguage
+        )
+        
+        console.log(`📧 Email de confirmation d'abonnement premium envoyé à ${foundUser.email} (nouvel abonnement)`)
+      } catch (emailError) {
+        // Ne pas faire échouer le webhook si l'email échoue
+        console.warn('Erreur lors de l\'envoi de l\'email de confirmation d\'abonnement:', emailError)
+      }
+    }
+    
     console.log(`🎯 Subscription ${subscriptionData.stripe_subscription_id} status: ${subscriptionData.status}`)
     
     return true
@@ -274,6 +296,49 @@ async function upsertStripeInvoice(customerId: string, invoiceData: StripeInvoic
 
     console.log(`✅ Successfully upserted invoice ${invoiceData.stripe_invoice_id} for user ${foundUser.id}`)
     console.log(`💰 Invoice amount: ${invoiceData.amount_due / 100} ${invoiceData.currency.toUpperCase()}`)
+    
+    // Envoyer un email pour les factures payées (confirmation de paiement)
+    if (invoiceData.status === 'paid') {
+      try {
+        const userName = `${foundUser.first_name || ''} ${foundUser.last_name || ''}`.trim() || 'utilisateur'
+        const userLanguage = foundUser.language || 'fr'
+        
+        // Pour les nouveaux abonnements (première facture), envoyer l'email de confirmation premium
+        if (invoiceData.description && invoiceData.description.toLowerCase().includes('subscription')) {
+          await brevoEmailService.sendSubscriptionConfirmationEmail(
+            foundUser.email,
+            userName,
+            invoiceData.hosted_invoice_url || undefined,
+            userLanguage
+          )
+          
+          console.log(`📧 Email de confirmation premium envoyé à ${foundUser.email} (via facture payée)`)
+        }
+      } catch (emailError) {
+        // Ne pas faire échouer le webhook si l'email échoue
+        console.warn('Erreur lors de l\'envoi de l\'email de confirmation de facture:', emailError)
+      }
+    }
+    
+    // Envoyer un email pour les factures en échec de paiement
+    if (invoiceData.status === 'open' && invoiceData.attempt_count && invoiceData.attempt_count > 0) {
+      try {
+        const userName = `${foundUser.first_name || ''} ${foundUser.last_name || ''}`.trim() || 'utilisateur'
+        const userLanguage = foundUser.language || 'fr'
+        
+        await brevoEmailService.sendPaymentFailedEmail(
+          foundUser.email,
+          userName,
+          invoiceData.hosted_invoice_url || undefined,
+          userLanguage
+        )
+        
+        console.log(`📧 Email d'échec de paiement envoyé à ${foundUser.email}`)
+      } catch (emailError) {
+        // Ne pas faire échouer le webhook si l'email échoue
+        console.warn('Erreur lors de l\'envoi de l\'email d\'échec de paiement:', emailError)
+      }
+    }
     
     return true
   } catch (error) {
