@@ -169,10 +169,11 @@ async function upsertStripeSubscription(customerId: string, subscriptionData: St
       console.warn('Erreur synchronisation contact Brevo après mise à jour abonnement:', syncError)
       // Ne pas faire échouer le webhook si la sync échoue
     }
-    // Envoyer l'email de confirmation d'abonnement premium pour tous les abonnements actifs
-    console.log(`📧 [EMAIL CHECK] Status: ${subscriptionData.status}, User: ${foundUser.email}`)
+    // Envoyer l'email de confirmation d'abonnement premium SEULEMENT pour les nouveaux abonnements actifs
+    console.log(`📧 [EMAIL CHECK] Status: ${subscriptionData.status}, CancelAtPeriodEnd: ${subscriptionData.cancel_at_period_end}, User: ${foundUser.email}`)
     
-    if (subscriptionData.status === 'active') {
+    // Ne pas envoyer d'email si l'abonnement est annulé ou marqué pour annulation
+    if (subscriptionData.status === 'active' && !subscriptionData.cancel_at_period_end && !foundUser.stripe_subscription_id) {
       try {
         const userName = `${foundUser.first_name || ''} ${foundUser.last_name || ''}`.trim() || 'utilisateur'
         const userLanguage = foundUser.language || 'fr'
@@ -187,13 +188,13 @@ async function upsertStripeSubscription(customerId: string, subscriptionData: St
         )
         
         console.log(`📧 [EMAIL RESULT] Résultat envoi: ${emailResult}`)
-        console.log(`📧 Email de confirmation d'abonnement premium envoyé à ${foundUser.email}`)
+        console.log(`📧 Email de confirmation d'abonnement premium envoyé à ${foundUser.email} (nouvel abonnement)`)
       } catch (emailError) {
         // Ne pas faire échouer le webhook si l'email échoue
         console.error('❌ [EMAIL ERROR] Erreur lors de l\'envoi de l\'email de confirmation d\'abonnement:', emailError)
       }
     } else {
-      console.log(`📧 [EMAIL SKIP] Email ignoré - Status: ${subscriptionData.status} (pas actif)`)
+      console.log(`📧 [EMAIL SKIP] Email ignoré - Status: ${subscriptionData.status}, CancelAtPeriodEnd: ${subscriptionData.cancel_at_period_end}, ExistingSubId: ${!!foundUser.stripe_subscription_id}`)
     }
     
     console.log(`🎯 Subscription ${subscriptionData.stripe_subscription_id} status: ${subscriptionData.status}`)
