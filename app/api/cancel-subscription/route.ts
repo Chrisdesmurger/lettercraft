@@ -122,6 +122,28 @@ export async function POST(request: NextRequest) {
       }
     )
 
+    // Update local subscription record immediately for better UX
+    try {
+      await supabaseAdmin
+        .from('stripe_subscriptions')
+        .update({
+          cancel_at_period_end: true,
+          canceled_at: new Date().toISOString(),
+          metadata: {
+            cancellation_reason: sanitizedReason,
+            cancelled_by_user: 'true',
+            cancelled_at: new Date().toISOString()
+          },
+          updated_at: new Date().toISOString()
+        })
+        .eq('stripe_subscription_id', userProfile.stripe_subscription_id)
+        
+      console.log('✅ Local subscription updated with cancellation flag')
+    } catch (localUpdateError) {
+      console.warn('Warning: Could not update local subscription record:', localUpdateError)
+      // Don't fail the cancellation if local update fails
+    }
+
     // Log de sécurité pour l'annulation
     console.log(`🚫 [SECURITY] Subscription cancellation:`)
     console.log(`   - Subscription ID: ${userProfile.stripe_subscription_id}`)

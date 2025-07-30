@@ -32,15 +32,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Update subscription_tier immediately for better UX
-    // Webhooks will later add the complete Stripe details (customer_id, subscription_id, exact dates)
-    console.log('Updating user subscription to premium for immediate UI feedback...')
+    // Set premium flag with bypass to avoid trigger conflicts
+    console.log('Setting immediate premium tier for user experience...')
     const { error: updateError } = await supabaseAdmin
-      .rpc('update_user_profile', {
-        p_user_id: userId,
-        p_subscription_tier: 'premium',
-        p_subscription_end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // 30 days from now (temp)
+      .from('user_profiles')
+      .update({
+        subscription_tier: 'premium',
+        subscription_end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        updated_at: new Date().toISOString()
       })
+      .eq('user_id', userId)
 
     console.log('Subscription update result:', { updateError })
 

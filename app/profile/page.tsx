@@ -32,8 +32,8 @@ function ProfileContent() {
         
         if (result.success) {
           toast.success('Abonnement Premium activé ! 🎉')
-          // Refresh the page to update subscription status
-          window.location.reload()
+          // Refresh subscription status without full page reload
+          window.dispatchEvent(new CustomEvent('subscription-updated'))
         } else {
           console.error('Failed to update subscription:', result.error)
           toast.error('Erreur lors de la mise à jour de l\'abonnement')
