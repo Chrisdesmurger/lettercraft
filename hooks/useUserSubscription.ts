@@ -77,6 +77,13 @@ export function useUserSubscription(): UseUserSubscriptionReturn {
 
     initializeUser()
 
+    // Listen for subscription updates
+    const handleSubscriptionUpdate = () => {
+      refreshProfile()
+    }
+    
+    window.addEventListener('subscription-updated', handleSubscriptionUpdate)
+
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
@@ -90,7 +97,10 @@ export function useUserSubscription(): UseUserSubscriptionReturn {
       }
     )
 
-    return () => subscription.unsubscribe()
+    return () => {
+      subscription.unsubscribe()
+      window.removeEventListener('subscription-updated', handleSubscriptionUpdate)
+    }
   }, [])
 
   return { user, userProfile, loading, refreshProfile }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { securityMiddleware, validateInput } from '@/lib/api-security'
+import { brevoEmailService } from '@/lib/brevo-client'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2025-06-30.basil',
@@ -54,7 +55,7 @@ export async function POST(request: NextRequest) {
     // Get user's subscription info
     const { data: userProfile, error: profileError } = await supabaseAdmin
       .from('users_with_profiles')
-      .select('stripe_customer_id, stripe_subscription_id, email, first_name, last_name')
+      .select('stripe_customer_id, stripe_subscription_id, email, first_name, last_name, language')
       .eq('id', userId)
       .single()
 
@@ -121,6 +122,28 @@ export async function POST(request: NextRequest) {
       }
     )
 
+    // Update local subscription record immediately for better UX
+    try {
+      await supabaseAdmin
+        .from('stripe_subscriptions')
+        .update({
+          cancel_at_period_end: true,
+          canceled_at: new Date().toISOString(),
+          metadata: {
+            cancellation_reason: sanitizedReason,
+            cancelled_by_user: 'true',
+            cancelled_at: new Date().toISOString()
+          },
+          updated_at: new Date().toISOString()
+        })
+        .eq('stripe_subscription_id', userProfile.stripe_subscription_id)
+        
+      console.log('✅ Local subscription updated with cancellation flag')
+    } catch (localUpdateError) {
+      console.warn('Warning: Could not update local subscription record:', localUpdateError)
+      // Don't fail the cancellation if local update fails
+    }
+
     // Log de sécurité pour l'annulation
     console.log(`🚫 [SECURITY] Subscription cancellation:`)
     console.log(`   - Subscription ID: ${userProfile.stripe_subscription_id}`)
@@ -158,6 +181,46 @@ export async function POST(request: NextRequest) {
     const cancellationDate = (updatedSubscription as any).current_period_end 
       ? new Date((updatedSubscription as any).current_period_end * 1000).toISOString()
       : null
+
+    // Envoyer l'email de confirmation d'annulation
+    if (cancellationDate) {
+      try {
+        const userName = `${userProfile.first_name || ''} ${userProfile.last_name || ''}`.trim() || 'utilisateur'
+        const userLanguage = userProfile.language || 'fr'
+        
+        await brevoEmailService.sendSubscriptionCancelledEmail(
+          userProfile.email,
+          userName,
+          cancellationDate,
+          userLanguage
+        )
+        
+        console.log(`📧 Email d'annulation envoyé à ${userProfile.email}`)
+      } catch (emailError) {
+        // Ne pas faire échouer l'annulation si l'email échoue
+        console.warn('Erreur lors de l\'envoi de l\'email d\'annulation:', emailError)
+      }
+      
+      // Synchroniser le contact Brevo pour mettre à jour le statut d'abonnement
+      try {
+        await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/sync-contact`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Internal-Secret': process.env.INTERNAL_API_SECRET || 'lettercraft-internal-secret-2025',
+            'X-Internal-Source': 'cancel-subscription'
+          },
+          body: JSON.stringify({
+            userId: userId,
+            action: 'sync'
+          })
+        })
+        console.log(`🔄 Contact Brevo synchronisé après annulation pour l'utilisateur ${userId}`)
+      } catch (syncError) {
+        console.warn('Erreur synchronisation contact Brevo après annulation:', syncError)
+        // Ne pas faire échouer l'annulation si la sync échoue
+      }
+    }
 
     return NextResponse.json({
       success: true,

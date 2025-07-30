@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { supabase } from '@/lib/supabase-client'
 import { supabaseAdmin } from '@/lib/supabase-admin'
+import { brevoEmailService } from '@/lib/brevo-client'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2025-06-30.basil',
@@ -137,17 +138,12 @@ async function upsertStripeSubscription(customerId: string, subscriptionData: St
 
     console.log(`✅ Successfully upserted subscription for user ${foundUser.id} (${foundUser.first_name} ${foundUser.last_name})`)
     
-    // TEMPORARY FIX: Manually sync stripe IDs to user_profiles until migration is applied
-    try {
-      await supabaseAdmin.rpc('update_user_profile', {
-        p_user_id: foundUser.id,
-        p_stripe_customer_id: subscriptionData.stripe_customer_id,
-        p_stripe_subscription_id: subscriptionData.stripe_subscription_id
-      })
-      console.log(`🔄 [TEMP FIX] Synced Stripe IDs to user_profiles for user ${foundUser.id}`)
-    } catch (tempSyncError) {
-      console.warn('Temporary sync error (non-critical):', tempSyncError)
-    }
+    // Sauvegarder l'état de l'abonnement AVANT synchronisation pour déterminer si c'est un nouvel abonnement
+    const hadPreviousSubscription = !!foundUser.stripe_subscription_id
+    console.log(`💾 [SUBSCRIPTION STATE] User had previous subscription: ${hadPreviousSubscription}`)
+    
+    // Stripe IDs sync is now handled automatically by the subscription trigger
+    console.log(`🔄 [AUTO SYNC] Stripe IDs will be synced by trigger for user ${foundUser.id}`)
     
     // Synchroniser le contact avec Brevo après la mise à jour de l'abonnement
     try {
@@ -155,10 +151,12 @@ async function upsertStripeSubscription(customerId: string, subscriptionData: St
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-Internal-Secret': process.env.INTERNAL_API_SECRET || 'lettercraft-internal-secret-2025',
+          'X-Internal-Source': 'stripe-webhook'
         },
         body: JSON.stringify({
           userId: foundUser.id,
-          action: 'update'
+          action: 'sync'
         })
       })
       console.log(`🔄 Contact Brevo synchronisé pour l'utilisateur ${foundUser.id}`)
@@ -166,6 +164,51 @@ async function upsertStripeSubscription(customerId: string, subscriptionData: St
       console.warn('Erreur synchronisation contact Brevo après mise à jour abonnement:', syncError)
       // Ne pas faire échouer le webhook si la sync échoue
     }
+    // Gestion des emails selon le statut de l'abonnement
+    console.log(`📧 [EMAIL CHECK] Status: ${subscriptionData.status}, CancelAtPeriodEnd: ${subscriptionData.cancel_at_period_end}, User: ${foundUser.email}`)
+    
+    const userName = `${foundUser.first_name || ''} ${foundUser.last_name || ''}`.trim() || 'utilisateur'
+    const userLanguage = foundUser.language || 'fr'
+    
+    // Si l'abonnement est marqué pour annulation (cancel_at_period_end = true)
+    if (subscriptionData.status === 'active' && subscriptionData.cancel_at_period_end) {
+      try {
+        console.log(`📧 [CANCELLATION EMAIL] Envoi email d'annulation à ${foundUser.email}`)
+        
+        const emailResult = await brevoEmailService.sendSubscriptionCancelledEmail(
+          foundUser.email,
+          userName,
+          subscriptionData.current_period_end || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // fin de période ou +30 jours
+          userLanguage
+        )
+        
+        console.log(`📧 [CANCELLATION RESULT] Email d'annulation envoyé: ${emailResult}`)
+      } catch (emailError) {
+        console.error('❌ [CANCELLATION EMAIL ERROR] Erreur lors de l\'envoi de l\'email d\'annulation:', emailError)
+      }
+    }
+    // Envoyer l'email de confirmation d'abonnement premium SEULEMENT pour les nouveaux abonnements actifs
+    else if (subscriptionData.status === 'active' && !subscriptionData.cancel_at_period_end && !hadPreviousSubscription) {
+      try {
+        console.log(`📧 [EMAIL SENDING] Tentative d'envoi à ${foundUser.email}, nom: ${userName}, langue: ${userLanguage}`)
+        
+        const emailResult = await brevoEmailService.sendSubscriptionConfirmationEmail(
+          foundUser.email,
+          userName,
+          undefined, // invoiceUrl - sera géré via les factures si disponible
+          userLanguage
+        )
+        
+        console.log(`📧 [EMAIL RESULT] Résultat envoi: ${emailResult}`)
+        console.log(`📧 Email de confirmation d'abonnement premium envoyé à ${foundUser.email} (nouvel abonnement)`)
+      } catch (emailError) {
+        // Ne pas faire échouer le webhook si l'email échoue
+        console.error('❌ [EMAIL ERROR] Erreur lors de l\'envoi de l\'email de confirmation d\'abonnement:', emailError)
+      }
+    } else {
+      console.log(`📧 [EMAIL SKIP] Email ignoré - Status: ${subscriptionData.status}, CancelAtPeriodEnd: ${subscriptionData.cancel_at_period_end}, HadPreviousSubscription: ${hadPreviousSubscription}`)
+    }
+    
     console.log(`🎯 Subscription ${subscriptionData.stripe_subscription_id} status: ${subscriptionData.status}`)
     
     return true
@@ -272,6 +315,57 @@ async function upsertStripeInvoice(customerId: string, invoiceData: StripeInvoic
 
     console.log(`✅ Successfully upserted invoice ${invoiceData.stripe_invoice_id} for user ${foundUser.id}`)
     console.log(`💰 Invoice amount: ${invoiceData.amount_due / 100} ${invoiceData.currency.toUpperCase()}`)
+    
+    // Envoyer un email pour les factures payées (confirmation de paiement)
+    console.log(`💰 [INVOICE EMAIL CHECK] Status: ${invoiceData.status}, Description: ${invoiceData.description}`)
+    
+    if (invoiceData.status === 'paid') {
+      try {
+        const userName = `${foundUser.first_name || ''} ${foundUser.last_name || ''}`.trim() || 'utilisateur'
+        const userLanguage = foundUser.language || 'fr'
+        
+        // Pour les nouveaux abonnements (première facture), envoyer l'email de confirmation premium
+        const isSubscriptionInvoice = invoiceData.description && invoiceData.description.toLowerCase().includes('subscription')
+        console.log(`💰 [INVOICE EMAIL] IsSubscriptionInvoice: ${isSubscriptionInvoice}`)
+        
+        if (isSubscriptionInvoice) {
+          console.log(`💰 [INVOICE EMAIL SENDING] Tentative d'envoi à ${foundUser.email}`)
+          
+          const emailResult = await brevoEmailService.sendSubscriptionConfirmationEmail(
+            foundUser.email,
+            userName,
+            invoiceData.hosted_invoice_url || undefined,
+            userLanguage
+          )
+          
+          console.log(`💰 [INVOICE EMAIL RESULT] Résultat: ${emailResult}`)
+          console.log(`📧 Email de confirmation premium envoyé à ${foundUser.email} (via facture payée)`)
+        }
+      } catch (emailError) {
+        // Ne pas faire échouer le webhook si l'email échoue
+        console.error('❌ [INVOICE EMAIL ERROR] Erreur lors de l\'envoi de l\'email de confirmation de facture:', emailError)
+      }
+    }
+    
+    // Envoyer un email pour les factures en échec de paiement
+    if (invoiceData.status === 'open' && invoiceData.attempt_count && invoiceData.attempt_count > 0) {
+      try {
+        const userName = `${foundUser.first_name || ''} ${foundUser.last_name || ''}`.trim() || 'utilisateur'
+        const userLanguage = foundUser.language || 'fr'
+        
+        await brevoEmailService.sendPaymentFailedEmail(
+          foundUser.email,
+          userName,
+          invoiceData.hosted_invoice_url || undefined,
+          userLanguage
+        )
+        
+        console.log(`📧 Email d'échec de paiement envoyé à ${foundUser.email}`)
+      } catch (emailError) {
+        // Ne pas faire échouer le webhook si l'email échoue
+        console.warn('Erreur lors de l\'envoi de l\'email d\'échec de paiement:', emailError)
+      }
+    }
     
     return true
   } catch (error) {
@@ -458,36 +552,9 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
     }
   }
 
-  // Envoyer l'email de confirmation d'abonnement
-  if (invoiceResult && subscriptionId) {
-    try {
-      // Récupérer les infos utilisateur
-      const { data: userData } = await supabaseAdmin
-        .from('users_with_profiles')
-        .select('email, first_name, last_name, language')
-        .eq('stripe_customer_id', customerId)
-        .single()
-
-      if (userData) {
-        await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/send-email`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            type: 'subscription_confirmed',
-            userEmail: userData.email,
-            userName: `${userData.first_name} ${userData.last_name}`,
-            userLanguage: userData.language || 'fr',
-            invoiceUrl: invoiceData.hosted_invoice_url
-          })
-        })
-        console.log('📧 Email de confirmation d\'abonnement envoyé à:', userData.email)
-      }
-    } catch (emailError) {
-      console.warn('Erreur envoi email confirmation abonnement:', emailError)
-    }
-  }
+  // Email d'abonnement géré par upsertStripeSubscription via handleCustomerSubscriptionUpdated
+  // pour éviter les doublons d'emails
+  console.log('📧 [INVOICE] Email d\'abonnement géré par la logique subscription, pas par invoice')
   
   return invoiceResult
 }

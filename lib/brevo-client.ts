@@ -367,6 +367,99 @@ class BrevoEmailService {
   }
 
   /**
+   * Email de confirmation d'annulation d'abonnement
+   */
+  async sendSubscriptionCancelledEmail(userEmail: string, userName: string, endDate: string, userLanguage: string = 'fr'): Promise<boolean> {
+    const endDateFormatted = new Date(endDate).toLocaleDateString(userLanguage === 'en' ? 'en-US' : 'fr-FR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })
+    
+    const templates = {
+      fr: {
+        subject: 'Abonnement annulé - Accès maintenu jusqu\'à la fin de période 📅',
+        htmlContent: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h1 style="color: #f97316;">Bonjour ${userName},</h1>
+            <p>Nous confirmons l'annulation de votre abonnement LetterCraft Premium.</p>
+            <div style="background: #fff7ed; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f97316;">
+              <h3 style="color: #c2410c; margin-top: 0;">Informations importantes :</h3>
+              <ul style="margin: 0;">
+                <li>✅ Votre abonnement reste <strong>actif jusqu'au ${endDateFormatted}</strong></li>
+                <li>🚀 Vous conservez tous les avantages Premium jusqu'à cette date</li>
+                <li>📅 Après cette date, votre compte passera automatiquement au plan gratuit</li>
+                <li>💡 Vous pouvez vous réabonner à tout moment</li>
+              </ul>
+            </div>
+            <div style="background: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="color: #0369a1; margin-top: 0;">Que se passe-t-il ensuite ?</h3>
+              <p style="margin: 0;">À partir du <strong>${endDateFormatted}</strong>, vous aurez accès au plan gratuit avec :</p>
+              <ul style="margin: 10px 0 0 0;">
+                <li>📝 10 générations de lettres par mois</li>
+                <li>📄 1 CV sauvegardé</li>
+                <li>✉️ Support par email</li>
+              </ul>
+            </div>
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${process.env.NEXT_PUBLIC_APP_URL}/profile" 
+                 style="background: #f97316; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
+                Gérer mon compte
+              </a>
+            </div>
+            <p>Nous espérons vous revoir bientôt ! N'hésitez pas à nous faire part de vos commentaires.</p>
+            <p>Merci de votre confiance,<br><strong>L'équipe LetterCraft</strong></p>
+          </div>
+        `
+      },
+      en: {
+        subject: 'Subscription Cancelled - Access Maintained Until End of Period 📅',
+        htmlContent: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h1 style="color: #f97316;">Hello ${userName},</h1>
+            <p>We confirm the cancellation of your LetterCraft Premium subscription.</p>
+            <div style="background: #fff7ed; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f97316;">
+              <h3 style="color: #c2410c; margin-top: 0;">Important information:</h3>
+              <ul style="margin: 0;">
+                <li>✅ Your subscription remains <strong>active until ${endDateFormatted}</strong></li>
+                <li>🚀 You keep all Premium benefits until that date</li>
+                <li>📅 After this date, your account will automatically switch to the free plan</li>
+                <li>💡 You can resubscribe at any time</li>
+              </ul>
+            </div>
+            <div style="background: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="color: #0369a1; margin-top: 0;">What happens next?</h3>
+              <p style="margin: 0;">Starting <strong>${endDateFormatted}</strong>, you'll have access to the free plan with:</p>
+              <ul style="margin: 10px 0 0 0;">
+                <li>📝 10 letter generations per month</li>
+                <li>📄 1 saved CV</li>
+                <li>✉️ Email support</li>
+              </ul>
+            </div>
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${process.env.NEXT_PUBLIC_APP_URL}/profile" 
+                 style="background: #f97316; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
+                Manage My Account
+              </a>
+            </div>
+            <p>We hope to see you back soon! Feel free to share your feedback with us.</p>
+            <p>Thank you for your trust,<br><strong>The LetterCraft Team</strong></p>
+          </div>
+        `
+      }
+    }
+
+    const template = templates[userLanguage as keyof typeof templates] || templates.fr
+
+    return this.sendEmail({
+      to: [{ email: userEmail, name: userName }],
+      subject: template.subject,
+      htmlContent: template.htmlContent,
+      tags: ['subscription', 'cancelled', 'notification']
+    })
+  }
+
+  /**
    * Email d'approche de la limite de quota
    */
   async sendQuotaWarningEmail(userEmail: string, userName: string, remainingQuota: number, userLanguage: string = 'fr'): Promise<boolean> {
