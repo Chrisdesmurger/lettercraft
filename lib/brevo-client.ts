@@ -521,6 +521,242 @@ class BrevoEmailService {
       tags: ['quota', 'warning']
     })
   }
+
+  /**
+   * Email de confirmation de demande de suppression de compte
+   */
+  async sendAccountDeletionConfirmationEmail(
+    userEmail: string, 
+    userName: string, 
+    confirmationUrl: string, 
+    scheduledDeletionAt: string, 
+    userLanguage: string = 'fr'
+  ): Promise<boolean> {
+    const deletionDate = new Date(scheduledDeletionAt).toLocaleDateString(
+      userLanguage === 'en' ? 'en-US' : 'fr-FR',
+      { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      }
+    )
+    
+    const templates = {
+      fr: {
+        subject: '⚠️ Confirmation requise - Suppression de votre compte LetterCraft',
+        htmlContent: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h1 style="color: #dc2626;">Bonjour ${userName},</h1>
+            <p>Nous avons reçu une demande de suppression de votre compte LetterCraft.</p>
+            
+            <div style="background: #fef2f2; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #dc2626;">
+              <h3 style="color: #991b1b; margin-top: 0;">⚠️ Action requise</h3>
+              <p style="margin: 0;">Pour confirmer la suppression de votre compte, vous devez cliquer sur le lien ci-dessous dans les <strong>7 jours</strong>.</p>
+            </div>
+
+            <div style="background: #fffbeb; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="color: #92400e; margin-top: 0;">📅 Suppression programmée</h3>
+              <p style="margin: 0;">Si vous confirmez, votre compte sera définitivement supprimé le <strong>${deletionDate}</strong> (dans 48 heures).</p>
+            </div>
+
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${confirmationUrl}" 
+                 style="background: #dc2626; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; margin-bottom: 10px;">
+                ✅ Confirmer la suppression
+              </a>
+            </div>
+
+            <div style="background: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="color: #0369a1; margin-top: 0;">⏰ Période de grâce de 48h</h3>
+              <p style="margin: 0;">Après confirmation, vous disposez de 48 heures pour changer d'avis et annuler la suppression depuis votre compte.</p>
+            </div>
+
+            <div style="background: #fef3c7; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="color: #92400e; margin-top: 0;">🗂️ Ce qui sera supprimé :</h3>
+              <ul style="margin: 0;">
+                <li>Votre profil et informations personnelles</li>
+                <li>Tous vos CV téléchargés</li>
+                <li>Toutes vos lettres générées et sauvegardées</li>
+                <li>Votre historique d'utilisation</li>
+                <li>Votre abonnement (avec remboursement pro rata si applicable)</li>
+              </ul>
+              <p style="margin: 10px 0 0 0;"><strong>Cette action est irréversible.</strong></p>
+            </div>
+
+            <p><strong>Vous n'avez pas demandé cette suppression ?</strong><br>
+            Ignorez cet email et changez votre mot de passe par sécurité.</p>
+
+            <p>Pour toute question, contactez-nous à support@lettercraft.fr</p>
+            
+            <p>Cordialement,<br><strong>L'équipe LetterCraft</strong></p>
+          </div>
+        `
+      },
+      en: {
+        subject: '⚠️ Confirmation Required - LetterCraft Account Deletion',
+        htmlContent: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h1 style="color: #dc2626;">Hello ${userName},</h1>
+            <p>We received a request to delete your LetterCraft account.</p>
+            
+            <div style="background: #fef2f2; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #dc2626;">
+              <h3 style="color: #991b1b; margin-top: 0;">⚠️ Action Required</h3>
+              <p style="margin: 0;">To confirm the deletion of your account, you must click the link below within <strong>7 days</strong>.</p>
+            </div>
+
+            <div style="background: #fffbeb; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="color: #92400e; margin-top: 0;">📅 Scheduled Deletion</h3>
+              <p style="margin: 0;">If you confirm, your account will be permanently deleted on <strong>${deletionDate}</strong> (in 48 hours).</p>
+            </div>
+
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${confirmationUrl}" 
+                 style="background: #dc2626; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; margin-bottom: 10px;">
+                ✅ Confirm Deletion
+              </a>
+            </div>
+
+            <div style="background: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="color: #0369a1; margin-top: 0;">⏰ 48-Hour Grace Period</h3>
+              <p style="margin: 0;">After confirmation, you have 48 hours to change your mind and cancel the deletion from your account.</p>
+            </div>
+
+            <div style="background: #fef3c7; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="color: #92400e; margin-top: 0;">🗂️ What will be deleted:</h3>
+              <ul style="margin: 0;">
+                <li>Your profile and personal information</li>
+                <li>All your uploaded CVs</li>
+                <li>All your generated and saved letters</li>
+                <li>Your usage history</li>
+                <li>Your subscription (with pro rata refund if applicable)</li>
+              </ul>
+              <p style="margin: 10px 0 0 0;"><strong>This action is irreversible.</strong></p>
+            </div>
+
+            <p><strong>You didn't request this deletion?</strong><br>
+            Ignore this email and change your password for security.</p>
+
+            <p>For any questions, contact us at support@lettercraft.fr</p>
+            
+            <p>Best regards,<br><strong>The LetterCraft Team</strong></p>
+          </div>
+        `
+      }
+    }
+
+    const template = templates[userLanguage as keyof typeof templates] || templates.fr
+
+    return this.sendEmail({
+      to: [{ email: userEmail, name: userName }],
+      subject: template.subject,
+      htmlContent: template.htmlContent,
+      tags: ['account_deletion', 'confirmation', 'security']
+    })
+  }
+
+  /**
+   * Email de confirmation finale de suppression de compte
+   */
+  async sendAccountDeletedEmail(
+    userEmail: string, 
+    userName: string, 
+    deletionType: string, 
+    wasRefunded: boolean, 
+    refundAmount: number, 
+    userLanguage: string = 'fr'
+  ): Promise<boolean> {
+    const templates = {
+      fr: {
+        subject: '✅ Votre compte LetterCraft a été supprimé',
+        htmlContent: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h1 style="color: #059669;">Au revoir ${userName},</h1>
+            <p>Votre compte LetterCraft a été définitivement supprimé comme demandé.</p>
+            
+            <div style="background: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="color: #0369a1; margin-top: 0;">✅ Suppression confirmée</h3>
+              <ul style="margin: 0;">
+                <li>Type de suppression : <strong>${deletionType === 'hard' ? 'Complète' : 'Anonymisation'}</strong></li>
+                <li>Date : <strong>${new Date().toLocaleDateString('fr-FR')}</strong></li>
+                <li>Toutes vos données personnelles ont été supprimées</li>
+              </ul>
+            </div>
+
+            ${wasRefunded ? `
+              <div style="background: #f0fdf4; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h3 style="color: #059669; margin-top: 0;">💰 Remboursement traité</h3>
+                <p style="margin: 0;">Un remboursement de <strong>${refundAmount.toFixed(2)} €</strong> a été traité pour la partie inutilisée de votre abonnement. Vous le recevrez dans 5-10 jours ouvrés.</p>
+              </div>
+            ` : ''}
+
+            <div style="background: #fffbeb; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="color: #92400e; margin-top: 0;">📄 Données conservées (conformité légale)</h3>
+              <p style="margin: 0;">Conformément au RGPD et aux obligations comptables, seules vos factures sont conservées de manière anonymisée pendant 7 ans pour les obligations légales.</p>
+            </div>
+
+            <div style="background: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="color: #0369a1; margin-top: 0;">💡 Revenir un jour ?</h3>
+              <p style="margin: 0;">Vous pouvez créer un nouveau compte à tout moment sur <a href="${process.env.NEXT_PUBLIC_APP_URL}" style="color: #2563eb;">lettercraft.fr</a>. Nous serions ravis de vous accueillir à nouveau !</p>
+            </div>
+
+            <p>Merci d'avoir utilisé LetterCraft. Nous espérons que notre service vous a été utile dans votre recherche d'emploi.</p>
+            
+            <p>Bonne continuation dans vos projets professionnels !<br><strong>L'équipe LetterCraft</strong></p>
+          </div>
+        `
+      },
+      en: {
+        subject: '✅ Your LetterCraft account has been deleted',
+        htmlContent: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h1 style="color: #059669;">Goodbye ${userName},</h1>
+            <p>Your LetterCraft account has been permanently deleted as requested.</p>
+            
+            <div style="background: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="color: #0369a1; margin-top: 0;">✅ Deletion Confirmed</h3>
+              <ul style="margin: 0;">
+                <li>Deletion type: <strong>${deletionType === 'hard' ? 'Complete' : 'Anonymization'}</strong></li>
+                <li>Date: <strong>${new Date().toLocaleDateString('en-US')}</strong></li>
+                <li>All your personal data has been deleted</li>
+              </ul>
+            </div>
+
+            ${wasRefunded ? `
+              <div style="background: #f0fdf4; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h3 style="color: #059669; margin-top: 0;">💰 Refund Processed</h3>
+                <p style="margin: 0;">A refund of <strong>€${refundAmount.toFixed(2)}</strong> has been processed for the unused portion of your subscription. You will receive it within 5-10 business days.</p>
+              </div>
+            ` : ''}
+
+            <div style="background: #fffbeb; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="color: #92400e; margin-top: 0;">📄 Data Retained (Legal Compliance)</h3>
+              <p style="margin: 0;">In accordance with GDPR and accounting obligations, only your invoices are kept anonymized for 7 years for legal requirements.</p>
+            </div>
+
+            <div style="background: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="color: #0369a1; margin-top: 0;">💡 Coming Back Someday?</h3>
+              <p style="margin: 0;">You can create a new account anytime at <a href="${process.env.NEXT_PUBLIC_APP_URL}" style="color: #2563eb;">lettercraft.fr</a>. We'd be happy to welcome you back!</p>
+            </div>
+
+            <p>Thank you for using LetterCraft. We hope our service helped you in your job search.</p>
+            
+            <p>Good luck with your professional endeavors!<br><strong>The LetterCraft Team</strong></p>
+          </div>
+        `
+      }
+    }
+
+    const template = templates[userLanguage as keyof typeof templates] || templates.fr
+
+    return this.sendEmail({
+      to: [{ email: userEmail, name: userName }],
+      subject: template.subject,
+      htmlContent: template.htmlContent,
+      tags: ['account_deleted', 'confirmation', 'farewell']
+    })
+  }
 }
 
 // Instance singleton du service

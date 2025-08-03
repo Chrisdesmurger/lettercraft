@@ -9,6 +9,7 @@ import ProfileTab from './tabs/ProfileTab'
 import CVTab from './tabs/CVTab'
 import SettingsTab from './tabs/SettingsTab'
 import SubscriptionTab from './tabs/SubscriptionTab'
+import AccountDeletionStatus from './AccountDeletionStatus'
 import { useI18n } from '@/lib/i18n-context'
 import { useUserSubscription } from '@/hooks/useUserSubscription'
 
@@ -65,6 +66,11 @@ export default function ProfileLayout() {
                                 )
                             })}
                         </nav>
+                    </div>
+
+                    {/* Account Deletion Status */}
+                    <div className="p-6 border-b">
+                        <AccountDeletionStatus />
                     </div>
 
                     {/* Tab Content */}

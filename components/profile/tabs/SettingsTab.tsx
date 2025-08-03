@@ -210,7 +210,13 @@ export default function SettingsTab() {
           <p className="text-sm text-red-700 mb-4">
             {t('settings.deleteAccountWarning')}
           </p>
-          <button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+          <button 
+            onClick={() => {
+              // Navigate to the account deletion flow
+              window.location.href = '/account/delete'
+            }}
+            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+          >
             {t('settings.deleteAccount')}
           </button>
         </div>

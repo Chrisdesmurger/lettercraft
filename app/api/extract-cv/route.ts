@@ -7,19 +7,32 @@ import os from 'os';
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export async function POST(request: NextRequest) {
+  console.log('🔍 [CV-EXTRACT] Starting CV extraction...');
+  
   try {
+    console.log('🔍 [CV-EXTRACT] Parsing form data...');
     const form = await request.formData();
     const file = form.get('file') as File | null;
 
+    console.log('🔍 [CV-EXTRACT] File received:', {
+      name: file?.name,
+      size: file?.size,
+      type: file?.type
+    });
+
     if (!file || typeof file.arrayBuffer !== 'function') {
+      console.log('❌ [CV-EXTRACT] File validation failed');
       return NextResponse.json({ error: 'Fichier manquant' }, { status: 400 });
     }
 
+    console.log('🔍 [CV-EXTRACT] Converting file to buffer...');
     const buffer = Buffer.from(await file.arrayBuffer());
     const tempFilePath = path.join(os.tmpdir(), file.name);
 
-    fs.writeFileSync(tempFilePath, buffer);
+    console.log('🔍 [CV-EXTRACT] Writing temp file:', tempFilePath);
+    fs.writeFileSync(tempFilePath, new Uint8Array(buffer));
 
+    console.log('🔍 [CV-EXTRACT] Creating OpenAI assistant...');
     // Utiliser l'Assistants API avec file_search pour traiter le PDF
     const assistant = await openai.beta.assistants.create({
       name: "CV Extractor",
@@ -36,11 +49,14 @@ Return only the JSON, no other text.`,
       tools: [{ type: "file_search" }]
     });
 
+    console.log('🔍 [CV-EXTRACT] Uploading file to OpenAI...');
     const uploadedFile = await openai.files.create({
       file: fs.createReadStream(tempFilePath),
       purpose: "assistants",
     });
+    console.log('✅ [CV-EXTRACT] File uploaded:', uploadedFile.id);
 
+    console.log('🔍 [CV-EXTRACT] Creating thread...');
     const thread = await openai.beta.threads.create({
       messages: [
         {
@@ -100,7 +116,31 @@ Return only the JSON, no other text.`,
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: "Erreur lors de l'extraction" }, { status: 500 });
+    console.error('❌ [CV-EXTRACT] Error occurred:', error);
+    
+    // Log plus détaillé de l'erreur
+    if (error instanceof Error) {
+      console.error('❌ [CV-EXTRACT] Error details:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      });
+    }
+    
+    // Nettoyage en cas d'erreur si le fichier temp existe
+    try {
+      const tempFilePath = path.join(os.tmpdir(), 'temp_cv_file');
+      if (fs.existsSync(tempFilePath)) {
+        fs.unlinkSync(tempFilePath);
+        console.log('🧹 [CV-EXTRACT] Temp file cleaned up after error');
+      }
+    } catch (cleanupError) {
+      console.warn('⚠️ [CV-EXTRACT] Could not clean up temp file:', cleanupError);
+    }
+    
+    return NextResponse.json({ 
+      error: "Erreur lors de l'extraction",
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 });
   }
 }
