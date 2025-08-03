@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { CheckCircle, XCircle, Clock, AlertTriangle } from 'lucide-react'
 import { useI18n } from '@/lib/i18n-context'
@@ -8,7 +8,7 @@ import toast from 'react-hot-toast'
 
 type ConfirmationState = 'loading' | 'success' | 'error' | 'expired'
 
-export default function ConfirmDeletionPage() {
+function ConfirmDeletionContent() {
   const { t } = useI18n()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -270,5 +270,31 @@ export default function ConfirmDeletionPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function ConfirmDeletionPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 py-12">
+        <div className="max-w-2xl mx-auto px-4">
+          <div className="bg-white rounded-lg shadow-lg p-8">
+            <div className="text-center space-y-6">
+              <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-orange-500 mx-auto"></div>
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                  Chargement...
+                </h2>
+                <p className="text-gray-600">
+                  Vérification de votre demande de suppression de compte.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    }>
+      <ConfirmDeletionContent />
+    </Suspense>
   )
 }
