@@ -501,12 +501,38 @@
     "questions": "questions",
     "generatingDesc": "Generating your personalized letter...",
     "questionOf": "Question {questionNumber} of {totalQuestions}",
+    "question1": {
+      "title": "Why are you particularly interested in this position?",
+      "placeholder": "Describe your motivation for this position and company. Show your knowledge of the company and explain why you want to work there..."
+    },
+    "question2": {
+      "title": "Which experience from your CV would you like to highlight?"
+    },
+    "question3": {
+      "title": "Which skills best match the job requirements?"
+    },
+    "question4": {
+      "title": "How do your values align with those of the company?",
+      "placeholder": "Explain how your personal and professional values correspond to the company culture..."
+    },
+    "question5": {
+      "title": "Are there any specific elements you would like to mention?",
+      "placeholder": "Personal projects, additional training, particular experiences that strengthen your application..."
+    },
     "question6": {
       "title": "In which language would you like to generate your cover letter?",
-      "detectedLanguage": "Automatically detected language",
+      "placeholder": "Select the language for your letter",
+      "detectedLanguage": "Automatically detected language: {language}",
       "french": "French",
       "english": "English",
       "spanish": "Spanish"
+    },
+    "validation": {
+      "required": "This field is required",
+      "min50chars": "Please enter at least 50 characters",
+      "min30chars": "Please enter at least 30 characters",
+      "selectExperience": "Please select an experience",
+      "selectSkills": "Please select at least one skill"
     }
   },
   "flow": {
