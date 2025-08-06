@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { AlertTriangle, Clock, XCircle, CheckCircle } from 'lucide-react'
 import { supabase } from '@/lib/supabase-client'
+import { useI18n } from '@/lib/i18n-context'
 import toast from 'react-hot-toast'
 
 interface DeletionRequest {
@@ -16,6 +17,7 @@ interface DeletionRequest {
 }
 
 export default function AccountDeletionStatus() {
+  const { t, locale } = useI18n()
   const [deletionRequest, setDeletionRequest] = useState<DeletionRequest | null>(null)
   const [loading, setLoading] = useState(true)
   const [cancelling, setCancelling] = useState(false)
@@ -60,7 +62,7 @@ export default function AccountDeletionStatus() {
       const { data: { session } } = await supabase.auth.getSession()
       
       if (!session) {
-        toast.error('Session expirée. Veuillez vous reconnecter.')
+        toast.error(t('auth.sessionExpired'))
         return
       }
 
@@ -78,23 +80,23 @@ export default function AccountDeletionStatus() {
       const result = await response.json()
 
       if (!response.ok) {
-        toast.error(result.error || 'Erreur lors de l\'annulation')
+        toast.error(result.error || t('account.deletion.cancelError'))
         return
       }
 
-      toast.success('Demande de suppression annulée avec succès')
+      toast.success(t('account.deletion.cancelSuccess'))
       setDeletionRequest(null)
 
     } catch (error) {
       console.error('Error cancelling deletion:', error)
-      toast.error('Erreur lors de l\'annulation')
+      toast.error(t('account.deletion.cancelError'))
     } finally {
       setCancelling(false)
     }
   }
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('fr-FR', {
+    return new Date(dateString).toLocaleDateString(locale, {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
@@ -109,20 +111,20 @@ export default function AccountDeletionStatus() {
     const diffMs = scheduledDate.getTime() - now.getTime()
     
     if (diffMs <= 0) {
-      return { text: 'Imminent', urgent: true }
+      return { text: t('account.deletion.imminent'), urgent: true }
     }
     
     const diffHours = Math.ceil(diffMs / (1000 * 60 * 60))
     
     if (diffHours < 24) {
       return { 
-        text: `${diffHours} heure${diffHours > 1 ? 's' : ''}`, 
+        text: t('account.deletion.inHours', { count: diffHours.toString() }), 
         urgent: diffHours <= 6 
       }
     } else {
       const diffDays = Math.ceil(diffHours / 24)
       return { 
-        text: `${diffDays} jour${diffDays > 1 ? 's' : ''}`, 
+        text: t('account.deletion.inDays', { count: diffDays.toString() }), 
         urgent: false 
       }
     }
@@ -182,7 +184,7 @@ export default function AccountDeletionStatus() {
                 ? 'text-orange-800'
                 : 'text-yellow-800'
           }`}>
-            {isConfirmed ? 'Suppression confirmée' : 'Demande de suppression en attente'}
+            {isConfirmed ? t('account.deletion.confirmed') : t('account.deletion.pending')}
           </h3>
           
           <div className={`text-sm mt-1 ${
@@ -193,28 +195,32 @@ export default function AccountDeletionStatus() {
                 : 'text-yellow-700'
           }`}>
             <p className="mb-2">
-              Votre compte sera {deletionRequest.deletion_type === 'hard' ? 'définitivement supprimé' : 'anonymisé'} 
-              {' '}le <strong>{formatDate(deletionRequest.scheduled_deletion_at)}</strong>
+              {t('account.deletion.willBeDeleted', { 
+                type: deletionRequest.deletion_type === 'hard' 
+                  ? t('account.deletion.permanently') 
+                  : t('account.deletion.anonymized'),
+                date: formatDate(deletionRequest.scheduled_deletion_at)
+              })}
             </p>
             
             <p className="font-medium">
               {timeRemaining.urgent ? (
-                <span className="text-red-800">⚠️ Suppression imminente !</span>
+                <span className="text-red-800">⚠️ {t('account.deletion.urgentWarning')}</span>
               ) : (
-                <>Suppression dans {timeRemaining.text}</>
+                <>{t('account.deletion.scheduledIn', { time: timeRemaining.text })}</>
               )}
             </p>
 
             {!isConfirmed && (
               <p className="mt-2 text-xs">
-                <strong>Action requise :</strong> Consultez votre email pour confirmer la suppression
+                <strong>{t('account.deletion.actionRequired')}:</strong> {t('account.deletion.checkEmail')}
               </p>
             )}
           </div>
 
           {deletionRequest.reason && (
             <div className="mt-3 p-3 bg-white bg-opacity-50 rounded border">
-              <div className="text-xs font-medium text-gray-600 mb-1">Raison donnée :</div>
+              <div className="text-xs font-medium text-gray-600 mb-1">{t('account.deletion.reasonGiven')}:</div>
               <div className="text-sm text-gray-700">{deletionRequest.reason}</div>
             </div>
           )}
@@ -233,12 +239,12 @@ export default function AccountDeletionStatus() {
             {cancelling ? (
               <div className="flex items-center space-x-2">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
-                <span>Annulation...</span>
+                <span>{t('account.deletion.cancelling')}</span>
               </div>
             ) : (
               <>
                 <XCircle className="w-4 h-4 inline mr-1" />
-                Annuler la suppression
+                {t('account.deletion.cancelButton')}
               </>
             )}
           </button>
@@ -250,8 +256,7 @@ export default function AccountDeletionStatus() {
           <div className="flex items-center text-red-800 text-sm">
             <AlertTriangle className="w-4 h-4 mr-2 flex-shrink-0" />
             <div>
-              <strong>Dernière chance !</strong> Votre compte sera supprimé très bientôt. 
-              Cliquez sur "Annuler la suppression" si vous changez d'avis.
+              <strong>{t('account.deletion.lastChance')}</strong> {t('account.deletion.urgentMessage')}
             </div>
           </div>
         </div>

@@ -18,7 +18,7 @@ interface DeletionRequest {
 }
 
 export default function AccountDeletePage() {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const router = useRouter()
   const [step, setStep] = useState<DeletionStep>('warning')
   const [user, setUser] = useState<any>(null)
@@ -52,12 +52,12 @@ export default function AccountDeletePage() {
     e.preventDefault()
     
     if (!password.trim()) {
-      toast.error('Veuillez saisir votre mot de passe')
+      toast.error(t('account.deletion.passwordRequired'))
       return
     }
 
     if (!acknowledged) {
-      toast.error('Veuillez confirmer que vous comprenez les conséquences')
+      toast.error(t('account.deletion.acknowledgeRequired'))
       return
     }
 
@@ -67,7 +67,7 @@ export default function AccountDeletePage() {
       const { data: { session } } = await supabase.auth.getSession()
       
       if (!session) {
-        toast.error('Session expirée. Veuillez vous reconnecter.')
+        toast.error(t('auth.sessionExpired'))
         router.push('/login')
         return
       }
@@ -89,7 +89,7 @@ export default function AccountDeletePage() {
       const result = await response.json()
 
       if (!response.ok) {
-        toast.error(result.error || 'Erreur lors de la demande de suppression')
+        toast.error(result.error || t('account.deletion.apiError'))
         return
       }
 
@@ -102,18 +102,18 @@ export default function AccountDeletePage() {
       })
 
       setStep('success')
-      toast.success('Demande de suppression créée avec succès')
+      toast.success(t('account.deletion.success'))
 
     } catch (error) {
       console.error('Error creating deletion request:', error)
-      toast.error('Erreur lors de la demande de suppression')
+      toast.error(t('account.deletion.apiError'))
     } finally {
       setLoading(false)
     }
   }
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('fr-FR', {
+    return new Date(dateString).toLocaleDateString(locale, {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
@@ -141,10 +141,10 @@ export default function AccountDeletePage() {
               <AlertTriangle className="w-8 h-8 text-red-600" />
             </div>
             <h1 className="text-2xl font-bold text-gray-900 mb-2">
-              Suppression de compte
+              {t('account.deletion.title')}
             </h1>
             <p className="text-gray-600">
-              Cette action est irréversible. Toutes vos données seront supprimées.
+              {t('account.deletion.subtitle')}
             </p>
           </div>
 
@@ -177,16 +177,16 @@ export default function AccountDeletePage() {
               <div className="bg-red-50 border border-red-200 rounded-lg p-6">
                 <h3 className="text-lg font-semibold text-red-800 mb-4 flex items-center">
                   <AlertTriangle className="w-5 h-5 mr-2" />
-                  Attention : Suppression définitive
+                  {t('account.deletion.warningTitle')}
                 </h3>
                 <div className="space-y-3 text-red-700">
                   <p>La suppression de votre compte entraînera :</p>
                   <ul className="list-disc list-inside space-y-1 ml-4">
-                    <li>Suppression de votre profil et informations personnelles</li>
-                    <li>Suppression de tous vos CV téléchargés</li>
-                    <li>Suppression de toutes vos lettres générées et sauvegardées</li>
-                    <li>Suppression de votre historique d'utilisation</li>
-                    <li>Annulation immédiate de votre abonnement (avec remboursement pro rata si applicable)</li>
+                    <li>{t('account.deletion.warningList.profile')}</li>
+                    <li>{t('account.deletion.warningList.cvs')}</li>
+                    <li>{t('account.deletion.warningList.letters')}</li>
+                    <li>{t('account.deletion.warningList.history')}</li>
+                    <li>{t('account.deletion.warningList.subscription')}</li>
                   </ul>
                 </div>
               </div>
@@ -194,22 +194,22 @@ export default function AccountDeletePage() {
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
                 <h3 className="text-lg font-semibold text-blue-800 mb-4 flex items-center">
                   <Shield className="w-5 h-5 mr-2" />
-                  Conformité RGPD
+                  {t('account.deletion.gdprTitle')}
                 </h3>
                 <div className="space-y-2 text-blue-700">
-                  <p>Nous respectons votre droit à l'effacement selon l'Article 17 du RGPD.</p>
-                  <p>Seules vos factures seront conservées de manière anonymisée pendant 7 ans pour les obligations légales comptables.</p>
+                  <p>{t('account.deletion.gdprDescription')}</p>
+                  <p>{t('account.deletion.gdprInvoices')}</p>
                 </div>
               </div>
 
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
                 <h3 className="text-lg font-semibold text-yellow-800 mb-4 flex items-center">
                   <Clock className="w-5 h-5 mr-2" />
-                  Période de grâce de 48 heures
+                  {t('account.deletion.gracePeriodTitle')}
                 </h3>
                 <div className="space-y-2 text-yellow-700">
-                  <p>Après confirmation par email, vous disposez de 48 heures pour annuler la suppression.</p>
-                  <p>Passé ce délai, la suppression sera définitive et irréversible.</p>
+                  <p>{t('account.deletion.gracePeriodDescription')}</p>
+                  <p>{t('account.deletion.gracePeriodWarning')}</p>
                 </div>
               </div>
 
@@ -218,13 +218,13 @@ export default function AccountDeletePage() {
                   onClick={() => router.push('/profile')}
                   className="px-6 py-2 text-gray-600 hover:text-gray-800 transition-colors"
                 >
-                  Annuler
+                  {t('common.cancel')}
                 </button>
                 <button
                   onClick={() => setStep('password')}
                   className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
                 >
-                  Continuer
+                  {t('common.continue')}
                 </button>
               </div>
             </div>
@@ -235,7 +235,7 @@ export default function AccountDeletePage() {
             <form onSubmit={handlePasswordSubmit} className="space-y-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Type de suppression
+                  {t('account.deletion.deletionTypeTitle')}
                 </label>
                 <div className="space-y-3">
                   <label className="flex items-start space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
@@ -248,8 +248,8 @@ export default function AccountDeletePage() {
                       className="mt-1"
                     />
                     <div>
-                      <div className="font-medium text-gray-900">Suppression complète (recommandé)</div>
-                      <div className="text-sm text-gray-600">Toutes vos données sont définitivement supprimées</div>
+                      <div className="font-medium text-gray-900">{t('account.deletion.hardDelete')}</div>
+                      <div className="text-sm text-gray-600">{t('account.deletion.hardDeleteDescription')}</div>
                     </div>
                   </label>
                   <label className="flex items-start space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
@@ -262,8 +262,8 @@ export default function AccountDeletePage() {
                       className="mt-1"
                     />
                     <div>
-                      <div className="font-medium text-gray-900">Anonymisation</div>
-                      <div className="text-sm text-gray-600">Vos données sont anonymisées mais conservées pour les statistiques</div>
+                      <div className="font-medium text-gray-900">{t('account.deletion.softDelete')}</div>
+                      <div className="text-sm text-gray-600">{t('account.deletion.softDeleteDescription')}</div>
                     </div>
                   </label>
                 </div>
@@ -271,12 +271,12 @@ export default function AccountDeletePage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Raison de la suppression (optionnel)
+                  {t('account.deletion.reasonTitle')}
                 </label>
                 <textarea
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
-                  placeholder="Aidez-nous à améliorer notre service en nous expliquant pourquoi vous nous quittez..."
+                  placeholder={t('account.deletion.reasonPlaceholder')}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
                   rows={3}
                   maxLength={1000}
