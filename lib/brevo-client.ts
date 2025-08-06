@@ -556,6 +556,11 @@ class BrevoEmailService {
               <p style="margin: 0;">Pour confirmer la suppression de votre compte, vous devez cliquer sur le lien ci-dessous dans les <strong>7 jours</strong>.</p>
             </div>
 
+            <div style="background: #fef2f2; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #dc2626;">
+              <h3 style="color: #991b1b; margin-top: 0;">⚡ Annulation d'abonnement immédiate</h3>
+              <p style="margin: 0;"><strong>IMPORTANT :</strong> En cliquant sur le lien de confirmation, votre abonnement Premium sera <strong>immédiatement et définitivement annulé</strong>, sans possibilité d'annulation.</p>
+            </div>
+
             <div style="background: #fffbeb; padding: 20px; border-radius: 8px; margin: 20px 0;">
               <h3 style="color: #92400e; margin-top: 0;">📅 Suppression programmée</h3>
               <p style="margin: 0;">Si vous confirmez, votre compte sera définitivement supprimé le <strong>${deletionDate}</strong> (dans 48 heures).</p>
@@ -566,11 +571,12 @@ class BrevoEmailService {
                  style="background: #dc2626; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; margin-bottom: 10px;">
                 ✅ Confirmer la suppression
               </a>
+              <p style="color: #dc2626; font-size: 12px; margin: 5px 0 0 0;"><strong>⚡ Votre abonnement sera annulé immédiatement</strong></p>
             </div>
 
             <div style="background: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
-              <h3 style="color: #0369a1; margin-top: 0;">⏰ Période de grâce de 48h</h3>
-              <p style="margin: 0;">Après confirmation, vous disposez de 48 heures pour changer d'avis et annuler la suppression depuis votre compte.</p>
+              <h3 style="color: #0369a1; margin-top: 0;">⏰ Période de grâce de 48h pour le compte</h3>
+              <p style="margin: 0;">Après confirmation, vous disposez de 48 heures pour changer d'avis et annuler la suppression de compte depuis votre profil. <strong>Attention :</strong> l'abonnement restera annulé même si vous annulez la suppression de compte.</p>
             </div>
 
             <div style="background: #fef3c7; padding: 20px; border-radius: 8px; margin: 20px 0;">
@@ -580,9 +586,9 @@ class BrevoEmailService {
                 <li>Tous vos CV téléchargés</li>
                 <li>Toutes vos lettres générées et sauvegardées</li>
                 <li>Votre historique d'utilisation</li>
-                <li>Votre abonnement (avec remboursement pro rata si applicable)</li>
+                <li><strong>⚡ Votre abonnement Premium (annulé immédiatement, sans remboursement)</strong></li>
               </ul>
-              <p style="margin: 10px 0 0 0;"><strong>Cette action est irréversible.</strong></p>
+              <p style="margin: 10px 0 0 0;"><strong>L'annulation d'abonnement est immédiate et irréversible.</strong></p>
             </div>
 
             <p><strong>Vous n'avez pas demandé cette suppression ?</strong><br>
@@ -606,6 +612,11 @@ class BrevoEmailService {
               <p style="margin: 0;">To confirm the deletion of your account, you must click the link below within <strong>7 days</strong>.</p>
             </div>
 
+            <div style="background: #fef2f2; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #dc2626;">
+              <h3 style="color: #991b1b; margin-top: 0;">⚡ Immediate Subscription Cancellation</h3>
+              <p style="margin: 0;"><strong>IMPORTANT:</strong> By clicking the confirmation link, your Premium subscription will be <strong>immediately and permanently cancelled</strong>, with no possibility to undo this action.</p>
+            </div>
+
             <div style="background: #fffbeb; padding: 20px; border-radius: 8px; margin: 20px 0;">
               <h3 style="color: #92400e; margin-top: 0;">📅 Scheduled Deletion</h3>
               <p style="margin: 0;">If you confirm, your account will be permanently deleted on <strong>${deletionDate}</strong> (in 48 hours).</p>
@@ -616,11 +627,12 @@ class BrevoEmailService {
                  style="background: #dc2626; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; margin-bottom: 10px;">
                 ✅ Confirm Deletion
               </a>
+              <p style="color: #dc2626; font-size: 12px; margin: 5px 0 0 0;"><strong>⚡ Your subscription will be cancelled immediately</strong></p>
             </div>
 
             <div style="background: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
-              <h3 style="color: #0369a1; margin-top: 0;">⏰ 48-Hour Grace Period</h3>
-              <p style="margin: 0;">After confirmation, you have 48 hours to change your mind and cancel the deletion from your account.</p>
+              <h3 style="color: #0369a1; margin-top: 0;">⏰ 48-Hour Grace Period for Account</h3>
+              <p style="margin: 0;">After confirmation, you have 48 hours to change your mind and cancel the account deletion from your profile. <strong>Note:</strong> the subscription will remain cancelled even if you cancel the account deletion.</p>
             </div>
 
             <div style="background: #fef3c7; padding: 20px; border-radius: 8px; margin: 20px 0;">
@@ -630,9 +642,9 @@ class BrevoEmailService {
                 <li>All your uploaded CVs</li>
                 <li>All your generated and saved letters</li>
                 <li>Your usage history</li>
-                <li>Your subscription (with pro rata refund if applicable)</li>
+                <li><strong>⚡ Your Premium subscription (cancelled immediately, no refund)</strong></li>
               </ul>
-              <p style="margin: 10px 0 0 0;"><strong>This action is irreversible.</strong></p>
+              <p style="margin: 10px 0 0 0;"><strong>Subscription cancellation is immediate and irreversible.</strong></p>
             </div>
 
             <p><strong>You didn't request this deletion?</strong><br>
