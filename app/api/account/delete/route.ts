@@ -343,12 +343,124 @@ async function handleConfirmDeletion(request: NextRequest) {
   const userId = result.user_id
   const scheduledDeletionAt = result.scheduled_deletion_at
 
+  // 🔥 NOUVELLE FONCTIONNALITÉ: Annulation immédiate de l'abonnement Stripe
+  console.log(`🎯 Confirmation de suppression reçue - annulation immédiate de l'abonnement pour l'utilisateur ${userId}`)
+  
+  try {
+    // Récupérer les informations utilisateur pour Stripe
+    const { data: userProfile, error: profileError } = await supabaseAdmin
+      .from('users_with_profiles')
+      .select('email, first_name, last_name, stripe_customer_id, stripe_subscription_id, subscription_tier, language')
+      .eq('id', userId)
+      .single()
+
+    if (!profileError && userProfile) {
+      console.log(`🔍 Utilisateur trouvé: ${userProfile.email}, Stripe Customer ID: ${userProfile.stripe_customer_id}, Subscription ID: ${userProfile.stripe_subscription_id}`)
+
+      // Si l'utilisateur a un abonnement Stripe actif, l'annuler immédiatement
+      if (userProfile.stripe_customer_id && userProfile.stripe_subscription_id) {
+        console.log(`💳 Annulation immédiate de l'abonnement Stripe pour l'utilisateur ${userId}`)
+        
+        try {
+          // Récupérer l'abonnement actuel
+          const subscription = await stripe.subscriptions.retrieve(userProfile.stripe_subscription_id)
+          
+          if (subscription.status === 'active' && !subscription.cancel_at_period_end) {
+            // Annuler immédiatement l'abonnement
+            const cancelledSubscription = await stripe.subscriptions.cancel(userProfile.stripe_subscription_id, {
+              prorate: false // Ne pas créer de crédit pro rata
+            })
+            
+            console.log(`✅ Abonnement Stripe ${userProfile.stripe_subscription_id} annulé avec succès`)
+            console.log(`📅 Date d'annulation: ${new Date(cancelledSubscription.canceled_at! * 1000).toISOString()}`)
+            
+            // Mettre à jour l'abonnement dans notre base de données immédiatement
+            await supabaseAdmin
+              .from('stripe_subscriptions')
+              .update({
+                status: 'canceled',
+                cancel_at_period_end: true,
+                canceled_at: new Date().toISOString(),
+                metadata: {
+                  ...subscription.metadata,
+                  cancellation_reason: 'Suppression de compte utilisateur',
+                  cancelled_by_user: 'true',
+                  cancelled_at: new Date().toISOString(),
+                  cancelled_via: 'account_deletion_confirmation'
+                },
+                updated_at: new Date().toISOString()
+              })
+              .eq('stripe_subscription_id', userProfile.stripe_subscription_id)
+
+            // Mettre à jour le tier de l'utilisateur immédiatement
+            await supabaseAdmin
+              .rpc('update_user_profile', {
+                p_user_id: userId,
+                p_subscription_tier: 'free',
+                p_subscription_end_date: null
+              })
+
+            // Envoyer l'email d'annulation d'abonnement
+            try {
+              const userName = `${userProfile.first_name || ''} ${userProfile.last_name || ''}`.trim() || 'utilisateur'
+              const userLanguage = userProfile.language || 'fr'
+              
+              await brevoEmailService.sendSubscriptionCancelledEmail(
+                userProfile.email,
+                userName,
+                new Date().toISOString(), // Annulé immédiatement
+                userLanguage
+              )
+              
+              console.log(`📧 Email d'annulation d'abonnement envoyé à ${userProfile.email}`)
+            } catch (emailError) {
+              console.warn('Erreur lors de l\'envoi de l\'email d\'annulation d\'abonnement:', emailError)
+            }
+
+            // Synchroniser avec Brevo pour mettre à jour le statut d'abonnement
+            try {
+              await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/sync-contact`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'X-Internal-Secret': process.env.INTERNAL_API_SECRET || 'lettercraft-internal-secret-2025',
+                  'X-Internal-Source': 'account-deletion-confirmation'
+                },
+                body: JSON.stringify({
+                  userId: userId,
+                  action: 'sync'
+                })
+              })
+              console.log(`🔄 Contact Brevo synchronisé après annulation d'abonnement pour l'utilisateur ${userId}`)
+            } catch (syncError) {
+              console.warn('Erreur synchronisation contact Brevo après annulation abonnement:', syncError)
+            }
+            
+          } else {
+            console.log(`ℹ️ L'abonnement ${userProfile.stripe_subscription_id} n'est pas actif ou déjà annulé (status: ${subscription.status}, cancel_at_period_end: ${subscription.cancel_at_period_end})`)
+          }
+        } catch (stripeError) {
+          console.error(`❌ Erreur lors de l'annulation de l'abonnement Stripe pour l'utilisateur ${userId}:`, stripeError)
+          // Ne pas faire échouer la confirmation de suppression si l'annulation Stripe échoue
+        }
+      } else {
+        console.log(`ℹ️ Aucun abonnement Stripe actif trouvé pour l'utilisateur ${userId}`)
+      }
+    } else {
+      console.warn(`⚠️ Impossible de récupérer le profil utilisateur ${userId}:`, profileError)
+    }
+  } catch (error) {
+    console.error(`❌ Erreur lors du traitement de l'annulation d'abonnement pour l'utilisateur ${userId}:`, error)
+    // Ne pas faire échouer la confirmation de suppression
+  }
+
   return NextResponse.json({
     success: true,
-    message: 'Suppression confirmée avec succès',
+    message: 'Suppression confirmée avec succès. Votre abonnement a été annulé immédiatement.',
     userId,
     scheduledDeletionAt,
-    note: 'Vous recevrez un email de confirmation. Vous pouvez encore annuler avant la date programmée.'
+    subscriptionCancelled: true,
+    note: 'Vous recevrez un email de confirmation. Vous pouvez encore annuler la suppression de compte avant la date programmée.'
   })
 }
 
