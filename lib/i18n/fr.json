@@ -635,7 +635,47 @@
       "canCancelDescription": "Vous pouvez annuler cette demande à tout moment avant cette date depuis votre profil.",
       "backToProfile": "Retourner au profil",
       "backToHome": "Retourner à l'accueil",
-      "success": "Demande de suppression créée avec succès"
+      "success": "Demande de suppression créée avec succès",
+      "confirm": {
+        "tokenMissing": "Token de confirmation manquant",
+        "confirmationError": "Erreur lors de la confirmation",
+        "confirmationSuccess": "Suppression confirmée avec succès",
+        "loading": "Confirmation en cours...",
+        "loadingDescription": "Vérification de votre demande de suppression de compte.",
+        "confirmed": "Suppression confirmée",
+        "confirmedDescription": "Votre demande de suppression de compte a été confirmée avec succès.",
+        "scheduledDeletion": "Suppression programmée",
+        "scheduledDeletionDescription": "Votre compte sera définitivement supprimé le {date}",
+        "scheduledIn": "Suppression prévue {time}",
+        "canStillCancel": "Vous pouvez encore annuler",
+        "canStillCancelDescription": "Vous disposez encore de temps pour changer d'avis et annuler la suppression.",
+        "accessProfileToCancel": "Accéder à mon profil pour annuler",
+        "whatWillBeDeleted": "Ce qui sera supprimé :",
+        "deletionList": {
+          "profile": "• Votre profil et informations personnelles",
+          "cvs": "• Tous vos CV téléchargés", 
+          "letters": "• Toutes vos lettres générées et sauvegardées",
+          "history": "• Votre historique d'utilisation",
+          "subscription": "• Votre abonnement (avec annulation immédiate)"
+        },
+        "invoicesKept": "Seules vos factures seront conservées de manière anonymisée (obligation légale).",
+        "errorTitle": "Erreur de confirmation",
+        "errorDescription": "Une erreur est survenue lors de la confirmation de votre demande.",
+        "troubleshoot": "Que faire ?",
+        "troubleshootList": {
+          "checkLink": "• Vérifiez que le lien n'est pas tronqué dans votre email",
+          "copyPaste": "• Copiez-collez l'URL complète dans votre navigateur",
+          "checkBrowser": "• Vérifiez que vous utilisez le bon navigateur/appareil",
+          "contactSupport": "• Contactez le support si le problème persiste"
+        },
+        "makeNewRequest": "Faire une nouvelle demande",
+        "expiredTitle": "Lien de confirmation expiré",
+        "expiredDescription": "Ce lien de confirmation a expiré. Les liens de confirmation sont valides pendant 7 jours.",
+        "toContinue": "Pour continuer :",
+        "toContinueDescription": "Vous devez refaire une nouvelle demande de suppression de compte pour obtenir un nouveau lien de confirmation.",
+        "subscriptionCancelledImmediate": "Votre abonnement a été annulé immédiatement.",
+        "subscriptionCancelledNote": "Vous recevrez un email de confirmation. Vous pouvez encore annuler la suppression de compte avant la date programmée."
+      }
     }
   }
 }

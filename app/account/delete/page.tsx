@@ -286,7 +286,7 @@ export default function AccountDeletePage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Confirmez votre mot de passe *
+                  {t('account.deletion.passwordTitle')}
                 </label>
                 <div className="relative">
                   <input
@@ -294,7 +294,7 @@ export default function AccountDeletePage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                    placeholder="Votre mot de passe actuel"
+                    placeholder={t('account.deletion.passwordPlaceholder')}
                     required
                   />
                   <button
@@ -316,8 +316,8 @@ export default function AccountDeletePage() {
                     className="mt-1"
                   />
                   <div className="text-sm">
-                    <div className="font-medium text-gray-900">Recevoir un email de confirmation</div>
-                    <div className="text-gray-600">Un lien de confirmation sera envoyé à votre adresse email</div>
+                    <div className="font-medium text-gray-900">{t('account.deletion.emailConfirmationTitle')}</div>
+                    <div className="text-gray-600">{t('account.deletion.emailConfirmationDescription')}</div>
                   </div>
                 </label>
 
@@ -330,9 +330,9 @@ export default function AccountDeletePage() {
                     required
                   />
                   <div className="text-sm">
-                    <div className="font-medium text-gray-900">Je comprends les conséquences *</div>
+                    <div className="font-medium text-gray-900">{t('account.deletion.acknowledgeTitle')}</div>
                     <div className="text-gray-600">
-                      Je comprends que cette action est irréversible et que toutes mes données seront supprimées
+                      {t('account.deletion.acknowledgeDescription')}
                     </div>
                   </div>
                 </label>
@@ -345,7 +345,7 @@ export default function AccountDeletePage() {
                   className="px-6 py-2 text-gray-600 hover:text-gray-800 transition-colors"
                   disabled={loading}
                 >
-                  Retour
+                  {t('common.back')}
                 </button>
                 <button
                   type="submit"
@@ -353,7 +353,7 @@ export default function AccountDeletePage() {
                   className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
                 >
                   {loading && <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>}
-                  <span>{loading ? 'Traitement...' : 'Confirmer la suppression'}</span>
+                  <span>{loading ? t('account.deletion.processing') : t('account.deletion.confirmButton')}</span>
                 </button>
               </div>
             </form>
@@ -368,10 +368,10 @@ export default function AccountDeletePage() {
 
               <div>
                 <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                  Demande de suppression créée
+                  {t('account.deletion.requestCreated')}
                 </h2>
                 <p className="text-gray-600">
-                  Votre demande de suppression de compte a été enregistrée avec succès.
+                  {t('account.deletion.requestDescription')}
                 </p>
               </div>
 
@@ -379,10 +379,10 @@ export default function AccountDeletePage() {
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
                   <div className="flex items-center justify-center mb-3">
                     <Mail className="w-6 h-6 text-blue-600 mr-2" />
-                    <h3 className="font-semibold text-blue-800">Email de confirmation envoyé</h3>
+                    <h3 className="font-semibold text-blue-800">{t('account.deletion.emailSentTitle')}</h3>
                   </div>
                   <p className="text-blue-700 text-sm">
-                    Consultez votre boîte email et cliquez sur le lien de confirmation pour valider la suppression.
+                    {t('account.deletion.emailSentDescription')}
                   </p>
                 </div>
               )}
@@ -390,13 +390,13 @@ export default function AccountDeletePage() {
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
                 <div className="flex items-center justify-center mb-3">
                   <Clock className="w-6 h-6 text-yellow-600 mr-2" />
-                  <h3 className="font-semibold text-yellow-800">Suppression programmée</h3>
+                  <h3 className="font-semibold text-yellow-800">{t('account.deletion.scheduledTitle')}</h3>
                 </div>
                 <p className="text-yellow-700 text-sm mb-2">
-                  Votre compte sera supprimé le <strong>{formatDate(deletionRequest.scheduledDeletionAt)}</strong>
+                  {t('account.deletion.scheduledDescription', { date: formatDate(deletionRequest.scheduledDeletionAt) })}
                 </p>
                 <p className="text-yellow-700 text-sm">
-                  Vous pouvez annuler cette demande à tout moment avant cette date depuis votre profil.
+                  {t('account.deletion.canCancelDescription')}
                 </p>
               </div>
 
@@ -405,13 +405,13 @@ export default function AccountDeletePage() {
                   onClick={() => router.push('/profile')}
                   className="w-full px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
                 >
-                  Retourner au profil
+                  {t('account.deletion.backToProfile')}
                 </button>
                 <button
                   onClick={() => router.push('/')}
                   className="w-full px-6 py-2 text-gray-600 hover:text-gray-800 transition-colors"
                 >
-                  Retourner à l'accueil
+                  {t('account.deletion.backToHome')}
                 </button>
               </div>
             </div>

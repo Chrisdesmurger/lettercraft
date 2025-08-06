@@ -9,7 +9,7 @@ import toast from 'react-hot-toast'
 type ConfirmationState = 'loading' | 'success' | 'error' | 'expired'
 
 function ConfirmDeletionContent() {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const router = useRouter()
   const searchParams = useSearchParams()
   const [state, setState] = useState<ConfirmationState>('loading')
@@ -23,7 +23,7 @@ function ConfirmDeletionContent() {
     const token = searchParams.get('token')
     if (!token) {
       setState('error')
-      setError('Token de confirmation manquant')
+      setError(t('account.deletion.confirm.tokenMissing'))
       return
     }
 
@@ -49,7 +49,7 @@ function ConfirmDeletionContent() {
           setState('expired')
         } else {
           setState('error')
-          setError(result.error || 'Erreur lors de la confirmation')
+          setError(result.error || t('account.deletion.confirm.confirmationError'))
         }
         return
       }
@@ -59,17 +59,17 @@ function ConfirmDeletionContent() {
         scheduledDeletionAt: result.scheduledDeletionAt
       })
       setState('success')
-      toast.success('Suppression confirmée avec succès')
+      toast.success(t('account.deletion.confirm.confirmationSuccess'))
 
     } catch (error) {
       console.error('Error confirming deletion:', error)
       setState('error')
-      setError('Erreur lors de la confirmation')
+      setError(t('account.deletion.confirm.confirmationError'))
     }
   }
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('fr-FR', {
+    return new Date(dateString).toLocaleDateString(locale, {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
@@ -85,12 +85,12 @@ function ConfirmDeletionContent() {
     const diffHours = Math.ceil(diffMs / (1000 * 60 * 60))
     
     if (diffHours <= 0) {
-      return 'Imminent'
+      return t('account.deletion.imminent')
     } else if (diffHours < 24) {
-      return `dans ${diffHours} heure${diffHours > 1 ? 's' : ''}`
+      return t('account.deletion.inHours', { count: diffHours.toString() })
     } else {
       const diffDays = Math.ceil(diffHours / 24)
-      return `dans ${diffDays} jour${diffDays > 1 ? 's' : ''}`
+      return t('account.deletion.inDays', { count: diffDays.toString() })
     }
   }
 
