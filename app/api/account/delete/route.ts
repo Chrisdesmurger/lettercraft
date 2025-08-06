@@ -75,7 +75,7 @@ async function cancelStripeSubscriptionWithRefund(customerId: string, subscripti
     
     // 2. Annuler immédiatement l'abonnement
     await stripe.subscriptions.cancel(subscriptionId, {
-      prorate: true // Créer un crédit pro rata
+      prorate: false // Créer un crédit pro rata
     })
     
     console.log(`✅ Subscription ${subscriptionId} cancelled successfully`)
@@ -508,22 +508,13 @@ async function executeUserDeletionInternal(
 
   try {
     // 1. Gérer l'annulation Stripe si nécessaire
-    console.log(`🔍 DEBUG: Stripe IDs for user ${userId}:`, {
-      stripe_customer_id: userProfile.stripe_customer_id,
-      stripe_subscription_id: userProfile.stripe_subscription_id,
-      subscription_tier: userProfile.subscription_tier
-    })
-    
     let stripeResult: StripeRefundResult | null = null
     if (userProfile.stripe_customer_id && userProfile.stripe_subscription_id) {
-      console.log(`💳 Attempting Stripe cancellation...`)
       stripeResult = await cancelStripeSubscriptionWithRefund(
         userProfile.stripe_customer_id,
         userProfile.stripe_subscription_id
       )
       console.log(`💳 Stripe processing result:`, stripeResult)
-    } else {
-      console.log(`⚠️ No Stripe IDs found - skipping cancellation`)
     }
 
     // 2. Exécuter la suppression selon le type
