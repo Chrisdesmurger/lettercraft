@@ -117,14 +117,30 @@ export default function AccountDeletionStatus() {
     const diffHours = Math.ceil(diffMs / (1000 * 60 * 60))
     
     if (diffHours < 24) {
+      // Handle pluralization manually for hours
+      const hourText = diffHours === 1 ? 'heure' : 'heures'
+      const text = locale === 'en' ? (diffHours === 1 ? `in ${diffHours} hour` : `in ${diffHours} hours`) :
+                   locale === 'es' ? (diffHours === 1 ? `en ${diffHours} hora` : `en ${diffHours} horas`) :
+                   locale === 'de' ? (diffHours === 1 ? `in ${diffHours} Stunde` : `in ${diffHours} Stunden`) :
+                   locale === 'it' ? (diffHours === 1 ? `tra ${diffHours} ora` : `tra ${diffHours} ore`) :
+                   `dans ${diffHours} ${hourText}` // French default
+      
       return { 
-        text: t('account.deletion.inHours', { count: diffHours.toString() }), 
+        text,
         urgent: diffHours <= 6 
       }
     } else {
       const diffDays = Math.ceil(diffHours / 24)
+      // Handle pluralization manually for days
+      const dayText = diffDays === 1 ? 'jour' : 'jours'
+      const text = locale === 'en' ? (diffDays === 1 ? `in ${diffDays} day` : `in ${diffDays} days`) :
+                   locale === 'es' ? (diffDays === 1 ? `en ${diffDays} día` : `en ${diffDays} días`) :
+                   locale === 'de' ? (diffDays === 1 ? `in ${diffDays} Tag` : `in ${diffDays} Tagen`) :
+                   locale === 'it' ? (diffDays === 1 ? `tra ${diffDays} giorno` : `tra ${diffDays} giorni`) :
+                   `dans ${diffDays} ${dayText}` // French default
+                   
       return { 
-        text: t('account.deletion.inDays', { count: diffDays.toString() }), 
+        text,
         urgent: false 
       }
     }

@@ -577,8 +577,6 @@
       "confirmed": "Eliminazione confermata",
       "pending": "Richiesta di eliminazione in sospeso",
       "imminent": "Imminente",
-      "inHours": "tra {count} or{count, plural, one {a} other {e}}",
-      "inDays": "tra {count} giorn{count, plural, one {o} other {i}}",
       "willBeDeleted": "Il tuo account sarà {type} il {date}",
       "permanently": "eliminato permanentemente",
       "anonymized": "anonimizzato",

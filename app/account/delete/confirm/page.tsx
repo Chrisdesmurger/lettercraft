@@ -87,10 +87,20 @@ function ConfirmDeletionContent() {
     if (diffHours <= 0) {
       return t('account.deletion.imminent')
     } else if (diffHours < 24) {
-      return t('account.deletion.inHours', { count: diffHours.toString() })
+      // Handle pluralization manually for hours
+      return locale === 'en' ? (diffHours === 1 ? `in ${diffHours} hour` : `in ${diffHours} hours`) :
+             locale === 'es' ? (diffHours === 1 ? `en ${diffHours} hora` : `en ${diffHours} horas`) :
+             locale === 'de' ? (diffHours === 1 ? `in ${diffHours} Stunde` : `in ${diffHours} Stunden`) :
+             locale === 'it' ? (diffHours === 1 ? `tra ${diffHours} ora` : `tra ${diffHours} ore`) :
+             `dans ${diffHours} heure${diffHours > 1 ? 's' : ''}` // French default
     } else {
       const diffDays = Math.ceil(diffHours / 24)
-      return t('account.deletion.inDays', { count: diffDays.toString() })
+      // Handle pluralization manually for days
+      return locale === 'en' ? (diffDays === 1 ? `in ${diffDays} day` : `in ${diffDays} days`) :
+             locale === 'es' ? (diffDays === 1 ? `en ${diffDays} día` : `en ${diffDays} días`) :
+             locale === 'de' ? (diffDays === 1 ? `in ${diffDays} Tag` : `in ${diffDays} Tagen`) :
+             locale === 'it' ? (diffDays === 1 ? `tra ${diffDays} giorno` : `tra ${diffDays} giorni`) :
+             `dans ${diffDays} jour${diffDays > 1 ? 's' : ''}` // French default
     }
   }
 

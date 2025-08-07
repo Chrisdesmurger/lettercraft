@@ -577,8 +577,6 @@
       "confirmed": "Deletion confirmed",
       "pending": "Deletion request pending",
       "imminent": "Imminent",
-      "inHours": "in {count} hour{count, plural, one {} other {s}}",
-      "inDays": "in {count} day{count, plural, one {} other {s}}",
       "willBeDeleted": "Your account will be {type} on {date}",
       "permanently": "permanently deleted",
       "anonymized": "anonymized",

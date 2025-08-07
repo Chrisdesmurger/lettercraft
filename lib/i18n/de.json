@@ -577,8 +577,6 @@
       "confirmed": "Löschung bestätigt",
       "pending": "Löschungsantrag ausstehend",
       "imminent": "Unmittelbar bevorstehend",
-      "inHours": "in {count} Stunde{count, plural, one {} other {n}}",
-      "inDays": "in {count} Tag{count, plural, one {} other {en}}",
       "willBeDeleted": "Ihr Konto wird am {date} {type}",
       "permanently": "dauerhaft gelöscht",
       "anonymized": "anonymisiert",

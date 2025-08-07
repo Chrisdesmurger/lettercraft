@@ -576,8 +576,6 @@
       "confirmed": "Suppression confirmée",
       "pending": "Demande de suppression en attente",
       "imminent": "Imminent",
-      "inHours": "dans {count} heure{count, plural, one {} other {s}}",
-      "inDays": "dans {count} jour{count, plural, one {} other {s}}",
       "willBeDeleted": "Votre compte sera {type} le {date}",
       "permanently": "définitivement supprimé",
       "anonymized": "anonymisé",
