@@ -27,6 +27,7 @@ class BrevoEmailService {
     email: process.env.BREVO_SENDER_EMAIL || 'noreply@lettercraft.fr',
     name: process.env.BREVO_SENDER_NAME || 'LetterCraft'
   }
+  private supportEmail: string = process.env.BREVO_SUPPORT_EMAIL || 'support@lettercraft.fr'
 
   constructor() {
     if (!process.env.BREVO_API_KEY) {
@@ -256,7 +257,7 @@ class BrevoEmailService {
               </div>
             ` : ''}
             <p><strong>Important :</strong> Votre accès Premium sera suspendu si le paiement n'est pas régularisé dans les 7 jours.</p>
-            <p>Besoin d'aide ? Répondez à cet email.<br><strong>L'équipe LetterCraft</strong></p>
+            <p>Besoin d'aide ? Contactez-nous à ${this.supportEmail}<br><strong>L'équipe LetterCraft</strong></p>
           </div>
         `
       },
@@ -283,7 +284,7 @@ class BrevoEmailService {
               </div>
             ` : ''}
             <p><strong>Important:</strong> Your Premium access will be suspended if payment is not resolved within 7 days.</p>
-            <p>Need help? Reply to this email.<br><strong>The LetterCraft Team</strong></p>
+            <p>Need help? Contact us at ${this.supportEmail}<br><strong>The LetterCraft Team</strong></p>
           </div>
         `
       }
@@ -594,7 +595,7 @@ class BrevoEmailService {
             <p><strong>Vous n'avez pas demandé cette suppression ?</strong><br>
             Ignorez cet email et changez votre mot de passe par sécurité.</p>
 
-            <p>Pour toute question, contactez-nous à support@lettercraft.fr</p>
+            <p>Pour toute question, contactez-nous à ${this.supportEmail}</p>
             
             <p>Cordialement,<br><strong>L'équipe LetterCraft</strong></p>
           </div>
@@ -650,7 +651,7 @@ class BrevoEmailService {
             <p><strong>You didn't request this deletion?</strong><br>
             Ignore this email and change your password for security.</p>
 
-            <p>For any questions, contact us at support@lettercraft.fr</p>
+            <p>For any questions, contact us at ${this.supportEmail}</p>
             
             <p>Best regards,<br><strong>The LetterCraft Team</strong></p>
           </div>

@@ -29,7 +29,6 @@ export default function AccountDeletePage() {
   const [password, setPassword] = useState('')
   const [deletionType, setDeletionType] = useState<'soft' | 'hard'>('hard')
   const [reason, setReason] = useState('')
-  const [confirmationEmail, setConfirmationEmail] = useState(true)
   const [acknowledged, setAcknowledged] = useState(false)
   
   // Result data
@@ -82,7 +81,7 @@ export default function AccountDeletePage() {
           password,
           deletionType,
           reason: reason.trim() || undefined,
-          confirmationEmail
+          confirmationEmail: true
         })
       })
 
@@ -180,7 +179,7 @@ export default function AccountDeletePage() {
                   {t('account.deletion.warningTitle')}
                 </h3>
                 <div className="space-y-3 text-red-700">
-                  <p>La suppression de votre compte entraînera :</p>
+                  <p>{t('account.deletion.warningIntro')}</p>
                   <ul className="list-disc list-inside space-y-1 ml-4">
                     <li>{t('account.deletion.warningList.profile')}</li>
                     <li>{t('account.deletion.warningList.cvs')}</li>
@@ -308,19 +307,6 @@ export default function AccountDeletePage() {
               </div>
 
               <div className="space-y-3">
-                <label className="flex items-start space-x-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={confirmationEmail}
-                    onChange={(e) => setConfirmationEmail(e.target.checked)}
-                    className="mt-1"
-                  />
-                  <div className="text-sm">
-                    <div className="font-medium text-gray-900">{t('account.deletion.emailConfirmationTitle')}</div>
-                    <div className="text-gray-600">{t('account.deletion.emailConfirmationDescription')}</div>
-                  </div>
-                </label>
-
                 <label className="flex items-start space-x-3 cursor-pointer">
                   <input
                     type="checkbox"

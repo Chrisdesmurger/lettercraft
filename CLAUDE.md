@@ -195,7 +195,14 @@ Environment variables required:
 BREVO_API_KEY=xkeysib-your-brevo-api-key
 BREVO_SENDER_EMAIL=noreply@lettercraft.fr
 BREVO_SENDER_NAME=LetterCraft
+BREVO_SUPPORT_EMAIL=support@lettercraft.fr
 ```
+
+**Variable descriptions:**
+- `BREVO_API_KEY`: Your Brevo API key for sending transactional emails
+- `BREVO_SENDER_EMAIL`: Email address used as the sender for all outgoing emails
+- `BREVO_SENDER_NAME`: Display name for the email sender
+- `BREVO_SUPPORT_EMAIL`: Contact email displayed in user-facing emails for support inquiries
 
 #### Multilingual Support
 All email templates support French (fr) and English (en) with automatic language detection from user profiles.

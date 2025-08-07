@@ -570,6 +570,19 @@
     "generatedOn": "Generated on"
   },
   "auth": {
+    "login": "Login",
+    "register": "Register",
+    "email": "Email",
+    "password": "Password",
+    "signin": "Sign in",
+    "pleaseLogin": "Please log in to continue",
+    "signup": "Sign up",
+    "logout": "Logout",
+    "noAccount": "No account?",
+    "haveAccount": "Already have an account?",
+    "loginSuccess": "Login successful!",
+    "registerSuccess": "Registration successful!",
+    "unknownError": "Unknown error",
     "sessionExpired": "Session expired. Please log in again."
   },
   "account": {
@@ -594,6 +607,7 @@
       "title": "Account Deletion",
       "subtitle": "This action is irreversible. All your data will be deleted.",
       "warningTitle": "Warning: Permanent Deletion",
+      "warningIntro": "Deleting your account will result in:",
       "warningList": {
         "profile": "Deletion of your profile and personal information",
         "cvs": "Deletion of all your uploaded CVs",

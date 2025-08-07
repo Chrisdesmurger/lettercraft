@@ -570,6 +570,19 @@
     "generatedOn": "Generado el"
   },
   "auth": {
+    "login": "Iniciar sesión",
+    "register": "Registrarse",
+    "email": "Email",
+    "password": "Contraseña",
+    "signin": "Iniciar sesión",
+    "pleaseLogin": "Por favor, inicia sesión para continuar",
+    "signup": "Registrarse",
+    "logout": "Cerrar sesión",
+    "noAccount": "¿No tienes cuenta?",
+    "haveAccount": "¿Ya tienes una cuenta?",
+    "loginSuccess": "¡Inicio de sesión exitoso!",
+    "registerSuccess": "¡Registro exitoso!",
+    "unknownError": "Error desconocido",
     "sessionExpired": "Sesión expirada. Por favor, inicie sesión nuevamente."
   },
   "account": {
@@ -594,6 +607,7 @@
       "title": "Eliminación de cuenta",
       "subtitle": "Esta acción es irreversible. Todos sus datos serán eliminados.",
       "warningTitle": "Advertencia: Eliminación permanente",
+      "warningIntro": "La eliminación de su cuenta resultará en:",
       "warningList": {
         "profile": "Eliminación de su perfil e información personal",
         "cvs": "Eliminación de todos sus CV cargados",

@@ -81,7 +81,8 @@
     "haveAccount": "Vous avez déjà un compte ?",
     "loginSuccess": "Connexion reussie !",
     "registerSuccess": "Inscription reussie !",
-    "unknownError": "Erreur inconnue"
+    "unknownError": "Erreur inconnue",
+    "sessionExpired": "Session expirée. Veuillez vous reconnecter."
   },
   "profile": {
     "title": "Mon Profil",
@@ -569,6 +570,19 @@
     "generatedOn": "Généré le"
   },
   "auth": {
+    "login": "Connexion",
+    "register": "Inscription",
+    "email": "Email",
+    "password": "Mot de passe",
+    "signin": "Se connecter",
+    "pleaseLogin": "Veuillez vous connecter pour continuer",
+    "signup": "S'inscrire",
+    "logout": "Déconnexion",
+    "noAccount": "Pas de compte?",
+    "haveAccount": "Vous avez déjà un compte ?",
+    "loginSuccess": "Connexion reussie !",
+    "registerSuccess": "Inscription reussie !",
+    "unknownError": "Erreur inconnue",
     "sessionExpired": "Session expirée. Veuillez vous reconnecter."
   },
   "account": {
@@ -593,6 +607,7 @@
       "title": "Suppression de compte",
       "subtitle": "Cette action est irréversible. Toutes vos données seront supprimées.",
       "warningTitle": "Attention : Suppression définitive",
+      "warningIntro": "La suppression de votre compte entraînera :",
       "warningList": {
         "profile": "Suppression de votre profil et informations personnelles",
         "cvs": "Suppression de tous vos CV téléchargés",

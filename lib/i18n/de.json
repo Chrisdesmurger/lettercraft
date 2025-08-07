@@ -570,6 +570,19 @@
     "generatedOn": "Erstellt am"
   },
   "auth": {
+    "login": "Anmelden",
+    "register": "Registrieren",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "signin": "Anmelden",
+    "pleaseLogin": "Bitte melden Sie sich an, um fortzufahren",
+    "signup": "Registrieren",
+    "logout": "Abmelden",
+    "noAccount": "Kein Konto?",
+    "haveAccount": "Haben Sie bereits ein Konto?",
+    "loginSuccess": "Anmeldung erfolgreich!",
+    "registerSuccess": "Registrierung erfolgreich!",
+    "unknownError": "Unbekannter Fehler",
     "sessionExpired": "Sitzung abgelaufen. Bitte melden Sie sich erneut an."
   },
   "account": {
@@ -594,6 +607,7 @@
       "title": "Kontolöschung",
       "subtitle": "Diese Aktion ist unwiderruflich. Alle Ihre Daten werden gelöscht.",
       "warningTitle": "Warnung: Dauerhafte Löschung",
+      "warningIntro": "Die Löschung Ihres Kontos wird zur Folge haben:",
       "warningList": {
         "profile": "Löschung Ihres Profils und persönlicher Informationen",
         "cvs": "Löschung aller Ihrer hochgeladenen Lebensläufe",
