@@ -148,10 +148,10 @@ export default function SubscriptionTab({ user, userProfile, loading: profileLoa
       price: '0€',
       period: t('subscription.perMonth'),
       features: [
-        { name: `10 ${t('subscription.features.monthlyLetters')}`, included: true },
+        { name: t('subscription.features.monthlyLetters'), included: true },
         { name: t('subscription.features.basicTemplates'), included: true },
-        { name: t('subscription.features.emailSupport'), included: true },
-        { name: t('subscription.features.multilingualGeneration'), included: false },
+        { name: t('subscription.features.multilingualGeneration'), included: true },
+        { name: t('subscription.features.emailSupport'), included: false },
         { name: t('subscription.features.premiumTemplates'), included: false },
         { name: t('subscription.features.prioritySupport'), included: false },
       ]
