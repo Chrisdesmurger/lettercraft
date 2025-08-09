@@ -5,6 +5,8 @@
  * from HTML content using html2pdf.js library.
  */
 
+import { getTemplateById, getDefaultTemplate, type LetterData } from './pdf-templates'
+
 /**
  * PDF generation options interface
  */
@@ -16,6 +18,7 @@ export interface PdfOptions {
   scale?: number
   allowTaint?: boolean
   useCORS?: boolean
+  templateId?: string
 }
 
 /**
@@ -28,7 +31,8 @@ const DEFAULT_PDF_OPTIONS: Required<PdfOptions> = {
   quality: 0.98,
   scale: 2,
   allowTaint: true,
-  useCORS: false
+  useCORS: false,
+  templateId: 'classic'
 }
 
 /**
@@ -182,6 +186,46 @@ export async function generatePdfFromElement(
     }
     throw new Error(`Failed to generate PDF: ${error instanceof Error ? error.message : 'Unknown error'}`)
   }
+}
+
+/**
+ * Generates and downloads a PDF using a template
+ * 
+ * @param letterData - The letter data to use in the template
+ * @param fileName - The name of the file to download (without extension)
+ * @param options - Optional PDF generation settings
+ * @returns Promise that resolves when the PDF generation is complete
+ */
+export async function generateLetterPdfWithTemplate(
+  letterData: LetterData,
+  fileName: string,
+  options: PdfOptions = {}
+): Promise<void> {
+  // Ensure we're on the client side
+  if (typeof window === 'undefined') {
+    throw new Error('PDF generation is only available on the client side')
+  }
+  
+  const mergedOptions = { ...DEFAULT_PDF_OPTIONS, ...options }
+  
+  // Get the template
+  const template = getTemplateById(mergedOptions.templateId) || getDefaultTemplate()
+  
+  console.log('Generating PDF with template:', {
+    templateId: template.id,
+    templateName: template.name,
+    fileName,
+    letterData
+  })
+  
+  // Generate HTML using the template
+  const letterHtml = template.generateHtml(letterData)
+  
+  // Use the existing generateLetterPdf function
+  await generateLetterPdf(letterHtml, fileName, {
+    ...options,
+    templateId: undefined // Remove templateId from options passed to generateLetterPdf
+  })
 }
 
 /**

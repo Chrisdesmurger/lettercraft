@@ -12,14 +12,17 @@ import {
   Calendar, 
   Building, 
   MapPin,
-  Loader2 
+  Loader2,
+  Palette
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import toast from 'react-hot-toast'
 import { useI18n } from '@/lib/i18n-context'
 import { supabase } from '@/lib/supabase-client'
-import { generateLetterPdf } from '@/lib/pdf'
+import { generateLetterPdfWithTemplate, generateTextFile } from '@/lib/pdf'
+import { type LetterData } from '@/lib/pdf-templates'
+import TemplateSelector from '@/components/pdf/TemplateSelector'
 
 type GeneratedLetter = Tables<'generated_letters'> & {
   job_offers: Tables<'job_offers'> | null
@@ -34,86 +37,58 @@ interface LetterCardProps {
 export default function LetterCard({ letter, onView }: LetterCardProps) {
   const { t } = useI18n()
   const [isDownloading, setIsDownloading] = useState(false)
+  const [selectedTemplateId, setSelectedTemplateId] = useState('classic')
+  const [showTemplateSelector, setShowTemplateSelector] = useState(false)
 
-  const handleDownload = async () => {
+  // Convertir les données de la lettre vers le format LetterData
+  const letterData: LetterData = {
+    content: letter.content || 'Contenu de la lettre non disponible',
+    jobTitle: letter.job_offers?.title || '',
+    company: letter.job_offers?.company || '',
+    candidateName: letter.candidates_profile?.title || 'Candidat', // Utilise le titre du profil candidat
+    candidateEmail: '', // Ces infos ne sont pas directement disponibles dans la structure actuelle
+    candidatePhone: '',
+    candidateAddress: '',
+    location: 'Paris', // Valeur par défaut
+    date: new Date().toLocaleDateString('fr-FR', { 
+      day: 'numeric', 
+      month: 'long', 
+      year: 'numeric' 
+    })
+  }
+
+  const fileName = `lettre-motivation-${letter.job_offers?.company || 'entreprise'}-${letter.job_offers?.title || 'poste'}`
+
+  const handleDownloadPdf = async () => {
     setIsDownloading(true)
     try {
-      console.log('Starting PDF download for letter:', letter.id)
+      console.log('Starting PDF download with template:', selectedTemplateId)
       
-      // Create formatted HTML content for the letter
-      const letterHtml = `
-        <!DOCTYPE html>
-        <html lang="fr">
-        <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Lettre de Motivation - ${letter.job_offers?.title || 'Poste'}</title>
-          <style>
-            @page { size: A4; margin: 2cm; }
-            body { 
-              font-family: 'Times New Roman', Times, serif; 
-              font-size: 12pt; 
-              line-height: 1.6; 
-              color: #333; 
-              margin: 0; 
-              padding: 20px;
-              background: white;
-            }
-            .header { text-align: right; margin-bottom: 2cm; }
-            .sender-info { font-size: 11pt; line-height: 1.4; }
-            .date-location { text-align: right; margin-bottom: 1.5cm; }
-            .recipient-info { margin-bottom: 1.5cm; }
-            .subject { font-weight: bold; margin-bottom: 1cm; text-decoration: underline; }
-            .content { text-align: justify; margin-bottom: 1.5cm; white-space: pre-wrap; }
-            .signature { text-align: right; margin-top: 2cm; }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <div class="sender-info">
-              <!-- Nom candidat à récupérer depuis le profil -->
-            </div>
-          </div>
-          
-          <div class="date-location">
-            ${new Date().toLocaleDateString('fr-FR', { 
-              day: 'numeric', 
-              month: 'long', 
-              year: 'numeric' 
-            })}
-          </div>
-          
-          <div class="recipient-info">
-            À l'attention du service recrutement<br>
-            ${letter.job_offers?.company || 'Entreprise'}
-          </div>
-          
-          <div class="subject">
-            Objet : Candidature pour le poste de ${letter.job_offers?.title || 'Poste'}
-          </div>
-          
-          <div class="content">${letter.content || 'Contenu de la lettre non disponible'}</div>
-          
-          <div class="signature">
-            Cordialement,<br>
-            <br>
-            <!-- Signature candidat -->
-          </div>
-        </body>
-        </html>
-      `
-      
-      const fileName = `lettre-motivation-${letter.job_offers?.company || 'entreprise'}-${letter.job_offers?.title || 'poste'}`
-      
-      // Use our client-side PDF generation
-      await generateLetterPdf(letterHtml, fileName)
+      await generateLetterPdfWithTemplate(letterData, fileName, {
+        templateId: selectedTemplateId,
+        format: 'a4',
+        quality: 0.98
+      })
       
       console.log('PDF generation successful')
-      toast.success(t('letter.pdfDownloadSuccess') || 'PDF téléchargé avec succès')
+      toast.success('PDF téléchargé avec succès')
       
     } catch (error) {
       console.error('PDF download error:', error)
-      toast.error(t('letter.pdfDownloadError') || 'Erreur lors du téléchargement PDF')
+      toast.error(`Erreur lors du téléchargement PDF: ${error instanceof Error ? error.message : 'Erreur inconnue'}`)
+    } finally {
+      setIsDownloading(false)
+    }
+  }
+
+  const handleDownloadTxt = async () => {
+    setIsDownloading(true)
+    try {
+      generateTextFile(letterData.content, fileName)
+      toast.success('Fichier texte téléchargé')
+    } catch (error) {
+      console.error('TXT download error:', error)
+      toast.error('Erreur lors du téléchargement TXT')
     } finally {
       setIsDownloading(false)
     }
@@ -157,7 +132,8 @@ export default function LetterCard({ letter, onView }: LetterCardProps) {
           </div>
         </div>
 
-        <div className="flex gap-2">
+        {/* Actions principales */}
+        <div className="flex gap-2 mb-3">
           <Button
             variant="outline"
             size="sm"
@@ -170,18 +146,66 @@ export default function LetterCard({ letter, onView }: LetterCardProps) {
           <Button
             variant="outline"
             size="sm"
-            onClick={handleDownload}
-            disabled={isDownloading}
+            onClick={() => setShowTemplateSelector(!showTemplateSelector)}
             className="flex-1"
           >
-            {isDownloading ? (
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            ) : (
-              <Download className="w-4 h-4 mr-2" />
-            )}
-            {isDownloading ? t('letter.downloading') : 'PDF'}
+            <Palette className="w-4 h-4 mr-2" />
+            Export
           </Button>
         </div>
+
+        {/* Options d'export avec modèles */}
+        {showTemplateSelector && (
+          <div className="space-y-3 p-3 bg-muted/50 rounded-lg">
+            {/* Sélecteur de modèle */}
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-muted-foreground">
+                Modèle PDF
+              </label>
+              <TemplateSelector
+                selectedTemplateId={selectedTemplateId}
+                onTemplateSelect={setSelectedTemplateId}
+              />
+            </div>
+
+            {/* Boutons d'export */}
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                onClick={handleDownloadPdf}
+                disabled={isDownloading}
+                className="flex-1"
+              >
+                {isDownloading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    PDF...
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-4 h-4 mr-2" />
+                    PDF
+                  </>
+                )}
+              </Button>
+              
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleDownloadTxt}
+                disabled={isDownloading}
+              >
+                <FileText className="w-4 h-4 mr-2" />
+                TXT
+              </Button>
+            </div>
+
+            {/* Informations */}
+            <div className="text-xs text-muted-foreground">
+              <strong>Modèle:</strong> {selectedTemplateId} • <strong>Format:</strong> A4
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   )
