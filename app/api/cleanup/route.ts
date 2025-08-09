@@ -118,7 +118,7 @@ async function ensureGenericUserExists(): Promise<string | null> {
         // Make sure this user has a profile
         const { error: profileError } = await supabaseAdmin
           .from('user_profiles')
-          .insert({
+          .upsert({
             user_id: existingGenericUser.id,
             first_name: 'Utilisateur',
             last_name: 'Supprimé',
@@ -126,8 +126,6 @@ async function ensureGenericUserExists(): Promise<string | null> {
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
           })
-          .onConflict('user_id')
-          .merge()
 
         if (profileError) {
           console.warn('⚠️ Warning: Could not ensure generic user profile:', profileError.message)
