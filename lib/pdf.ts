@@ -16,6 +16,8 @@ export interface PdfOptions {
   orientation?: 'portrait' | 'landscape'
   quality?: number
   scale?: number
+  allowTaint?: boolean
+  useCORS?: boolean
 }
 
 /**
@@ -26,7 +28,9 @@ const DEFAULT_PDF_OPTIONS: Required<PdfOptions> = {
   format: 'letter',
   orientation: 'portrait',
   quality: 0.98,
-  scale: 2
+  scale: 2,
+  allowTaint: true,
+  useCORS: false
 }
 
 /**
@@ -63,7 +67,8 @@ export async function generateLetterPdf(
     },
     html2canvas: { 
       scale: mergedOptions.scale,
-      useCORS: true
+      allowTaint: mergedOptions.allowTaint,
+      useCORS: mergedOptions.useCORS
     },
     jsPDF: { 
       unit: 'in', 
@@ -71,12 +76,25 @@ export async function generateLetterPdf(
       orientation: mergedOptions.orientation 
     }
   }
+  
+  console.log('PDF generation options:', opt)
+  console.log('About to call html2pdf...')
 
   try {
-    await html2pdf().set(opt).from(element).save()
+    const pdfInstance = html2pdf().set(opt).from(element)
+    console.log('html2pdf instance created, calling save...')
+    await pdfInstance.save()
   } catch (error) {
     console.error('Error generating PDF:', error)
-    throw new Error('Failed to generate PDF')
+    // Log plus d'informations pour le debug
+    if (error instanceof Error) {
+      console.error('PDF Error details:', {
+        message: error.message,
+        name: error.name,
+        stack: error.stack
+      })
+    }
+    throw new Error(`Failed to generate PDF: ${error instanceof Error ? error.message : 'Unknown error'}`)
   }
 }
 
@@ -93,6 +111,15 @@ export async function generatePdfFromElement(
   fileName: string,
   options: PdfOptions = {}
 ): Promise<void> {
+  console.log('generatePdfFromElement called:', {
+    fileName,
+    elementTag: element.tagName,
+    elementId: element.id,
+    elementClasses: element.className,
+    contentLength: element.innerHTML.length,
+    options
+  })
+  
   const mergedOptions = { ...DEFAULT_PDF_OPTIONS, ...options }
   
   const opt = {
@@ -104,7 +131,8 @@ export async function generatePdfFromElement(
     },
     html2canvas: { 
       scale: mergedOptions.scale,
-      useCORS: true
+      allowTaint: mergedOptions.allowTaint,
+      useCORS: mergedOptions.useCORS
     },
     jsPDF: { 
       unit: 'in', 
@@ -112,12 +140,25 @@ export async function generatePdfFromElement(
       orientation: mergedOptions.orientation 
     }
   }
+  
+  console.log('PDF generation options:', opt)
+  console.log('About to call html2pdf...')
 
   try {
-    await html2pdf().set(opt).from(element).save()
+    const pdfInstance = html2pdf().set(opt).from(element)
+    console.log('html2pdf instance created, calling save...')
+    await pdfInstance.save()
   } catch (error) {
     console.error('Error generating PDF:', error)
-    throw new Error('Failed to generate PDF')
+    // Log plus d'informations pour le debug
+    if (error instanceof Error) {
+      console.error('PDF Error details:', {
+        message: error.message,
+        name: error.name,
+        stack: error.stack
+      })
+    }
+    throw new Error(`Failed to generate PDF: ${error instanceof Error ? error.message : 'Unknown error'}`)
   }
 }
 

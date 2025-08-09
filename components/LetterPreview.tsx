@@ -52,16 +52,34 @@ export default function LetterPreview({ data, onUpdate, onNext }: LetterPreviewP
   }
 
   const handleDownloadPDF = async () => {
-    if (!letterRef.current) return
+    if (!letterRef.current) {
+      console.error('PDF Error: letterRef.current is null')
+      toast.error('Impossible de générer le PDF - élément non trouvé')
+      return
+    }
 
     const fileName = `lettre-motivation-${data?.jobOffer?.company || 'document'}`
     
+    console.log('Starting PDF generation:', {
+      fileName,
+      elementExists: !!letterRef.current,
+      elementContent: letterRef.current.innerHTML.substring(0, 100) + '...'
+    })
+    
     try {
       await generatePdfFromElement(letterRef.current, fileName)
+      console.log('PDF generation successful')
       toast.success(t('letter.pdfDownloaded'))
     } catch (error) {
-      console.error('PDF generation error:', error)
-      toast.error(t('letter.pdfError') || 'Erreur lors de la génération du PDF')
+      console.error('PDF generation error in LetterPreview:', error)
+      console.error('Error details:', {
+        type: typeof error,
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      })
+      
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      toast.error(`Erreur PDF: ${errorMessage}`)
     }
   }
 
