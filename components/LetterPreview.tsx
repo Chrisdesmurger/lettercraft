@@ -20,9 +20,9 @@ import {
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { supabase } from '@/lib/supabase-client'
-import html2pdf from 'html2pdf.js'
 import { useUser } from '@/hooks/useUser'
 import { useI18n } from '@/lib/i18n-context'
+import { generatePdfFromElement, generateTextFile } from '@/lib/pdf'
 
 interface LetterPreviewProps {
   data?: any
@@ -51,30 +51,48 @@ export default function LetterPreview({ data, onUpdate, onNext }: LetterPreviewP
     }
   }
 
-  const handleDownloadPDF = () => {
-    if (!letterRef.current) return
-
-    const opt = {
-      margin: 1,
-      filename: `lettre-motivation-${data?.jobOffer?.company || 'document'}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+  const handleDownloadPDF = async () => {
+    if (!letterRef.current) {
+      console.error('PDF Error: letterRef.current is null')
+      toast.error('Impossible de générer le PDF - élément non trouvé')
+      return
     }
 
-    html2pdf().set(opt).from(letterRef.current).save()
-    toast.success(t('letter.pdfDownloaded'))
+    const fileName = `lettre-motivation-${data?.jobOffer?.company || 'document'}`
+    
+    console.log('Starting PDF generation:', {
+      fileName,
+      elementExists: !!letterRef.current,
+      elementContent: letterRef.current.innerHTML.substring(0, 100) + '...'
+    })
+    
+    try {
+      await generatePdfFromElement(letterRef.current, fileName)
+      console.log('PDF generation successful')
+      toast.success(t('letter.pdfDownloaded'))
+    } catch (error) {
+      console.error('PDF generation error in LetterPreview:', error)
+      console.error('Error details:', {
+        type: typeof error,
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      })
+      
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      toast.error(`Erreur PDF: ${errorMessage}`)
+    }
   }
 
   const handleDownloadTXT = () => {
-    const element = document.createElement('a')
-    const file = new Blob([editedLetter], { type: 'text/plain' })
-    element.href = URL.createObjectURL(file)
-    element.download = `lettre-motivation-${data?.jobOffer?.company || 'document'}.txt`
-    document.body.appendChild(element)
-    element.click()
-    document.body.removeChild(element)
-    toast.success(t('letter.txtDownloaded'))
+    const fileName = `lettre-motivation-${data?.jobOffer?.company || 'document'}`
+    
+    try {
+      generateTextFile(editedLetter, fileName)
+      toast.success(t('letter.txtDownloaded'))
+    } catch (error) {
+      console.error('TXT generation error:', error)
+      toast.error(t('letter.txtError') || 'Erreur lors de la génération du fichier texte')
+    }
   }
 
   const handleSave = async () => {

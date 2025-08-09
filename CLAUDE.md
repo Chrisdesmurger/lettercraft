@@ -420,6 +420,24 @@ L'API Brevo implémente plusieurs couches de protection :
 ### CV Extraction
 Uses OpenAI File API with GPT-4-turbo model. Files are temporarily stored in `/tmp` and cleaned up after processing.
 
+### PDF Generation
+The application includes a dedicated PDF generation utility (`lib/pdf.ts`) for exporting letters:
+
+#### Key Functions
+- `generateLetterPdf(letterHtml, fileName, options?)` - Generates PDF from HTML string
+- `generatePdfFromElement(element, fileName, options?)` - Generates PDF from DOM element
+- `generateTextFile(content, fileName)` - Downloads content as text file
+
+#### Usage in Components
+- **LetterPreview**: Uses `generatePdfFromElement` for PDF export and `generateTextFile` for TXT export
+- **Configurable options**: margin, format (a4/letter/legal), orientation, quality, scale
+- **Error handling**: Try/catch blocks with user-friendly toast notifications
+
+#### Dependencies
+- `html2pdf.js` - Core PDF generation library
+- Supports high-quality output with customizable options
+- Automatic cleanup of temporary DOM elements and object URLs
+
 ### Error Handling
 Components use React Hot Toast for user-facing errors. API routes return structured error responses.
 
