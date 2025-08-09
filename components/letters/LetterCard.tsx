@@ -18,6 +18,7 @@ import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import toast from 'react-hot-toast'
 import { useI18n } from '@/lib/i18n-context'
+import { supabase } from '@/lib/supabase-client'
 
 type GeneratedLetter = Tables<'generated_letters'> & {
   job_offers: Tables<'job_offers'> | null
@@ -36,10 +37,18 @@ export default function LetterCard({ letter, onView }: LetterCardProps) {
   const handleDownload = async () => {
     setIsDownloading(true)
     try {
+      // Get the current session token
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (!session?.access_token) {
+        throw new Error('Non authentifié')
+      }
+
       const response = await fetch('/api/generate-letter-pdf', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({
           letterId: letter.id
@@ -47,7 +56,13 @@ export default function LetterCard({ letter, onView }: LetterCardProps) {
       })
 
       if (!response.ok) {
-        throw new Error(t('letter.pdfGenerationError'))
+        const errorText = await response.text()
+        console.error('PDF API Error:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorText
+        })
+        throw new Error(`${t('letter.pdfGenerationError')} (${response.status})`)
       }
 
       const blob = await response.blob()
