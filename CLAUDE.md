@@ -423,5 +423,71 @@ Uses OpenAI File API with GPT-4-turbo model. Files are temporarily stored in `/t
 ### Error Handling
 Components use React Hot Toast for user-facing errors. API routes return structured error responses.
 
+### Account Deletion Automation
+
+The application uses **cron-job.org** for automated account deletion maintenance:
+
+#### Architecture
+- **Automated cleanup**: Removes expired deletion requests (7+ days old, unconfirmed)
+- **Scheduled deletions**: Executes confirmed account deletions after 48h cooldown
+- **Stripe data handling**: Transfers subscription/invoice data to generic system user
+- **GDPR compliance**: Full audit logs and data anonymization
+
+#### Cron-Job.org Configuration
+
+**Service**: [cron-job.org](https://cron-job.org) (Free tier)
+
+**Job 1 - Cleanup Expired Requests (Every 6 hours)**:
+- URL: `https://lettercraft.vercel.app/api/cleanup`
+- Method: `POST`
+- Headers: `Content-Type: application/json`
+- Body:
+  ```json
+  {
+    "action": "cleanup_expired_requests",
+    "adminSecret": "lettercraft-admin-secret-2025"
+  }
+  ```
+- Schedule: `0 */6 * * *`
+
+**Job 2 - Execute Pending Deletions (Daily at 2:00 AM)**:
+- URL: `https://lettercraft.vercel.app/api/cleanup`  
+- Method: `POST`
+- Headers: `Content-Type: application/json`
+- Body:
+  ```json
+  {
+    "action": "execute_pending_deletions", 
+    "adminSecret": "lettercraft-admin-secret-2025"
+  }
+  ```
+- Schedule: `0 2 * * *`
+
+#### API Endpoints
+- `/api/cleanup` - Main maintenance endpoint with actions: `cleanup_expired_requests`, `execute_pending_deletions`, `full_maintenance`
+- `/api/setup-generic-user` - Creates system user for deleted account data preservation
+- `/api/debug-deletion` - Diagnostic tools for deletion troubleshooting
+
+#### Generic User System
+- **Purpose**: Preserves Stripe subscription/invoice data for accounting compliance
+- **Email**: `deleted-user@system.local`
+- **Metadata**: Original user UUID stored in `metadata.original_user_id`
+- **Setup**: Must be created via `/api/setup-generic-user` before first deletion
+
+#### Database Functions
+- `cleanup_expired_deletion_requests()` - Cancels unconfirmed requests after 7 days
+- `execute_hard_delete_user()` - Complete user deletion with Stripe data transfer
+- `execute_soft_delete_user()` - User anonymization with data preservation
+
+#### Environment Variables Required
+```env
+ADMIN_SECRET=lettercraft-admin-secret-2025
+```
+
+#### Monitoring
+- Health check: `GET /api/cleanup` returns system status and statistics
+- Audit logs: All operations logged in `audit_logs` table
+- Error handling: Non-blocking failures with detailed logging
+
 ### Authentication
 Supabase auth with session persistence. `AutoLogout` component handles session management.
