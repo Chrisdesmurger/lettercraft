@@ -421,22 +421,46 @@ L'API Brevo implémente plusieurs couches de protection :
 Uses OpenAI File API with GPT-4-turbo model. Files are temporarily stored in `/tmp` and cleaned up after processing.
 
 ### PDF Generation
-The application includes a dedicated PDF generation utility (`lib/pdf.ts`) for exporting letters:
+The application includes a comprehensive PDF generation system with multiple templates and customization options:
 
-#### Key Functions
+#### Core System (`lib/pdf.ts`)
 - `generateLetterPdf(letterHtml, fileName, options?)` - Generates PDF from HTML string
-- `generatePdfFromElement(element, fileName, options?)` - Generates PDF from DOM element
+- `generatePdfFromElement(element, fileName, options?)` - Generates PDF from DOM element  
+- `generateLetterPdfWithTemplate(letterData, fileName, options?)` - **NEW**: Uses predefined templates
 - `generateTextFile(content, fileName)` - Downloads content as text file
 
+#### Template System (`lib/pdf-templates.ts`)
+**4 Professional Templates Available:**
+- **Classic**: Traditional French style with Times New Roman (banking, legal, administration)
+- **Modern**: Clean contemporary design with Helvetica (tech, startups)
+- **Elegant**: Sophisticated with gradient header (consulting, luxury)
+- **Creative**: Colorful modern style with emojis (design, marketing)
+
+#### UI Components
+- **`PdfExportControls`**: Complete export interface with template selection
+- **`TemplateSelector`**: Standalone template picker with visual previews
+- **Integration examples**: Available in `examples/pdf-integration-example.tsx`
+
 #### Usage in Components
-- **LetterPreview**: Uses `generatePdfFromElement` for PDF export and `generateTextFile` for TXT export
-- **Configurable options**: margin, format (a4/letter/legal), orientation, quality, scale
-- **Error handling**: Try/catch blocks with user-friendly toast notifications
+- **LetterPreview**: Can use either legacy system or new template system
+- **LetterCard**: Supports both approaches for saved letters
+- **Configurable options**: margin, format (a4/letter/legal), orientation, quality, scale, templateId
+
+#### Advanced Features
+- **SSR-Safe**: Dynamic imports prevent server-side errors
+- **Template Customization**: Easy to add/modify templates
+- **Automatic Data Mapping**: Converts app data to template format
+- **Error Handling**: Comprehensive logging and user-friendly messages
+- **Performance**: Client-side generation, no server dependencies
 
 #### Dependencies
-- `html2pdf.js` - Core PDF generation library
+- `html2pdf.js` - Core PDF generation library (dynamically imported)
 - Supports high-quality output with customizable options
 - Automatic cleanup of temporary DOM elements and object URLs
+
+#### Documentation
+- Complete guide: `docs/PDF_TEMPLATES_GUIDE.md`
+- Integration examples: `examples/pdf-integration-example.tsx`
 
 ### Error Handling
 Components use React Hot Toast for user-facing errors. API routes return structured error responses.

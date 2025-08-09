@@ -22,7 +22,9 @@ import toast from 'react-hot-toast'
 import { supabase } from '@/lib/supabase-client'
 import { useUser } from '@/hooks/useUser'
 import { useI18n } from '@/lib/i18n-context'
-import { generatePdfFromElement, generateTextFile } from '@/lib/pdf'
+import { generatePdfFromElement, generateTextFile, generateLetterPdfWithTemplate } from '@/lib/pdf'
+import { type LetterData } from '@/lib/pdf-templates'
+import PdfExportControls from '@/components/pdf/PdfExportControls'
 
 interface LetterPreviewProps {
   data?: any
@@ -38,7 +40,31 @@ export default function LetterPreview({ data, onUpdate, onNext }: LetterPreviewP
   const [editedLetter, setEditedLetter] = useState(data?.generatedLetter || '')
   const [copied, setCopied] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [useNewPdfSystem, setUseNewPdfSystem] = useState(true) // Toggle pour nouveau/ancien système
   const letterRef = useRef<HTMLDivElement>(null)
+
+  // Convertir les données actuelles vers le format LetterData pour les modèles
+  const letterData: LetterData = {
+    content: editedLetter || data?.generatedLetter || '',
+    jobTitle: data?.jobOffer?.title || '',
+    company: data?.jobOffer?.company || '',
+    candidateName: data?.profile?.first_name && data?.profile?.last_name 
+      ? `${data.profile.first_name} ${data.profile.last_name}`
+      : user?.user_metadata?.first_name && user?.user_metadata?.last_name
+      ? `${user.user_metadata.first_name} ${user.user_metadata.last_name}`
+      : '',
+    candidateEmail: data?.profile?.email || user?.email || '',
+    candidatePhone: data?.profile?.phone || user?.user_metadata?.phone || '',
+    candidateAddress: data?.profile?.address || '',
+    location: data?.profile?.city || 'Paris',
+    date: new Date().toLocaleDateString('fr-FR', { 
+      day: 'numeric', 
+      month: 'long', 
+      year: 'numeric' 
+    })
+  }
+
+  const fileName = `lettre-motivation-${data?.jobOffer?.company || 'entreprise'}`
 
   const handleCopy = async () => {
     try {
@@ -197,26 +223,70 @@ export default function LetterPreview({ data, onUpdate, onNext }: LetterPreviewP
             </Button>
           </div>
           
+          {/* Export Actions - Choose between legacy and new template system */}
           <div className="flex gap-2">
-            <Button
-              onClick={handleDownloadTXT}
-              variant="outline"
-              size="sm"
-            >
-              <FileText className="h-4 w-4 mr-2" />
-              TXT
-            </Button>
-            
-            <Button
-              onClick={handleDownloadPDF}
-              size="sm"
-            >
-              <Download className="h-4 w-4 mr-2" />
-              PDF
-            </Button>
+            {useNewPdfSystem ? (
+              /* Nouveau système avec modèles - Interface intégrée */
+              <>
+                <Button
+                  onClick={handleDownloadTXT}
+                  variant="outline"
+                  size="sm"
+                >
+                  <FileText className="h-4 w-4 mr-2" />
+                  TXT
+                </Button>
+                <Button
+                  onClick={() => setUseNewPdfSystem(false)}
+                  variant="outline"
+                  size="sm"
+                  title="Basculer vers l'ancien système PDF"
+                >
+                  📄 PDF (Simple)
+                </Button>
+              </>
+            ) : (
+              /* Ancien système PDF */
+              <>
+                <Button
+                  onClick={handleDownloadTXT}
+                  variant="outline"
+                  size="sm"
+                >
+                  <FileText className="h-4 w-4 mr-2" />
+                  TXT
+                </Button>
+                
+                <Button
+                  onClick={handleDownloadPDF}
+                  size="sm"
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  PDF
+                </Button>
+                
+                <Button
+                  onClick={() => setUseNewPdfSystem(true)}
+                  variant="outline" 
+                  size="sm"
+                  title="Basculer vers les modèles PDF"
+                >
+                  🎨 Modèles
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </Card>
+
+      {/* Nouveau système PDF avec modèles */}
+      {useNewPdfSystem && (
+        <PdfExportControls 
+          letterData={letterData}
+          fileName={fileName}
+          className="mb-6"
+        />
+      )}
 
       {/* Letter preview/edit */}
       <Card className="p-8">
