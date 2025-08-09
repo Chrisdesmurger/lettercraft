@@ -128,7 +128,7 @@ async function executePendingDeletions() {
 
     for (const deletion of pendingDeletions) {
       try {
-        const userProfile = deletion.users_with_profiles
+        const userProfile = deletion.users_with_profiles as any
         console.log(`🗑️ Processing deletion for user ${deletion.user_id} (${userProfile.email})`)
         
         // Exécuter la suppression selon le type
