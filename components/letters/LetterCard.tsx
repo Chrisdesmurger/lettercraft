@@ -19,6 +19,7 @@ import { fr } from 'date-fns/locale'
 import toast from 'react-hot-toast'
 import { useI18n } from '@/lib/i18n-context'
 import { supabase } from '@/lib/supabase-client'
+import { generateLetterPdf } from '@/lib/pdf'
 
 type GeneratedLetter = Tables<'generated_letters'> & {
   job_offers: Tables<'job_offers'> | null
@@ -37,49 +38,82 @@ export default function LetterCard({ letter, onView }: LetterCardProps) {
   const handleDownload = async () => {
     setIsDownloading(true)
     try {
-      // Get the current session token
-      const { data: { session } } = await supabase.auth.getSession()
+      console.log('Starting PDF download for letter:', letter.id)
       
-      if (!session?.access_token) {
-        throw new Error('Non authentifié')
-      }
-
-      const response = await fetch('/api/generate-letter-pdf', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({
-          letterId: letter.id
-        })
-      })
-
-      if (!response.ok) {
-        const errorText = await response.text()
-        console.error('PDF API Error:', {
-          status: response.status,
-          statusText: response.statusText,
-          error: errorText
-        })
-        throw new Error(`${t('letter.pdfGenerationError')} (${response.status})`)
-      }
-
-      const blob = await response.blob()
-      const url = URL.createObjectURL(blob)
+      // Create formatted HTML content for the letter
+      const letterHtml = `
+        <!DOCTYPE html>
+        <html lang="fr">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Lettre de Motivation - ${letter.job_offers?.title || 'Poste'}</title>
+          <style>
+            @page { size: A4; margin: 2cm; }
+            body { 
+              font-family: 'Times New Roman', Times, serif; 
+              font-size: 12pt; 
+              line-height: 1.6; 
+              color: #333; 
+              margin: 0; 
+              padding: 20px;
+              background: white;
+            }
+            .header { text-align: right; margin-bottom: 2cm; }
+            .sender-info { font-size: 11pt; line-height: 1.4; }
+            .date-location { text-align: right; margin-bottom: 1.5cm; }
+            .recipient-info { margin-bottom: 1.5cm; }
+            .subject { font-weight: bold; margin-bottom: 1cm; text-decoration: underline; }
+            .content { text-align: justify; margin-bottom: 1.5cm; white-space: pre-wrap; }
+            .signature { text-align: right; margin-top: 2cm; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div class="sender-info">
+              <!-- Nom candidat à récupérer depuis le profil -->
+            </div>
+          </div>
+          
+          <div class="date-location">
+            ${new Date().toLocaleDateString('fr-FR', { 
+              day: 'numeric', 
+              month: 'long', 
+              year: 'numeric' 
+            })}
+          </div>
+          
+          <div class="recipient-info">
+            À l'attention du service recrutement<br>
+            ${letter.job_offers?.company || 'Entreprise'}
+          </div>
+          
+          <div class="subject">
+            Objet : Candidature pour le poste de ${letter.job_offers?.title || 'Poste'}
+          </div>
+          
+          <div class="content">${letter.content || 'Contenu de la lettre non disponible'}</div>
+          
+          <div class="signature">
+            Cordialement,<br>
+            <br>
+            <!-- Signature candidat -->
+          </div>
+        </body>
+        </html>
+      `
       
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `lettre-motivation-${letter.job_offers?.company || 'entreprise'}-${letter.job_offers?.title || 'poste'}.pdf`
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      URL.revokeObjectURL(url)
-
-      toast.success(t('letter.pdfDownloadSuccess'))
+      const fileName = `lettre-motivation-${letter.job_offers?.company || 'entreprise'}-${letter.job_offers?.title || 'poste'}`
+      
+      // Use our client-side PDF generation
+      await generateLetterPdf(letterHtml, fileName)
+      
+      console.log('PDF generation successful')
+      toast.success(t('letter.pdfDownloadSuccess') || 'PDF téléchargé avec succès')
+      
     } catch (error) {
-      console.error('Download error:', error)
-      toast.error(t('letter.pdfDownloadError'))
+      console.error('PDF download error:', error)
+      toast.error(t('letter.pdfDownloadError') || 'Erreur lors du téléchargement PDF')
     } finally {
       setIsDownloading(false)
     }
