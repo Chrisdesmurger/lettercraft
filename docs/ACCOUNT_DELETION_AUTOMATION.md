@@ -18,12 +18,11 @@ Le système de suppression automatique comprend :
   - `execute_pending_deletions` - Exécute les suppressions programmées
   - `full_maintenance` - Combinaison des deux actions
 
-### 2. GitHub Actions Workflow
-- **Fichier** : `.github/workflows/cleanup-maintenance.yml`
+### 2. Automatisation via Cron-Job.org
+- **Service externe** : [cron-job.org](https://cron-job.org) (gratuit)
 - **Planification** :
-  - Maintenance complète : tous les jours à 2h00 UTC
-  - Nettoyage rapide : toutes les 6 heures
-  - Exécution manuelle possible depuis l'interface GitHub
+  - Nettoyage : toutes les 6 heures (`0 */6 * * *`)
+  - Suppressions : quotidien à 2h00 UTC (`0 2 * * *`)
 
 ## ⚙️ Configuration Requise
 
@@ -33,42 +32,9 @@ Ajoutez ces variables dans votre `.env.local` :
 ADMIN_SECRET=votre-secret-admin-securise
 ```
 
-### 2. Secrets GitHub
-Dans votre repository GitHub, allez dans **Settings > Secrets and variables > Actions** et ajoutez :
-
-#### Repository Secrets
-- `ADMIN_SECRET` : Le même secret que dans votre .env.local
-
-#### Repository Variables  
-- `APP_URL` : L'URL de votre application (ex: `https://votre-app.vercel.app`)
-
 ## 🔧 Instructions de Mise en Place
 
-### Option 1 : GitHub Actions (Recommandé - Gratuit)
-
-1. **Configurer les secrets GitHub** :
-   ```bash
-   # Dans votre repository GitHub :
-   # Settings > Secrets and variables > Actions
-   # Ajouter :
-   ADMIN_SECRET = votre-secret-admin-securise
-   APP_URL = https://votre-app.vercel.app
-   ```
-
-2. **Pousser les fichiers** :
-   ```bash
-   git add .github/workflows/cleanup-maintenance.yml
-   git add app/api/cleanup/route.ts
-   git commit -m "feat: Add automated account deletion maintenance"
-   git push
-   ```
-
-3. **Vérifier l'activation** :
-   - Allez dans l'onglet **Actions** de votre repository GitHub
-   - Vous devriez voir le workflow "Account Deletion Maintenance"
-   - Testez avec **"Run workflow"** pour une exécution manuelle
-
-### Option 2 : Cron-Job.org (Service Externe Gratuit)
+### Configuration Cron-Job.org (Recommandé - Gratuit)
 
 1. **Inscrivez-vous** sur [cron-job.org](https://cron-job.org) (gratuit)
 
@@ -100,7 +66,7 @@ Dans votre repository GitHub, allez dans **Settings > Secrets and variables > Ac
      ```
    - Schedule : `0 2 * * *`
 
-### Option 3 : UptimeRobot (Monitoring + Cron Gratuit)
+### Alternative : UptimeRobot (Monitoring + Cron Gratuit)
 
 1. **Inscrivez-vous** sur [UptimeRobot](https://uptimerobot.com) (gratuit)
 
@@ -176,13 +142,13 @@ ORDER BY created_at DESC;
 
 ## 🔧 Dépannage
 
-### GitHub Actions ne se déclenche pas
-- Vérifiez que les secrets `ADMIN_SECRET` et `APP_URL` sont configurés
-- Assurez-vous que le workflow est dans la branche principale
-- Vérifiez l'onglet Actions pour voir les erreurs
+### Cron-Job.org ne fonctionne pas
+- Vérifiez que l'URL et le body JSON sont corrects
+- Testez manuellement avec curl d'abord
+- Vérifiez les logs d'exécution sur cron-job.org
 
 ### API retourne 403 Unauthorized
-- Vérifiez que `ADMIN_SECRET` est identique dans `.env.local` et GitHub Secrets
+- Vérifiez que `ADMIN_SECRET` est identique dans `.env.local` et cron-job.org
 - Testez manuellement avec curl
 
 ### API retourne 500 Internal Error
