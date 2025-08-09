@@ -93,61 +93,119 @@ async function cleanupExpiredRequests() {
 }
 
 // Helper function to ensure generic user exists
-async function ensureGenericUserExists(): Promise<boolean> {
-  const genericUserId = '00000000-0000-0000-0000-000000000001'
+async function ensureGenericUserExists(): Promise<string | null> {
+  const preferredGenericUserId = '00000000-0000-0000-0000-000000000001'
+  const genericEmail = 'deleted-user@system.local'
   
   try {
-    // Check if generic user exists
-    const { data: existingUser } = await supabaseAdmin.auth.admin.getUserById(genericUserId)
+    // First, check if the preferred generic user exists
+    const { data: existingUser } = await supabaseAdmin.auth.admin.getUserById(preferredGenericUserId)
     
     if (existingUser?.user) {
-      console.log('✅ Generic user already exists')
-      return true
+      console.log('✅ Preferred generic user already exists')
+      return preferredGenericUserId
     }
     
-    console.log('🔧 Creating generic user for deletion operations...')
+    // Check if a user with the generic email already exists
+    const { data: users, error: listError } = await supabaseAdmin.auth.admin.listUsers()
     
-    // Create generic user
-    const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
-      email: 'deleted-user@system.local',
-      password: 'system-user-no-login-' + Math.random().toString(36).substring(7),
-      email_confirm: true,
-      user_metadata: {
-        system_user: true,
-        purpose: 'deleted_accounts_placeholder',
-        created_by: 'account_deletion_system'
+    if (!listError && users?.users) {
+      const existingGenericUser = users.users.find(user => user.email === genericEmail)
+      
+      if (existingGenericUser) {
+        console.log(`✅ Found existing generic user with different ID: ${existingGenericUser.id}`)
+        
+        // Make sure this user has a profile
+        const { error: profileError } = await supabaseAdmin
+          .from('user_profiles')
+          .insert({
+            user_id: existingGenericUser.id,
+            first_name: 'Utilisateur',
+            last_name: 'Supprimé',
+            subscription_tier: 'free',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          })
+          .onConflict('user_id')
+          .merge()
+
+        if (profileError) {
+          console.warn('⚠️ Warning: Could not ensure generic user profile:', profileError.message)
+        }
+        
+        return existingGenericUser.id
       }
-    })
+    }
+    
+    console.log('🔧 Creating new generic user for deletion operations...')
+    
+    // Try to create with preferred ID first
+    let createError: any
+    let newUser: any
+    
+    try {
+      const result = await supabaseAdmin.auth.admin.createUser({
+        email: genericEmail,
+        password: 'system-user-no-login-' + Math.random().toString(36).substring(7),
+        email_confirm: true,
+        user_metadata: {
+          system_user: true,
+          purpose: 'deleted_accounts_placeholder',
+          created_by: 'account_deletion_system'
+        }
+      })
+      newUser = result.data
+      createError = result.error
+    } catch (error) {
+      createError = error
+    }
 
     if (createError) {
       console.error('❌ Error creating generic user:', createError)
-      return false
+      
+      // If it's an email conflict, try to find the existing user again
+      if (createError.code === 'email_exists') {
+        console.log('🔍 Email exists, attempting to find existing user...')
+        const { data: retryUsers } = await supabaseAdmin.auth.admin.listUsers()
+        const conflictUser = retryUsers?.users?.find(user => user.email === genericEmail)
+        
+        if (conflictUser) {
+          console.log(`✅ Using existing user with email conflict: ${conflictUser.id}`)
+          return conflictUser.id
+        }
+      }
+      
+      return null
     }
 
-    // Create profile for generic user
-    const actualUserId = newUser?.user?.id || genericUserId
-    const { error: profileError } = await supabaseAdmin
-      .from('user_profiles')
-      .insert({
-        user_id: actualUserId,
-        first_name: 'Utilisateur',
-        last_name: 'Supprimé',
-        subscription_tier: 'free',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      })
+    // Create profile for the new generic user
+    const actualUserId = newUser?.user?.id
+    if (actualUserId) {
+      const { error: profileError } = await supabaseAdmin
+        .from('user_profiles')
+        .insert({
+          user_id: actualUserId,
+          first_name: 'Utilisateur',
+          last_name: 'Supprimé',
+          subscription_tier: 'free',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
 
-    if (profileError) {
-      console.warn('⚠️ Warning: Could not create generic user profile:', profileError.message)
-      // Don't fail the operation if profile creation fails
+      if (profileError) {
+        console.warn('⚠️ Warning: Could not create generic user profile:', profileError.message)
+        // Don't fail the operation if profile creation fails
+      }
+
+      console.log('✅ Generic user created successfully')
+      return actualUserId
     }
-
-    console.log('✅ Generic user created successfully')
-    return true
+    
+    return null
     
   } catch (error) {
     console.error('❌ Error ensuring generic user exists:', error)
-    return false
+    return null
   }
 }
 
@@ -156,9 +214,11 @@ async function executePendingDeletions() {
   
   try {
     // Ensure generic user exists before any deletion operations
-    const genericUserReady = await ensureGenericUserExists()
-    if (!genericUserReady) {
+    const genericUserId = await ensureGenericUserExists()
+    if (!genericUserId) {
       console.warn('⚠️ Generic user not available, proceeding with caution...')
+    } else {
+      console.log(`✅ Generic user ready: ${genericUserId}`)
     }
     // Trouver les demandes confirmées prêtes pour suppression
     const { data: pendingDeletions, error } = await supabaseAdmin
