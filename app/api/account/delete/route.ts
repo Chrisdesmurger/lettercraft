@@ -4,9 +4,7 @@ import { securityMiddleware } from '@/lib/api-security'
 import { brevoEmailService } from '@/lib/brevo-client'
 import Stripe from 'stripe'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-07-30.basil',
-})
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
 // Schéma de validation pour la suppression de compte
 const deleteAccountSchema = {
