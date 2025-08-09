@@ -148,12 +148,11 @@ export default function SubscriptionTab({ user, userProfile, loading: profileLoa
       price: '0€',
       period: t('subscription.perMonth'),
       features: [
-        { name: `10 ${t('subscription.features.monthlyLetters')}`, included: true },
+        { name: t('subscription.features.monthlyLetters'), included: true },
         { name: t('subscription.features.basicTemplates'), included: true },
-        { name: t('subscription.features.emailSupport'), included: true },
         { name: t('subscription.features.multilingualGeneration'), included: false },
-        { name: t('subscription.features.premiumTemplates'), included: false },
-        { name: t('subscription.features.prioritySupport'), included: false },
+        { name: t('subscription.features.emailSupport'), included: false },
+        { name: t('subscription.features.customizableTone'), included: false },
       ]
     },
     {
@@ -164,10 +163,9 @@ export default function SubscriptionTab({ user, userProfile, loading: profileLoa
       popular: true,
       features: [
         { name: t('subscription.features.unlimitedLetters'), included: true },
-        { name: t('subscription.features.allTemplates'), included: true },
-        { name: t('subscription.features.prioritySupport247'), included: true },
+        { name: t('subscription.features.emailSupport'), included: true },
         { name: t('subscription.features.multilingualGeneration'), included: true },
-        { name: t('subscription.features.premiumTemplates'), included: true },
+        { name: t('subscription.features.customizableTone'), included: true },
         { name: t('subscription.features.advancedExport'), included: true },
       ]
     }

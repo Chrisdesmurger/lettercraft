@@ -1,0 +1,64 @@
+# Configuration cron pour le traitement des suppressions de comptes
+# 
+# Cette configuration doit être ajoutée au crontab du serveur de production
+# 
+# Installation:
+# 1. Copiez ce fichier sur le serveur
+# 2. Modifiez les chemins selon votre installation
+# 3. Ajoutez au crontab: crontab -e
+# 4. Ajoutez la ligne ci-dessous (en modifiant les chemins)
+# 
+# Variables d'environnement nécessaires:
+# - ADMIN_SECRET
+# - NEXT_PUBLIC_APP_URL
+# 
+# Logs: Les logs sont écrits dans /var/log/lettercraft/deletions.log
+# Rotation des logs: logrotate est configuré pour une rotation hebdomadaire
+
+# Traitement des suppressions de comptes programmées - Toutes les heures
+0 * * * * cd /path/to/lettercraft && /usr/bin/node scripts/process-deletions.js >> /var/log/lettercraft/deletions.log 2>&1
+
+# Nettoyage des logs de plus de 30 jours - Une fois par semaine
+0 2 * * 0 find /var/log/lettercraft -name "*.log" -mtime +30 -delete
+
+# Vérification de santé du système de suppression - Une fois par jour à 8h
+0 8 * * * cd /path/to/lettercraft && /usr/bin/node scripts/health-check-deletions.js >> /var/log/lettercraft/health.log 2>&1
+
+# ================================
+# EXEMPLES DE CONFIGURATIONS
+# ================================
+
+# Production - Traitement toutes les heures
+# 0 * * * * cd /app && node scripts/process-deletions.js >> /var/log/lettercraft/deletions.log 2>&1
+
+# Développement - Traitement toutes les 15 minutes pour les tests
+# */15 * * * * cd /home/dev/lettercraft && node scripts/process-deletions.js >> /tmp/deletions.log 2>&1
+
+# Test - Traitement manuel (désactivé par défaut)
+# # 0 12 * * * cd /app && node scripts/process-deletions.js
+
+# ================================
+# MONITORING ET ALERTES
+# ================================
+
+# Vérification que le processus fonctionne - Tous les jours à 9h
+# Envoie une alerte si aucune exécution récente
+# 0 9 * * * /usr/local/bin/check-cron-health.sh "deletion-processor" >> /var/log/lettercraft/monitoring.log 2>&1
+
+# ================================
+# SAUVEGARDES AVANT SUPPRESSION
+# ================================
+
+# Sauvegarde des données avant suppression définitive - Tous les jours à 3h
+# (Optionnel pour conformité supplémentaire)
+# 0 3 * * * cd /app && node scripts/backup-before-deletion.js >> /var/log/lettercraft/backup.log 2>&1
+
+# ================================
+# MAINTENANCE DE LA BASE DE DONNÉES
+# ================================
+
+# Nettoyage des logs d'audit anciens (> 2 ans) - Une fois par mois
+# 0 4 1 * * cd /app && node scripts/cleanup-audit-logs.js >> /var/log/lettercraft/maintenance.log 2>&1
+
+# Optimisation des tables de suppression - Une fois par semaine
+# 0 3 * * 0 cd /app && node scripts/optimize-deletion-tables.js >> /var/log/lettercraft/maintenance.log 2>&1

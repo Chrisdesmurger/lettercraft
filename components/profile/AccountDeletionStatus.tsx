@@ -1,0 +1,282 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { AlertTriangle, Clock, XCircle, CheckCircle } from 'lucide-react'
+import { supabase } from '@/lib/supabase-client'
+import { useI18n } from '@/lib/i18n-context'
+import toast from 'react-hot-toast'
+
+interface DeletionRequest {
+  id: string
+  status: 'pending' | 'confirmed' | 'cancelled' | 'completed'
+  deletion_type: string
+  scheduled_deletion_at: string
+  confirmed_at: string | null
+  created_at: string
+  reason: string | null
+}
+
+export default function AccountDeletionStatus() {
+  const { t, locale } = useI18n()
+  const [deletionRequest, setDeletionRequest] = useState<DeletionRequest | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [cancelling, setCancelling] = useState(false)
+
+  useEffect(() => {
+    loadDeletionRequest()
+  }, [])
+
+  const loadDeletionRequest = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) return
+
+      const { data, error } = await supabase
+        .from('account_deletion_requests')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .in('status', ['pending', 'confirmed'])
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single()
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error loading deletion request:', error)
+        return
+      }
+
+      setDeletionRequest(data)
+    } catch (error) {
+      console.error('Error loading deletion request:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const cancelDeletion = async () => {
+    if (!deletionRequest) return
+
+    setCancelling(true)
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (!session) {
+        toast.error(t('auth.sessionExpired'))
+        return
+      }
+
+      const response = await fetch('/api/account/delete?action=cancel', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({
+          confirmationToken: null // Will use user ID to find active requests
+        })
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        toast.error(result.error || t('account.deletion.cancelError'))
+        return
+      }
+
+      toast.success(t('account.deletion.cancelSuccess'))
+      setDeletionRequest(null)
+
+    } catch (error) {
+      console.error('Error cancelling deletion:', error)
+      toast.error(t('account.deletion.cancelError'))
+    } finally {
+      setCancelling(false)
+    }
+  }
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString(locale, {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+  }
+
+  const getTimeRemaining = (dateString: string) => {
+    const now = new Date()
+    const scheduledDate = new Date(dateString)
+    const diffMs = scheduledDate.getTime() - now.getTime()
+    
+    if (diffMs <= 0) {
+      return { text: t('account.deletion.imminent'), urgent: true }
+    }
+    
+    const diffHours = Math.ceil(diffMs / (1000 * 60 * 60))
+    
+    if (diffHours < 24) {
+      // Handle pluralization manually for hours
+      const hourText = diffHours === 1 ? 'heure' : 'heures'
+      const text = locale === 'en' ? (diffHours === 1 ? `in ${diffHours} hour` : `in ${diffHours} hours`) :
+                   locale === 'es' ? (diffHours === 1 ? `en ${diffHours} hora` : `en ${diffHours} horas`) :
+                   locale === 'de' ? (diffHours === 1 ? `in ${diffHours} Stunde` : `in ${diffHours} Stunden`) :
+                   locale === 'it' ? (diffHours === 1 ? `tra ${diffHours} ora` : `tra ${diffHours} ore`) :
+                   `dans ${diffHours} ${hourText}` // French default
+      
+      return { 
+        text,
+        urgent: diffHours <= 6 
+      }
+    } else {
+      const diffDays = Math.ceil(diffHours / 24)
+      // Handle pluralization manually for days
+      const dayText = diffDays === 1 ? 'jour' : 'jours'
+      const text = locale === 'en' ? (diffDays === 1 ? `in ${diffDays} day` : `in ${diffDays} days`) :
+                   locale === 'es' ? (diffDays === 1 ? `en ${diffDays} día` : `en ${diffDays} días`) :
+                   locale === 'de' ? (diffDays === 1 ? `in ${diffDays} Tag` : `in ${diffDays} Tagen`) :
+                   locale === 'it' ? (diffDays === 1 ? `tra ${diffDays} giorno` : `tra ${diffDays} giorni`) :
+                   `dans ${diffDays} ${dayText}` // French default
+                   
+      return { 
+        text,
+        urgent: false 
+      }
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+        <div className="animate-pulse flex items-center space-x-3">
+          <div className="w-5 h-5 bg-gray-300 rounded"></div>
+          <div className="flex-1 space-y-2">
+            <div className="h-4 bg-gray-300 rounded w-3/4"></div>
+            <div className="h-3 bg-gray-300 rounded w-1/2"></div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (!deletionRequest) {
+    return null
+  }
+
+  const timeRemaining = getTimeRemaining(deletionRequest.scheduled_deletion_at)
+  const isConfirmed = deletionRequest.status === 'confirmed'
+
+  return (
+    <div className={`border rounded-lg p-6 ${
+      timeRemaining.urgent 
+        ? 'bg-red-50 border-red-200' 
+        : isConfirmed 
+          ? 'bg-orange-50 border-orange-200'
+          : 'bg-yellow-50 border-yellow-200'
+    }`}>
+      <div className="flex items-start space-x-4">
+        <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
+          timeRemaining.urgent 
+            ? 'bg-red-100' 
+            : isConfirmed 
+              ? 'bg-orange-100'
+              : 'bg-yellow-100'
+        }`}>
+          {timeRemaining.urgent ? (
+            <AlertTriangle className="w-5 h-5 text-red-600" />
+          ) : isConfirmed ? (
+            <CheckCircle className="w-5 h-5 text-orange-600" />
+          ) : (
+            <Clock className="w-5 h-5 text-yellow-600" />
+          )}
+        </div>
+
+        <div className="flex-1">
+          <h3 className={`font-semibold ${
+            timeRemaining.urgent 
+              ? 'text-red-800' 
+              : isConfirmed 
+                ? 'text-orange-800'
+                : 'text-yellow-800'
+          }`}>
+            {isConfirmed ? t('account.deletion.confirmed') : t('account.deletion.pending')}
+          </h3>
+          
+          <div className={`text-sm mt-1 ${
+            timeRemaining.urgent 
+              ? 'text-red-700' 
+              : isConfirmed 
+                ? 'text-orange-700'
+                : 'text-yellow-700'
+          }`}>
+            <p className="mb-2">
+              {t('account.deletion.willBeDeleted', { 
+                type: deletionRequest.deletion_type === 'hard' 
+                  ? t('account.deletion.permanently') 
+                  : t('account.deletion.anonymized'),
+                date: formatDate(deletionRequest.scheduled_deletion_at)
+              })}
+            </p>
+            
+            <p className="font-medium">
+              {timeRemaining.urgent ? (
+                <span className="text-red-800">⚠️ {t('account.deletion.urgentWarning')}</span>
+              ) : (
+                <>{t('account.deletion.scheduledIn', { time: timeRemaining.text })}</>
+              )}
+            </p>
+
+            {!isConfirmed && (
+              <p className="mt-2 text-xs">
+                <strong>{t('account.deletion.actionRequired')}:</strong> {t('account.deletion.checkEmail')}
+              </p>
+            )}
+          </div>
+
+          {deletionRequest.reason && (
+            <div className="mt-3 p-3 bg-white bg-opacity-50 rounded border">
+              <div className="text-xs font-medium text-gray-600 mb-1">{t('account.deletion.reasonGiven')}:</div>
+              <div className="text-sm text-gray-700">{deletionRequest.reason}</div>
+            </div>
+          )}
+        </div>
+
+        <div className="flex-shrink-0">
+          <button
+            onClick={cancelDeletion}
+            disabled={cancelling}
+            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+              timeRemaining.urgent
+                ? 'bg-red-600 text-white hover:bg-red-700'
+                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+            }`}
+          >
+            {cancelling ? (
+              <div className="flex items-center space-x-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
+                <span>{t('account.deletion.cancelling')}</span>
+              </div>
+            ) : (
+              <>
+                <XCircle className="w-4 h-4 inline mr-1" />
+                {t('account.deletion.cancelButton')}
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+
+      {timeRemaining.urgent && (
+        <div className="mt-4 p-3 bg-red-100 border border-red-200 rounded">
+          <div className="flex items-center text-red-800 text-sm">
+            <AlertTriangle className="w-4 h-4 mr-2 flex-shrink-0" />
+            <div>
+              <strong>{t('account.deletion.lastChance')}</strong> {t('account.deletion.urgentMessage')}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}

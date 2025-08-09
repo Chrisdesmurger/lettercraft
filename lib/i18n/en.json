@@ -302,7 +302,8 @@
       "unlimitedLetters": "Unlimited letters",
       "allTemplates": "All templates",
       "prioritySupport247": "24/7 priority support",
-      "advancedExport": "Advanced export"
+      "advancedExport": "Advanced export",
+      "customizableTone": "Customizable tone"
     },
     "table": {
       "date": "Date",
@@ -501,12 +502,38 @@
     "questions": "questions",
     "generatingDesc": "Generating your personalized letter...",
     "questionOf": "Question {questionNumber} of {totalQuestions}",
+    "question1": {
+      "title": "Why are you particularly interested in this position?",
+      "placeholder": "Describe your motivation for this position and company. Show your knowledge of the company and explain why you want to work there..."
+    },
+    "question2": {
+      "title": "Which experience from your CV would you like to highlight?"
+    },
+    "question3": {
+      "title": "Which skills best match the job requirements?"
+    },
+    "question4": {
+      "title": "How do your values align with those of the company?",
+      "placeholder": "Explain how your personal and professional values correspond to the company culture..."
+    },
+    "question5": {
+      "title": "Are there any specific elements you would like to mention?",
+      "placeholder": "Personal projects, additional training, particular experiences that strengthen your application..."
+    },
     "question6": {
       "title": "In which language would you like to generate your cover letter?",
-      "detectedLanguage": "Automatically detected language",
+      "placeholder": "Select the language for your letter",
+      "detectedLanguage": "Automatically detected language: {language}",
       "french": "French",
       "english": "English",
       "spanish": "Spanish"
+    },
+    "validation": {
+      "required": "This field is required",
+      "min50chars": "Please enter at least 50 characters",
+      "min30chars": "Please enter at least 30 characters",
+      "selectExperience": "Please select an experience",
+      "selectSkills": "Please select at least one skill"
     }
   },
   "flow": {
@@ -542,5 +569,87 @@
     "company": "Company",
     "cvUsed": "CV used",
     "generatedOn": "Generated on"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "email": "Email",
+    "password": "Password",
+    "signin": "Sign in",
+    "pleaseLogin": "Please log in to continue",
+    "signup": "Sign up",
+    "logout": "Logout",
+    "noAccount": "No account?",
+    "haveAccount": "Already have an account?",
+    "loginSuccess": "Login successful!",
+    "registerSuccess": "Registration successful!",
+    "unknownError": "Unknown error",
+    "sessionExpired": "Session expired. Please log in again."
+  },
+  "account": {
+    "deletion": {
+      "confirmed": "Deletion confirmed",
+      "pending": "Deletion request pending",
+      "imminent": "Imminent",
+      "willBeDeleted": "Your account will be {type} on {date}",
+      "permanently": "permanently deleted",
+      "anonymized": "anonymized",
+      "urgentWarning": "Deletion imminent!",
+      "scheduledIn": "Deletion {time}",
+      "actionRequired": "Action required",
+      "checkEmail": "Check your email to confirm the deletion",
+      "reasonGiven": "Reason given",
+      "cancelButton": "Cancel deletion",
+      "cancelling": "Cancelling...",
+      "cancelError": "Error during cancellation",
+      "cancelSuccess": "Deletion request cancelled successfully",
+      "lastChance": "Last chance!",
+      "urgentMessage": "Your account will be deleted very soon. Click \"Cancel deletion\" if you change your mind.",
+      "title": "Account Deletion",
+      "subtitle": "This action is irreversible. All your data will be deleted.",
+      "warningTitle": "Warning: Permanent Deletion",
+      "warningIntro": "Deleting your account will result in:",
+      "warningList": {
+        "profile": "Deletion of your profile and personal information",
+        "cvs": "Deletion of all your uploaded CVs",
+        "letters": "Deletion of all your generated and saved letters",
+        "history": "Deletion of your usage history",
+        "subscription": "Immediate cancellation of your subscription (no refund)"
+      },
+      "gdprTitle": "GDPR Compliance",
+      "gdprDescription": "We respect your right to erasure under Article 17 of GDPR.",
+      "gdprInvoices": "Only your invoices will be kept anonymized for 7 years for legal accounting obligations.",
+      "gracePeriodTitle": "48-Hour Grace Period",
+      "gracePeriodDescription": "After email confirmation, you have 48 hours to cancel the deletion.",
+      "gracePeriodWarning": "After this period, the deletion will be final and irreversible.",
+      "deletionTypeTitle": "Deletion type",
+      "hardDelete": "Complete deletion (recommended)",
+      "hardDeleteDescription": "All your data is permanently deleted",
+      "softDelete": "Anonymization",
+      "softDeleteDescription": "Your data is anonymized but kept for statistics",
+      "reasonTitle": "Reason for deletion (optional)",
+      "reasonPlaceholder": "Help us improve our service by telling us why you're leaving...",
+      "passwordTitle": "Confirm your password *",
+      "passwordPlaceholder": "Your current password",
+      "emailConfirmationTitle": "Receive confirmation email",
+      "emailConfirmationDescription": "A confirmation link will be sent to your email address",
+      "acknowledgeTitle": "I understand the consequences *",
+      "acknowledgeDescription": "I understand that this action is irreversible and all my data will be deleted",
+      "passwordRequired": "Please enter your password",
+      "acknowledgeRequired": "Please confirm that you understand the consequences",
+      "apiError": "Error during deletion request",
+      "processing": "Processing...",
+      "confirmButton": "Confirm deletion",
+      "requestCreated": "Deletion request created",
+      "requestDescription": "Your account deletion request has been successfully registered.",
+      "emailSentTitle": "Confirmation email sent",
+      "emailSentDescription": "Check your email and click on the confirmation link to validate the deletion.",
+      "scheduledTitle": "Scheduled deletion",
+      "scheduledDescription": "Your account will be deleted on {date}",
+      "canCancelDescription": "You can cancel this request anytime before this date from your profile.",
+      "backToProfile": "Back to profile",
+      "backToHome": "Back to home",
+      "success": "Deletion request created successfully"
+    }
   }
 }

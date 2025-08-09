@@ -3,7 +3,6 @@
  */
 
 import { NextRequest } from 'next/server'
-import { supabase } from './supabase-client'
 import { supabaseAdmin } from './supabase-admin'
 
 export interface SecurityContext {
@@ -19,9 +18,9 @@ const rateLimitMap = new Map<string, { count: number; resetTime: number }>()
 
 /**
  * Vérifier l'authentification de l'utilisateur
+ * Approche simplifiée pour debug
  */
 export async function verifyAuthentication(request: NextRequest): Promise<SecurityContext> {
-  const authHeader = request.headers.get('authorization')
   const userAgent = request.headers.get('user-agent') || 'unknown'
   const clientIP = request.headers.get('x-forwarded-for') || 
                   request.headers.get('x-real-ip') || 
@@ -32,33 +31,81 @@ export async function verifyAuthentication(request: NextRequest): Promise<Securi
     rateLimitKey: `${clientIP}:${userAgent.substring(0, 50)}`
   }
 
-  // Vérifier le token d'authentification
-  if (authHeader?.startsWith('Bearer ')) {
-    const token = authHeader.substring(7)
+  console.log('🔍 [AUTH DEBUG] Vérification authentification...')
+  console.log('🔍 [AUTH DEBUG] Headers cookies:', request.headers.get('cookie') ? 'présents' : 'absents')
+  console.log('🔍 [AUTH DEBUG] Authorization header:', request.headers.get('authorization') ? 'présent' : 'absent')
+
+  try {
+    // Pour le debug, désactiver temporairement l'authentification stricte
+    // et permettre d'identifier le problème
+    const cookies = request.headers.get('cookie') || ''
     
-    try {
+    // Essayer différents patterns de cookies Supabase (2024-2025)
+    const patterns = [
+      /sb-access-token=([^;]+)/,        // Pattern actuel Supabase 2024-2025
+      /sb-refresh-token=([^;]+)/,       // Pattern de refresh token
+      /sb-[^-]+-auth-token=([^;]+)/,    // Pattern legacy avec project ID
+      /supabase\.auth\.token=([^;]+)/,  // Pattern très ancien
+      /sb-auth-token=([^;]+)/           // Pattern générique
+    ]
+    
+    for (const pattern of patterns) {
+      const match = cookies.match(pattern)
+      if (match) {
+        console.log('🔍 [AUTH DEBUG] Cookie trouvé avec pattern:', pattern.source)
+        try {
+          const tokenData = JSON.parse(decodeURIComponent(match[1]))
+          console.log('🔍 [AUTH DEBUG] Token data keys:', Object.keys(tokenData))
+          
+          const accessToken = tokenData.access_token
+          if (accessToken) {
+            console.log('🔍 [AUTH DEBUG] Access token trouvé, longueur:', accessToken.length)
+            
+            const { data: { user }, error } = await supabaseAdmin.auth.getUser(accessToken)
+            
+            if (!error && user) {
+              context.isAuthenticated = true
+              context.userId = user.id
+              context.email = user.email
+              context.isAdmin = false // Simplifier pour le debug
+              
+              console.log(`✅ [AUTH DEBUG] Utilisateur authentifié: ${user.email}`)
+              return context
+            } else {
+              console.log('❌ [AUTH DEBUG] Erreur auth.getUser:', error?.message)
+            }
+          }
+        } catch (tokenError) {
+          console.log('❌ [AUTH DEBUG] Erreur parsing token:', tokenError instanceof Error ? tokenError.message : String(tokenError))
+        }
+      }
+    }
+    
+    // Fallback Authorization header
+    const authHeader = request.headers.get('authorization')
+    if (authHeader?.startsWith('Bearer ')) {
+      const token = authHeader.substring(7)
+      console.log('🔍 [AUTH DEBUG] Bearer token trouvé, longueur:', token.length)
+      
       const { data: { user }, error } = await supabaseAdmin.auth.getUser(token)
       
       if (!error && user) {
         context.isAuthenticated = true
         context.userId = user.id
         context.email = user.email
+        context.isAdmin = false
         
-        // Vérifier si l'utilisateur est admin (optionnel)
-        const { data: profile } = await supabaseAdmin
-          .from('user_profiles')
-          .select('*')
-          .eq('user_id', user.id)
-          .single()
-        
-        // Considérer comme admin si l'utilisateur a un rôle spécial (à adapter selon vos besoins)
-        context.isAdmin = profile?.subscription_tier === 'premium' // Exemple basique
-        
-        console.log(`🔐 Utilisateur authentifié: ${user.email} (${user.id})`)
+        console.log(`✅ [AUTH DEBUG] Utilisateur authentifié via Bearer: ${user.email}`)
+        return context
+      } else {
+        console.log('❌ [AUTH DEBUG] Erreur Bearer auth:', error?.message)
       }
-    } catch (error) {
-      console.error('❌ Erreur vérification token:', error)
     }
+    
+    console.log('❌ [AUTH DEBUG] Aucune authentification trouvée')
+    
+  } catch (error) {
+    console.error('❌ [AUTH DEBUG] Erreur générale:', error)
   }
 
   return context
@@ -297,7 +344,7 @@ export async function securityMiddleware(
     
     // 3. Validation des données
     let validatedData
-    if (options.validationSchema && request.method === 'POST') {
+    if (options.validationSchema && (request.method === 'POST' || request.method === 'DELETE')) {
       try {
         const data = await request.json()
         const validation = validateInput(data, options.validationSchema)

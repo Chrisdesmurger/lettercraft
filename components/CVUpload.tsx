@@ -43,28 +43,65 @@ export default function CVUpload({ data, onUpdate, onNext }: CVUploadProps) {
         setUploading(true)
 
         try {
-            // Upload to Supabase Storage
-            const fileExt = file.name.split('.').pop()
-            const fileName = `${user.id}-cv-${Date.now()}.${fileExt}`
+            console.log('🔍 [CV-UPLOAD] Starting CV upload and extraction for file:', file.name)
+            
+            // Get user session for authentication
+            const { data: { session } } = await supabase.auth.getSession()
+            if (!session) {
+                throw new Error('Session expirée. Veuillez vous reconnecter.')
+            }
 
-            const { data: uploadData, error: uploadError } = await supabase.storage
-                .from('cvs')
-                .upload(fileName, file)
+            // Upload to Supabase Storage via API (évite CORS)
+            console.log('🔍 [CV-UPLOAD] Uploading via API...')
+            const uploadFormData = new FormData()
+            uploadFormData.append('file', file)
 
-            if (uploadError) throw uploadError
+            const uploadResponse = await fetch('/api/upload-cv', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${session.access_token}`
+                },
+                body: uploadFormData
+            })
 
-            // Here you can add CV text extraction
-            // For example with a Cloud function or API
+            if (!uploadResponse.ok) {
+                const errorData = await uploadResponse.json()
+                console.error('❌ [CV-UPLOAD] Upload API error:', errorData)
+                throw new Error(errorData.error || 'Erreur lors de l\'upload')
+            }
 
-            // For demo purposes, we simulate extraction
+            const uploadResult = await uploadResponse.json()
+            console.log('✅ [CV-UPLOAD] File uploaded to storage:', uploadResult.data.path)
+
+            // Extract CV data using OpenAI API
+            console.log('🔍 [CV-UPLOAD] Starting CV text extraction...')
+            const formData = new FormData()
+            formData.append('file', file)
+
+            const extractResponse = await fetch('/api/extract-cv', {
+                method: 'POST',
+                body: formData
+            })
+
+            if (!extractResponse.ok) {
+                const errorData = await extractResponse.json()
+                console.error('❌ [CV-UPLOAD] Extraction API error:', errorData)
+                throw new Error(errorData.error || 'Erreur lors de l\'extraction du CV')
+            }
+
+            const extractedInfo = await extractResponse.json()
+            console.log('✅ [CV-UPLOAD] CV extracted successfully:', extractedInfo)
+
+            // Combine storage info with extracted data
             const extractedData = {
                 fileName: file.name,
-                uploadPath: uploadData.path,
-                // Extracted data (to implement with OCR/parsing)
-                extractedText: 'CV uploaded successfully',
-                skills: [],
-                experiences: [],
-                education: []
+                uploadPath: uploadResult.data.path,
+                extractedText: 'CV analysé avec succès',
+                first_name: extractedInfo.first_name || '',
+                last_name: extractedInfo.last_name || '',
+                skills: extractedInfo.skills || [],
+                experiences: extractedInfo.experiences || [],
+                education: extractedInfo.education || []
             }
 
             setCvData(extractedData)
