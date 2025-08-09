@@ -5,8 +5,6 @@
  * from HTML content using html2pdf.js library.
  */
 
-import html2pdf from 'html2pdf.js'
-
 /**
  * PDF generation options interface
  */
@@ -34,6 +32,18 @@ const DEFAULT_PDF_OPTIONS: Required<PdfOptions> = {
 }
 
 /**
+ * Dynamically imports html2pdf.js only on client-side
+ */
+async function getHtml2Pdf() {
+  if (typeof window === 'undefined') {
+    throw new Error('html2pdf can only be used on the client side')
+  }
+  
+  const html2pdf = await import('html2pdf.js')
+  return html2pdf.default
+}
+
+/**
  * Generates and downloads a PDF from HTML content
  * 
  * @param letterHtml - The HTML content to convert to PDF
@@ -46,6 +56,11 @@ export async function generateLetterPdf(
   fileName: string,
   options: PdfOptions = {}
 ): Promise<void> {
+  // Ensure we're on the client side
+  if (typeof window === 'undefined') {
+    throw new Error('PDF generation is only available on the client side')
+  }
+  
   const mergedOptions = { ...DEFAULT_PDF_OPTIONS, ...options }
   
   // Create a temporary element with the HTML content
@@ -81,6 +96,7 @@ export async function generateLetterPdf(
   console.log('About to call html2pdf...')
 
   try {
+    const html2pdf = await getHtml2Pdf()
     const pdfInstance = html2pdf().set(opt).from(element)
     console.log('html2pdf instance created, calling save...')
     await pdfInstance.save()
@@ -111,6 +127,11 @@ export async function generatePdfFromElement(
   fileName: string,
   options: PdfOptions = {}
 ): Promise<void> {
+  // Ensure we're on the client side
+  if (typeof window === 'undefined') {
+    throw new Error('PDF generation is only available on the client side')
+  }
+  
   console.log('generatePdfFromElement called:', {
     fileName,
     elementTag: element.tagName,
@@ -145,6 +166,7 @@ export async function generatePdfFromElement(
   console.log('About to call html2pdf...')
 
   try {
+    const html2pdf = await getHtml2Pdf()
     const pdfInstance = html2pdf().set(opt).from(element)
     console.log('html2pdf instance created, calling save...')
     await pdfInstance.save()
