@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { User, Settings, CreditCard, FileText, LogOut } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase-client'
 import { Card, CardContent } from '@/components/ui/card'
 import ProfileTab from './tabs/ProfileTab'
@@ -19,7 +19,16 @@ export default function ProfileLayout() {
     const { t } = useI18n()
     const [activeTab, setActiveTab] = useState<TabType>('profile')
     const router = useRouter()
+    const searchParams = useSearchParams()
     const { user, userProfile, loading, refreshProfile } = useUserSubscription()
+
+    // Lire le paramètre tab de l'URL au chargement du composant
+    useEffect(() => {
+        const tabParam = searchParams.get('tab') as TabType
+        if (tabParam && ['profile', 'cv', 'settings', 'subscription'].includes(tabParam)) {
+            setActiveTab(tabParam)
+        }
+    }, [searchParams])
 
     const handleLogout = async () => {
         await supabase.auth.signOut()
