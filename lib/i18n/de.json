@@ -486,7 +486,11 @@
     "backToDashboard": "Zurück zum Dashboard",
     "createNew": "Neuen Brief erstellen",
     "view": "Ansehen",
-    "generatedOn": "Erstellt am {date}"
+    "generatedOn": "Erstellt am {date}",
+    "exportOptions": "Export-Optionen",
+    "fileName": "Dateiname",
+    "format": "Format",
+    "highQuality": "hohe Qualität"
   },
   "questionnaire": {
     "experience": "Erfahrung",
@@ -691,5 +695,34 @@
         "subscriptionCancelledNote": "Sie erhalten eine Bestätigungs-E-Mail. Sie können die Kontolöschung noch vor dem geplanten Datum widerrufen."
       }
     }
+  },
+  "pdfTemplates": {
+    "title": "Vorlage wählen",
+    "subtitle": "Wählen Sie den Stil für Ihr Anschreiben",
+    "titleFull": "Brief-Vorlage wählen",
+    "subtitleFull": "Wählen Sie eine Vorlage, die zu Ihrer Branche passt",
+    "close": "Schließen",
+    "templatesAvailable": "Verfügbare Vorlagen",
+    "templates": {
+      "classic": {
+        "name": "Klassisch",
+        "description": "Traditioneller französischer Stil mit Times New Roman"
+      },
+      "modern": {
+        "name": "Modern", 
+        "description": "Sauberes und zeitgemäßes Design"
+      },
+      "elegant": {
+        "name": "Elegant",
+        "description": "Anspruchsvolles Design mit Farbakzenten"
+      },
+      "creative": {
+        "name": "Kreativ",
+        "description": "Modernes und farbenfrohes Design für kreative Berufe"
+      }
+    },
+    "preview": "Vorschau",
+    "select": "Auswählen",
+    "selected": "Ausgewählt"
   }
 }

@@ -486,7 +486,11 @@
     "backToDashboard": "Volver al panel",
     "createNew": "Crear nueva carta",
     "view": "Ver",
-    "generatedOn": "Generada el {date}"
+    "generatedOn": "Generada el {date}",
+    "exportOptions": "Opciones de exportación",
+    "fileName": "Nombre del archivo",
+    "format": "Formato",
+    "highQuality": "alta calidad"
   },
   "questionnaire": {
     "experience": "Experiencia",
@@ -651,5 +655,34 @@
       "backToHome": "Volver al inicio",
       "success": "Solicitud de eliminación creada con éxito"
     }
+  },
+  "pdfTemplates": {
+    "title": "Elegir una plantilla",
+    "subtitle": "Selecciona el estilo de tu carta de presentación",
+    "titleFull": "Elegir una plantilla de carta",
+    "subtitleFull": "Selecciona una plantilla que se adapte a tu sector de actividad",
+    "close": "Cerrar",
+    "templatesAvailable": "Plantillas disponibles",
+    "templates": {
+      "classic": {
+        "name": "Clásico",
+        "description": "Estilo tradicional francés con Times New Roman"
+      },
+      "modern": {
+        "name": "Moderno", 
+        "description": "Diseño limpio y contemporáneo"
+      },
+      "elegant": {
+        "name": "Elegante",
+        "description": "Diseño sofisticado con toques de color"
+      },
+      "creative": {
+        "name": "Creativo",
+        "description": "Diseño moderno y colorido para profesiones creativas"
+      }
+    },
+    "preview": "Vista previa",
+    "select": "Seleccionar",
+    "selected": "Seleccionado"
   }
 }

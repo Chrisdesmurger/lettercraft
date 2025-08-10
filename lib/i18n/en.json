@@ -486,7 +486,11 @@
     "backToDashboard": "Back to dashboard",
     "createNew": "Create new letter",
     "view": "View",
-    "generatedOn": "Generated on {date}"
+    "generatedOn": "Generated on {date}",
+    "exportOptions": "Export options",
+    "fileName": "File name",
+    "format": "Format",
+    "highQuality": "high quality"
   },
   "questionnaire": {
     "experience": "Experience",
@@ -651,5 +655,34 @@
       "backToHome": "Back to home",
       "success": "Deletion request created successfully"
     }
+  },
+  "pdfTemplates": {
+    "title": "Choose a template",
+    "subtitle": "Select the style for your cover letter",
+    "titleFull": "Choose a letter template",
+    "subtitleFull": "Select a template that matches your industry",
+    "close": "Close",
+    "templatesAvailable": "Available templates",
+    "templates": {
+      "classic": {
+        "name": "Classic",
+        "description": "Traditional French style with Times New Roman"
+      },
+      "modern": {
+        "name": "Modern", 
+        "description": "Clean and contemporary design"
+      },
+      "elegant": {
+        "name": "Elegant",
+        "description": "Sophisticated design with color touches"
+      },
+      "creative": {
+        "name": "Creative",
+        "description": "Modern and colorful design for creative professions"
+      }
+    },
+    "preview": "Preview",
+    "select": "Select",
+    "selected": "Selected"
   }
 }

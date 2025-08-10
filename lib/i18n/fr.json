@@ -486,7 +486,11 @@
     "backToDashboard": "Retour au tableau de bord",
     "createNew": "Créer une nouvelle lettre",
     "view": "Voir",
-    "generatedOn": "Générée le {date}"
+    "generatedOn": "Générée le {date}",
+    "exportOptions": "Options d'export",
+    "fileName": "Nom du fichier",
+    "format": "Format",
+    "highQuality": "haute qualité"
   },
   "questionnaire": {
     "experience": "Expérience",
@@ -691,5 +695,34 @@
         "subscriptionCancelledNote": "Vous recevrez un email de confirmation. Vous pouvez encore annuler la suppression de compte avant la date programmée."
       }
     }
+  },
+  "pdfTemplates": {
+    "title": "Choisir un modèle",
+    "subtitle": "Sélectionnez le style de votre lettre de motivation",
+    "titleFull": "Choisir un modèle de lettre",
+    "subtitleFull": "Sélectionnez un modèle qui correspond à votre secteur d'activité",
+    "close": "Fermer",
+    "templatesAvailable": "Modèles disponibles",
+    "templates": {
+      "classic": {
+        "name": "Classique",
+        "description": "Style traditionnel français avec Times New Roman"
+      },
+      "modern": {
+        "name": "Moderne", 
+        "description": "Design épuré et contemporain"
+      },
+      "elegant": {
+        "name": "Élégant",
+        "description": "Design sophistiqué avec touches de couleur"
+      },
+      "creative": {
+        "name": "Créatif",
+        "description": "Design moderne et coloré pour les métiers créatifs"
+      }
+    },
+    "preview": "Aperçu",
+    "select": "Sélectionner",
+    "selected": "Sélectionné"
   }
 }

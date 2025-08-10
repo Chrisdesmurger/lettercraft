@@ -486,7 +486,11 @@
     "backToDashboard": "Torna alla dashboard",
     "createNew": "Crea una nuova lettera",
     "view": "Visualizza",
-    "generatedOn": "Generata il {date}"
+    "generatedOn": "Generata il {date}",
+    "exportOptions": "Opzioni di esportazione",
+    "fileName": "Nome del file",
+    "format": "Formato",
+    "highQuality": "alta qualità"
   },
   "questionnaire": {
     "experience": "Esperienza",
@@ -691,5 +695,34 @@
         "subscriptionCancelledNote": "Riceverai un'email di conferma. Puoi ancora annullare l'eliminazione dell'account prima della data programmata."
       }
     }
+  },
+  "pdfTemplates": {
+    "title": "Scegli un modello",
+    "subtitle": "Seleziona lo stile per la tua lettera di presentazione",
+    "titleFull": "Scegli un modello di lettera",
+    "subtitleFull": "Seleziona un modello che corrisponda al tuo settore di attività",
+    "close": "Chiudi",
+    "templatesAvailable": "Modelli disponibili",
+    "templates": {
+      "classic": {
+        "name": "Classico",
+        "description": "Stile tradizionale francese con Times New Roman"
+      },
+      "modern": {
+        "name": "Moderno", 
+        "description": "Design pulito e contemporaneo"
+      },
+      "elegant": {
+        "name": "Elegante",
+        "description": "Design sofisticato con tocchi di colore"
+      },
+      "creative": {
+        "name": "Creativo",
+        "description": "Design moderno e colorato per professioni creative"
+      }
+    },
+    "preview": "Anteprima",
+    "select": "Seleziona",
+    "selected": "Selezionato"
   }
 }
