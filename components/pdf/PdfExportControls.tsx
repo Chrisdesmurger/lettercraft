@@ -47,11 +47,11 @@ export default function PdfExportControls({
       await generateLetterPdfWithTemplate(letterData, fileName, options)
       
       console.log('PDF generation successful')
-      toast.success('PDF téléchargé avec succès')
+      toast.success(t('letter.pdfDownloaded'))
       
     } catch (error) {
       console.error('PDF generation error:', error)
-      toast.error(`Erreur lors de la génération du PDF: ${error instanceof Error ? error.message : 'Erreur inconnue'}`)
+      toast.error(`${t('letter.generateError')}: ${error instanceof Error ? error.message : t('auth.unknownError')}`)
     } finally {
       setIsGeneratingPdf(false)
     }
@@ -61,10 +61,10 @@ export default function PdfExportControls({
     setIsGeneratingTxt(true)
     try {
       generateTextFile(letterData.content, fileName)
-      toast.success('Fichier texte téléchargé')
+      toast.success(t('letter.txtDownloaded'))
     } catch (error) {
       console.error('TXT generation error:', error)
-      toast.error('Erreur lors de la génération du fichier texte')
+      toast.error(t('letter.generateError'))
     } finally {
       setIsGeneratingTxt(false)
     }
@@ -78,17 +78,17 @@ export default function PdfExportControls({
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <Settings className="h-5 w-5 text-muted-foreground" />
-              <h3 className="font-semibold">Options d'export</h3>
+              <h3 className="font-semibold">{t('letter.exportOptions')}</h3>
             </div>
             <Badge variant="outline" className="text-xs">
-              Modèles disponibles: 4
+              {t('pdfTemplates.templatesAvailable')}: 4
             </Badge>
           </div>
 
           {/* Sélecteur de modèle */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-muted-foreground">
-              Modèle de lettre
+              {t('pdfTemplates.titleFull')}
             </label>
             <TemplateSelector
               selectedTemplateId={selectedTemplateId}
@@ -107,7 +107,7 @@ export default function PdfExportControls({
               {isGeneratingPdf ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Génération...
+                  {t('common.generating')}
                 </>
               ) : (
                 <>
@@ -126,7 +126,7 @@ export default function PdfExportControls({
               {isGeneratingTxt ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Export...
+                  {t('common.downloading')}
                 </>
               ) : (
                 <>
@@ -139,9 +139,9 @@ export default function PdfExportControls({
 
           {/* Informations sur le fichier */}
           <div className="text-xs text-muted-foreground bg-muted/50 p-2 rounded">
-            <strong>Nom du fichier:</strong> {fileName}.pdf<br />
-            <strong>Format:</strong> A4, haute qualité<br />
-            <strong>Modèle:</strong> {selectedTemplateId}
+            <strong>{t('letter.fileName')}:</strong> {fileName}.pdf<br />
+            <strong>{t('letter.format')}:</strong> A4, {t('letter.highQuality')}<br />
+            <strong>{t('pdfTemplates.title')}:</strong> {t(`pdfTemplates.templates.${selectedTemplateId}.name`)}
           </div>
         </div>
       </CardContent>

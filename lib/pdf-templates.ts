@@ -2,6 +2,7 @@
  * PDF Templates for Letter Generation
  * 
  * This module provides different PDF templates with various styles and layouts
+ * PDF content is in French with dynamic content from AI generation
  */
 
 export interface LetterData {
@@ -25,7 +26,7 @@ export interface PdfTemplate {
 }
 
 /**
- * Template 1: Classique Français (Default)
+ * Template 1: Classique Français
  * Style traditionnel avec police Times New Roman
  */
 const classicTemplate: PdfTemplate = {

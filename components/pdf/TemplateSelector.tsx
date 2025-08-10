@@ -14,6 +14,7 @@ import {
   Zap
 } from 'lucide-react'
 import { PDF_TEMPLATES, PdfTemplate } from '@/lib/pdf-templates'
+import { useI18n } from '@/lib/i18n-context'
 
 interface TemplateSelectorProps {
   selectedTemplateId?: string
@@ -41,6 +42,7 @@ export default function TemplateSelector({
   className = ''
 }: TemplateSelectorProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const { t } = useI18n()
   
   const selectedTemplate = PDF_TEMPLATES.find(t => t.id === selectedTemplateId) || PDF_TEMPLATES[0]
 
@@ -57,7 +59,7 @@ export default function TemplateSelector({
         onClick={() => setIsOpen(!isOpen)}
       >
         <Palette className="h-4 w-4 mr-2" />
-        Modèle: {selectedTemplate.name}
+        {t('pdfTemplates.title')}: {t(`pdfTemplates.templates.${selectedTemplate.id}.name`)}
       </Button>
       
       {isOpen && (
@@ -67,7 +69,7 @@ export default function TemplateSelector({
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-semibold flex items-center">
                   <Palette className="h-5 w-5 mr-2" />
-                  Choisir un modèle de lettre
+                  {t('pdfTemplates.titleFull')}
                 </h2>
                 <Button variant="outline" onClick={() => setIsOpen(false)}>
                   ✕
@@ -93,12 +95,12 @@ export default function TemplateSelector({
                     <CardTitle className="flex items-center justify-between">
                       <div className="flex items-center">
                         <Icon className="h-5 w-5 mr-2" />
-                        {template.name}
+                        {t(`pdfTemplates.templates.${template.id}.name`)}
                       </div>
                       {isSelected && (
                         <Badge variant="default" className="bg-green-500">
                           <Check className="h-3 w-3 mr-1" />
-                          Sélectionné
+                          {t('pdfTemplates.selected')}
                         </Badge>
                       )}
                     </CardTitle>
@@ -106,7 +108,7 @@ export default function TemplateSelector({
                   
                   <CardContent>
                     <p className="text-sm text-muted-foreground mb-3">
-                      {template.description}
+                      {t(`pdfTemplates.templates.${template.id}.description`)}
                     </p>
                     
                     {/* Aperçu miniature du style */}
@@ -165,11 +167,11 @@ export default function TemplateSelector({
           
               <div className="flex justify-between items-center pt-4 border-t mt-6">
                 <p className="text-sm text-muted-foreground">
-                  Sélectionnez un modèle qui correspond à votre secteur d'activité
+                  {t('pdfTemplates.subtitleFull')}
                 </p>
                 <Button variant="outline" onClick={() => setIsOpen(false)}>
                   <Eye className="h-4 w-4 mr-2" />
-                  Fermer
+                  {t('pdfTemplates.close')}
                 </Button>
               </div>
             </div>

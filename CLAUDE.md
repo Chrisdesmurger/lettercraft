@@ -421,7 +421,7 @@ L'API Brevo implémente plusieurs couches de protection :
 Uses OpenAI File API with GPT-4-turbo model. Files are temporarily stored in `/tmp` and cleaned up after processing.
 
 ### PDF Generation
-The application includes a comprehensive PDF generation system with multiple templates and customization options:
+The application includes a comprehensive PDF generation system with multiple templates and multilingual UI:
 
 #### Core System (`lib/pdf.ts`)
 - `generateLetterPdf(letterHtml, fileName, options?)` - Generates PDF from HTML string
@@ -431,19 +431,33 @@ The application includes a comprehensive PDF generation system with multiple tem
 
 #### Template System (`lib/pdf-templates.ts`)
 **4 Professional Templates Available:**
-- **Classic**: Traditional French style with Times New Roman (banking, legal, administration)
-- **Modern**: Clean contemporary design with Helvetica (tech, startups)
-- **Elegant**: Sophisticated with gradient header (consulting, luxury)
-- **Creative**: Colorful modern style with emojis (design, marketing)
+- **Classique**: Traditional French style with Times New Roman (banking, legal, administration)
+- **Moderne**: Clean contemporary design with Helvetica (tech, startups)
+- **Élégant**: Sophisticated with gradient header (consulting, luxury)
+- **Créatif**: Colorful modern style with emojis (design, marketing)
+
+#### Multilingual UI Support
+**Template selection interface translated in 5 languages:**
+- **5 Languages Supported**: French (fr), English (en), Spanish (es), German (de), Italian (it)
+- **UI Translations**: Template names, descriptions, and selection interface in all languages
+- **i18n Integration**: Uses existing `lib/i18n` system under `pdfTemplates` key
+- **PDF Content**: Templates generate French business letters with dynamic AI content
+- **Consistent Experience**: UI language follows user's selected locale
+
+#### Template Content Strategy
+- **French Format**: All PDF templates use standard French business letter format
+- **Dynamic Content**: Letter content comes from AI generation in user's chosen language
+- **Cultural Consistency**: Maintains French business correspondence conventions
+- **AI Integration**: AI-generated content is inserted into structured French templates
 
 #### UI Components
 - **`PdfExportControls`**: Complete export interface with template selection
-- **`TemplateSelector`**: Standalone template picker with visual previews
+- **`TemplateSelector`**: Standalone template picker with visual previews and translations
 - **Integration examples**: Available in `examples/pdf-integration-example.tsx`
 
 #### Usage in Components
-- **LetterPreview**: Can use either legacy system or new template system
-- **LetterCard**: Supports both approaches for saved letters
+- **LetterPreview**: Template selection UI shows translated names/descriptions
+- **LetterCard**: Supports template selection with localized interface
 - **Configurable options**: margin, format (a4/letter/legal), orientation, quality, scale, templateId
 
 #### Advanced Features
@@ -452,9 +466,11 @@ The application includes a comprehensive PDF generation system with multiple tem
 - **Automatic Data Mapping**: Converts app data to template format
 - **Error Handling**: Comprehensive logging and user-friendly messages
 - **Performance**: Client-side generation, no server dependencies
+- **Consistent Translation System**: Leverages existing i18n infrastructure for UI only
 
 #### Dependencies
 - `html2pdf.js` - Core PDF generation library (dynamically imported)
+- `lib/i18n` - Existing internationalization system for UI translations
 - Supports high-quality output with customizable options
 - Automatic cleanup of temporary DOM elements and object URLs
 
@@ -533,3 +549,8 @@ ADMIN_SECRET=lettercraft-admin-secret-2025
 
 ### Authentication
 Supabase auth with session persistence. `AutoLogout` component handles session management.
+
+## Translation System
+- **Multilingual UI Implementation**: Ensure translation of all UI for the following languages
+  - Add multilingual support across all UI components
+  - Traduire en multilingue toutes les UI que tu implementer (FR, EN, ES, GE, IT)
