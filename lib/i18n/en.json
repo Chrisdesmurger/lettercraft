@@ -68,21 +68,6 @@
     "refreshing": "Refreshing...",
     "optional": "optional"
   },
-  "auth": {
-    "login": "Login",
-    "register": "Register",
-    "email": "Email",
-    "password": "Password",
-    "signin": "Sign in",
-    "pleaseLogin": "Please log in to continue",
-    "signup": "Sign up",
-    "logout": "Logout",
-    "noAccount": "No account?",
-    "haveAccount": "Already have an account?",
-    "loginSuccess": "Login successful!",
-    "registerSuccess": "Registration successful!",
-    "unknownError": "Unknown error"
-  },
   "profile": {
     "title": "My Profile",
     "subtitle": "Manage your information and settings",
@@ -588,7 +573,27 @@
     "loginSuccess": "Login successful!",
     "registerSuccess": "Registration successful!",
     "unknownError": "Unknown error",
-    "sessionExpired": "Session expired. Please log in again."
+    "sessionExpired": "Session expired. Please log in again.",
+    "forgotPassword": "Forgot password?",
+    "forgotPasswordTitle": "Reset your password",
+    "forgotPasswordDesc": "Enter your email address and we'll send you a link to reset your password.",
+    "sendResetLink": "Send reset link",
+    "resetEmailSent": "Reset email sent!",
+    "resetEmailDesc": "Check your email inbox and click on the link to reset your password.",
+    "backToLogin": "Back to login",
+    "resetError": "Error sending password reset email",
+    "resetSuccess": "A password reset email has been sent to your address",
+    "resetPasswordTitle": "New password",
+    "resetPasswordDesc": "Choose a new secure password for your account.",
+    "newPassword": "New password",
+    "confirmNewPassword": "Confirm password",
+    "updatePassword": "Update password",
+    "updating": "Updating...",
+    "passwordMismatch": "Passwords do not match",
+    "passwordTooShort": "Password must be at least 6 characters long",
+    "passwordUpdateSuccess": "Your password has been successfully updated!",
+    "linkExpired": "Link expired",
+    "linkExpiredDesc": "This password reset link has expired or is no longer valid."
   },
   "account": {
     "deletion": {
@@ -683,6 +688,9 @@
     },
     "preview": "Preview",
     "select": "Select",
-    "selected": "Selected"
+    "selected": "Selected",
+    "premiumOnly": "Premium only",
+    "upgradeRequired": "Upgrade required",
+    "upgradeMessage": "Upgrade to Premium to access all templates"
   }
 }
