@@ -467,6 +467,30 @@ The application includes a comprehensive PDF generation system with multiple tem
 - **Error Handling**: Comprehensive logging and user-friendly messages
 - **Performance**: Client-side generation, no server dependencies
 - **Consistent Translation System**: Leverages existing i18n infrastructure for UI only
+- **Subscription-Based Access Control**: Premium template restrictions for free users
+
+#### Template Access Restrictions
+The PDF template system implements subscription-based access control:
+
+**Free Users:**
+- Access only to the 'classic' template
+- Premium templates are visually blurred and non-interactive
+- Lock icon overlay on restricted templates
+- "Premium" badges on inaccessible templates
+- Upgrade prompts in export controls
+
+**Premium Users:**
+- Full access to all 4 templates (classic, modern, elegant, creative)
+- No visual restrictions or prompts
+
+**Implementation Details:**
+- Client-side access control in `TemplateSelector` and `PdfExportControls`
+- Uses `useUserProfile()` hook to check `subscription_tier`
+- Automatic fallback to 'classic' template for unauthorized selections
+- Multilingual support for restriction messages in 5 languages
+- Visual feedback with blur effects and lock icons
+- **Upgrade buttons**: Direct links to subscription page (`/profile?tab=subscription`)
+- Test component available: `components/pdf/PdfTemplateTest.tsx`
 
 #### Dependencies
 - `html2pdf.js` - Core PDF generation library (dynamically imported)

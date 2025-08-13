@@ -8,13 +8,17 @@ import {
   Download,
   FileText,
   Settings,
-  Loader2
+  Loader2,
+  Sparkles,
+  ExternalLink
 } from 'lucide-react'
 import toast from 'react-hot-toast'
+import Link from 'next/link'
 import TemplateSelector from './TemplateSelector'
 import { generateLetterPdfWithTemplate, generateTextFile, type PdfOptions } from '@/lib/pdf'
 import { type LetterData } from '@/lib/pdf-templates'
 import { useI18n } from '@/lib/i18n-context'
+import { useUserProfile } from '@/hooks/useUserProfile'
 
 interface PdfExportControlsProps {
   letterData: LetterData
@@ -28,9 +32,25 @@ export default function PdfExportControls({
   className = '' 
 }: PdfExportControlsProps) {
   const { t } = useI18n()
+  const { profile } = useUserProfile()
   const [selectedTemplateId, setSelectedTemplateId] = useState('classic')
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false)
   const [isGeneratingTxt, setIsGeneratingTxt] = useState(false)
+  
+  const isPremium = profile?.subscription_tier === 'premium'
+  const premiumTemplates = ['modern', 'elegant', 'creative']
+  
+  // S'assurer que l'utilisateur free ne peut pas sélectionner un template premium
+  const handleTemplateSelect = (templateId: string) => {
+    if (!isPremium && premiumTemplates.includes(templateId)) {
+      // Si l'utilisateur n'est pas premium et essaie de sélectionner un template premium,
+      // revenir au template classic
+      setSelectedTemplateId('classic')
+      toast.error(t('pdfTemplates.upgradeMessage'))
+    } else {
+      setSelectedTemplateId(templateId)
+    }
+  }
 
   const handleDownloadPDF = async () => {
     setIsGeneratingPdf(true)
@@ -92,8 +112,28 @@ export default function PdfExportControls({
             </label>
             <TemplateSelector
               selectedTemplateId={selectedTemplateId}
-              onTemplateSelect={setSelectedTemplateId}
+              onTemplateSelect={handleTemplateSelect}
             />
+            {!isPremium && (
+              <div className="text-xs text-muted-foreground bg-blue-50 border border-blue-200 p-3 rounded">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start space-x-2">
+                    <Sparkles className="h-4 w-4 text-blue-500 mt-0.5" />
+                    <div>
+                      <p className="font-medium text-blue-700">{t('pdfTemplates.upgradeRequired')}</p>
+                      <p className="text-blue-600">{t('pdfTemplates.upgradeMessage')}</p>
+                    </div>
+                  </div>
+                  <Link href="/profile?tab=subscription">
+                    <Button size="sm" className="ml-3 h-7 text-xs">
+                      <Sparkles className="h-3 w-3 mr-1" />
+                      {t('subscription.upgradeToPremium')}
+                      <ExternalLink className="h-3 w-3 ml-1" />
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Boutons d'export */}
