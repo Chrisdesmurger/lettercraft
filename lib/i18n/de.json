@@ -68,21 +68,6 @@
     "refreshing": "Aktualisieren...",
     "optional": "optional"
   },
-  "auth": {
-    "login": "Anmelden",
-    "register": "Registrieren",
-    "email": "E-Mail",
-    "password": "Passwort",
-    "signin": "Anmelden",
-    "pleaseLogin": "Bitte melden Sie sich an, um fortzufahren",
-    "signup": "Registrieren",
-    "logout": "Abmelden",
-    "noAccount": "Kein Konto?",
-    "haveAccount": "Haben Sie bereits ein Konto?",
-    "loginSuccess": "Anmeldung erfolgreich!",
-    "registerSuccess": "Registrierung erfolgreich!",
-    "unknownError": "Unbekannter Fehler"
-  },
   "profile": {
     "title": "Mein Profil",
     "subtitle": "Verwalten Sie Ihre Informationen und Einstellungen",
@@ -588,7 +573,27 @@
     "loginSuccess": "Anmeldung erfolgreich!",
     "registerSuccess": "Registrierung erfolgreich!",
     "unknownError": "Unbekannter Fehler",
-    "sessionExpired": "Sitzung abgelaufen. Bitte melden Sie sich erneut an."
+    "sessionExpired": "Sitzung abgelaufen. Bitte melden Sie sich erneut an.",
+    "forgotPassword": "Passwort vergessen?",
+    "forgotPasswordTitle": "Passwort zurücksetzen",
+    "forgotPasswordDesc": "Geben Sie Ihre E-Mail-Adresse ein und wir senden Ihnen einen Link zum Zurücksetzen Ihres Passworts.",
+    "sendResetLink": "Reset-Link senden",
+    "resetEmailSent": "Reset-E-Mail gesendet!",
+    "resetEmailDesc": "Überprüfen Sie Ihr E-Mail-Postfach und klicken Sie auf den Link, um Ihr Passwort zurückzusetzen.",
+    "backToLogin": "Zurück zur Anmeldung",
+    "resetError": "Fehler beim Senden der Passwort-Reset-E-Mail",
+    "resetSuccess": "Eine Passwort-Reset-E-Mail wurde an Ihre Adresse gesendet",
+    "resetPasswordTitle": "Neues Passwort",
+    "resetPasswordDesc": "Wählen Sie ein neues sicheres Passwort für Ihr Konto.",
+    "newPassword": "Neues Passwort",
+    "confirmNewPassword": "Passwort bestätigen",
+    "updatePassword": "Passwort aktualisieren",
+    "updating": "Aktualisierung...",
+    "passwordMismatch": "Passwörter stimmen nicht überein",
+    "passwordTooShort": "Das Passwort muss mindestens 6 Zeichen lang sein",
+    "passwordUpdateSuccess": "Ihr Passwort wurde erfolgreich aktualisiert!",
+    "linkExpired": "Link abgelaufen",
+    "linkExpiredDesc": "Dieser Passwort-Reset-Link ist abgelaufen oder nicht mehr gültig."
   },
   "account": {
     "deletion": {
@@ -723,6 +728,9 @@
     },
     "preview": "Vorschau",
     "select": "Auswählen",
-    "selected": "Ausgewählt"
+    "selected": "Ausgewählt",
+    "premiumOnly": "Nur Premium",
+    "upgradeRequired": "Upgrade erforderlich",
+    "upgradeMessage": "Upgraden Sie auf Premium, um alle Vorlagen zu nutzen"
   }
 }

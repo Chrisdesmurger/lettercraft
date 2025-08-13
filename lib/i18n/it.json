@@ -68,21 +68,6 @@
     "refreshing": "Aggiornamento...",
     "optional": "opzionale"
   },
-  "auth": {
-    "login": "Accedi",
-    "register": "Registrati",
-    "email": "Email",
-    "password": "Password",
-    "signin": "Accedi",
-    "pleaseLogin": "Effettua l'accesso per continuare",
-    "signup": "Registrati",
-    "logout": "Disconnetti",
-    "noAccount": "Non hai un account?",
-    "haveAccount": "Hai già un account?",
-    "loginSuccess": "Accesso riuscito!",
-    "registerSuccess": "Registrazione riuscita!",
-    "unknownError": "Errore sconosciuto"
-  },
   "profile": {
     "title": "Il Mio Profilo",
     "subtitle": "Gestisci le tue informazioni e impostazioni",
@@ -588,7 +573,27 @@
     "loginSuccess": "Accesso riuscito!",
     "registerSuccess": "Registrazione riuscita!",
     "unknownError": "Errore sconosciuto",
-    "sessionExpired": "Sessione scaduta. Effettua nuovamente l'accesso."
+    "sessionExpired": "Sessione scaduta. Effettua nuovamente l'accesso.",
+    "forgotPassword": "Password dimenticata?",
+    "forgotPasswordTitle": "Reimposta la tua password",
+    "forgotPasswordDesc": "Inserisci il tuo indirizzo email e ti invieremo un link per reimpostare la password.",
+    "sendResetLink": "Invia link di reset",
+    "resetEmailSent": "Email di reset inviata!",
+    "resetEmailDesc": "Controlla la tua casella email e clicca sul link per reimpostare la password.",
+    "backToLogin": "Torna al login",
+    "resetError": "Errore nell'invio dell'email di reset password",
+    "resetSuccess": "Un'email di reset password è stata inviata al tuo indirizzo",
+    "resetPasswordTitle": "Nuova password",
+    "resetPasswordDesc": "Scegli una nuova password sicura per il tuo account.",
+    "newPassword": "Nuova password",
+    "confirmNewPassword": "Conferma password",
+    "updatePassword": "Aggiorna password",
+    "updating": "Aggiornamento...",
+    "passwordMismatch": "Le password non corrispondono",
+    "passwordTooShort": "La password deve essere lunga almeno 6 caratteri",
+    "passwordUpdateSuccess": "La tua password è stata aggiornata con successo!",
+    "linkExpired": "Link scaduto",
+    "linkExpiredDesc": "Questo link di reset password è scaduto o non più valido."
   },
   "account": {
     "deletion": {
@@ -723,6 +728,9 @@
     },
     "preview": "Anteprima",
     "select": "Seleziona",
-    "selected": "Selezionato"
+    "selected": "Selezionato",
+    "premiumOnly": "Solo Premium",
+    "upgradeRequired": "Aggiornamento richiesto",
+    "upgradeMessage": "Aggiorna a Premium per accedere a tutti i modelli"
   }
 }

@@ -11,16 +11,23 @@ import {
   Sparkles,
   FileText,
   Briefcase,
-  Zap
+  Zap,
+  Lock,
+  ExternalLink
 } from 'lucide-react'
 import { PDF_TEMPLATES, PdfTemplate } from '@/lib/pdf-templates'
 import { useI18n } from '@/lib/i18n-context'
+import { useUserProfile } from '@/hooks/useUserProfile'
+import Link from 'next/link'
 
 interface TemplateSelectorProps {
   selectedTemplateId?: string
   onTemplateSelect: (templateId: string) => void
   className?: string
 }
+
+// Définir les modèles premium (tous sauf 'classic')
+const PREMIUM_TEMPLATES = ['modern', 'elegant', 'creative']
 
 const templateIcons = {
   classic: FileText,
@@ -43,10 +50,21 @@ export default function TemplateSelector({
 }: TemplateSelectorProps) {
   const [isOpen, setIsOpen] = useState(false)
   const { t } = useI18n()
+  const { profile } = useUserProfile()
   
   const selectedTemplate = PDF_TEMPLATES.find(t => t.id === selectedTemplateId) || PDF_TEMPLATES[0]
+  const isPremium = profile?.subscription_tier === 'premium'
+  
+  // Fonction pour vérifier si un template est accessible
+  const isTemplateAccessible = (templateId: string) => {
+    return templateId === 'classic' || isPremium
+  }
 
   const handleTemplateSelect = (templateId: string) => {
+    // Vérifier l'accès au template
+    if (!isTemplateAccessible(templateId)) {
+      return // Ne pas permettre la sélection si pas d'accès
+    }
     onTemplateSelect(templateId)
     setIsOpen(false)
   }
@@ -80,22 +98,43 @@ export default function TemplateSelector({
             {PDF_TEMPLATES.map((template) => {
               const Icon = templateIcons[template.id as keyof typeof templateIcons] || FileText
               const isSelected = template.id === selectedTemplateId
+              const isAccessible = isTemplateAccessible(template.id)
+              const isPremiumTemplate = PREMIUM_TEMPLATES.includes(template.id)
               
               return (
                 <Card 
                   key={template.id}
-                  className={`cursor-pointer transition-all duration-200 ${
-                    isSelected 
-                      ? 'ring-2 ring-primary border-primary' 
-                      : 'hover:shadow-md'
-                  } ${templateColors[template.id as keyof typeof templateColors]}`}
+                  className={`transition-all duration-200 ${
+                    isAccessible
+                      ? `cursor-pointer ${
+                          isSelected 
+                            ? 'ring-2 ring-primary border-primary' 
+                            : 'hover:shadow-md'
+                        }`
+                      : 'cursor-not-allowed opacity-50'
+                  } ${templateColors[template.id as keyof typeof templateColors]} ${
+                    !isAccessible ? 'blur-[2px] hover:blur-[1px]' : ''
+                  }`}
                   onClick={() => handleTemplateSelect(template.id)}
                 >
-                  <CardHeader className="pb-3">
+                  {!isAccessible && (
+                    <div className="absolute inset-0 bg-black bg-opacity-20 rounded-lg flex items-center justify-center z-10">
+                      <div className="bg-white bg-opacity-90 rounded-full p-2 shadow-lg">
+                        <Lock className="h-5 w-5 text-gray-600" />
+                      </div>
+                    </div>
+                  )}
+                  <CardHeader className="pb-3 relative">
                     <CardTitle className="flex items-center justify-between">
                       <div className="flex items-center">
                         <Icon className="h-5 w-5 mr-2" />
                         {t(`pdfTemplates.templates.${template.id}.name`)}
+                        {isPremiumTemplate && (
+                          <Badge variant="secondary" className="ml-2 text-xs">
+                            <Sparkles className="h-3 w-3 mr-1" />
+                            Premium
+                          </Badge>
+                        )}
                       </div>
                       {isSelected && (
                         <Badge variant="default" className="bg-green-500">
@@ -166,9 +205,20 @@ export default function TemplateSelector({
           </div>
           
               <div className="flex justify-between items-center pt-4 border-t mt-6">
-                <p className="text-sm text-muted-foreground">
-                  {t('pdfTemplates.subtitleFull')}
-                </p>
+                <div className="flex items-center space-x-3">
+                  <p className="text-sm text-muted-foreground">
+                    {t('pdfTemplates.subtitleFull')}
+                  </p>
+                  {!isPremium && (
+                    <Link href="/profile?tab=subscription">
+                      <Button size="sm" className="h-7 text-xs">
+                        <Sparkles className="h-3 w-3 mr-1" />
+                        {t('subscription.upgradeToPremium')}
+                        <ExternalLink className="h-3 w-3 ml-1" />
+                      </Button>
+                    </Link>
+                  )}
+                </div>
                 <Button variant="outline" onClick={() => setIsOpen(false)}>
                   <Eye className="h-4 w-4 mr-2" />
                   {t('pdfTemplates.close')}

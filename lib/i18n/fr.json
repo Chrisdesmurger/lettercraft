@@ -82,7 +82,27 @@
     "loginSuccess": "Connexion reussie !",
     "registerSuccess": "Inscription reussie !",
     "unknownError": "Erreur inconnue",
-    "sessionExpired": "Session expirée. Veuillez vous reconnecter."
+    "sessionExpired": "Session expirée. Veuillez vous reconnecter.",
+    "forgotPassword": "Mot de passe oublié ?",
+    "forgotPasswordTitle": "Réinitialiser votre mot de passe",
+    "forgotPasswordDesc": "Saisissez votre adresse email et nous vous enverrons un lien pour réinitialiser votre mot de passe.",
+    "sendResetLink": "Envoyer le lien de réinitialisation",
+    "resetEmailSent": "Email de réinitialisation envoyé !",
+    "resetEmailDesc": "Vérifiez votre boîte email et cliquez sur le lien pour réinitialiser votre mot de passe.",
+    "backToLogin": "Retour à la connexion",
+    "resetError": "Erreur lors de l'envoi de l'email de réinitialisation",
+    "resetSuccess": "Un email de réinitialisation a été envoyé à votre adresse",
+    "resetPasswordTitle": "Nouveau mot de passe",
+    "resetPasswordDesc": "Choisissez un nouveau mot de passe sécurisé pour votre compte.",
+    "newPassword": "Nouveau mot de passe",
+    "confirmNewPassword": "Confirmer le mot de passe",
+    "updatePassword": "Mettre à jour le mot de passe",
+    "updating": "Mise à jour...",
+    "passwordMismatch": "Les mots de passe ne correspondent pas",
+    "passwordTooShort": "Le mot de passe doit contenir au moins 6 caractères",
+    "passwordUpdateSuccess": "Votre mot de passe a été mis à jour avec succès!",
+    "linkExpired": "Lien expiré",
+    "linkExpiredDesc": "Ce lien de réinitialisation de mot de passe a expiré ou n'est plus valide."
   },
   "profile": {
     "title": "Mon Profil",
@@ -574,22 +594,6 @@
     "cvUsed": "CV utilisé",
     "generatedOn": "Généré le"
   },
-  "auth": {
-    "login": "Connexion",
-    "register": "Inscription",
-    "email": "Email",
-    "password": "Mot de passe",
-    "signin": "Se connecter",
-    "pleaseLogin": "Veuillez vous connecter pour continuer",
-    "signup": "S'inscrire",
-    "logout": "Déconnexion",
-    "noAccount": "Pas de compte?",
-    "haveAccount": "Vous avez déjà un compte ?",
-    "loginSuccess": "Connexion reussie !",
-    "registerSuccess": "Inscription reussie !",
-    "unknownError": "Erreur inconnue",
-    "sessionExpired": "Session expirée. Veuillez vous reconnecter."
-  },
   "account": {
     "deletion": {
       "confirmed": "Suppression confirmée",
@@ -723,6 +727,9 @@
     },
     "preview": "Aperçu",
     "select": "Sélectionner",
-    "selected": "Sélectionné"
+    "selected": "Sélectionné",
+    "premiumOnly": "Premium uniquement",
+    "upgradeRequired": "Mise à niveau requise",
+    "upgradeMessage": "Passez à Premium pour accéder à tous les modèles"
   }
 }
