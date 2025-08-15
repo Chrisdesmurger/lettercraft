@@ -732,5 +732,60 @@
     "premiumOnly": "Solo Premium",
     "upgradeRequired": "Aggiornamento richiesto",
     "upgradeMessage": "Aggiorna a Premium per accedere a tutti i modelli"
+  },
+  "reviews": {
+    "modal": {
+      "title": "Come valuteresti questa lettera?",
+      "description": "Il tuo feedback ci aiuta a migliorare la qualità delle lettere generate."
+    },
+    "rating": {
+      "label": "Valutazione",
+      "labels": {
+        "1": "Molto insoddisfatto",
+        "2": "Insoddisfatto", 
+        "3": "Neutrale",
+        "4": "Soddisfatto",
+        "5": "Molto soddisfatto"
+      }
+    },
+    "feedback": {
+      "label": "Commento (opzionale)",
+      "placeholder": "Condividi le tue impressioni su questa lettera...",
+      "optional": "Opzionale",
+      "charactersRemaining": "{count} caratteri rimanenti"
+    },
+    "categories": {
+      "label": "Aspetti da migliorare (opzionale)",
+      "content": "Contenuto",
+      "style": "Stile", 
+      "relevance": "Rilevanza",
+      "length": "Lunghezza",
+      "categoryLabel": "Categoria {category}",
+      "selectUpTo": "Seleziona fino a {max} categorie (opzionale)",
+      "selectedCount": "{selected}/{max} categorie selezionate"
+    },
+    "actions": {
+      "skip": "Salta",
+      "submit": "Invia",
+      "submitting": "Invio in corso...",
+      "leaveReview": "Lascia una recensione",
+      "alreadyReviewed": "Già recensito"
+    },
+    "submitSuccess": "Grazie per il tuo feedback!",
+    "submitError": "Errore nell'invio della valutazione",
+    "errors": {
+      "alreadyReviewed": "Hai già valutato questa lettera",
+      "rateLimitExceeded": "Troppi tentativi. Riprova più tardi.",
+      "submissionError": "Errore di invio"
+    },
+    "badge": {
+      "contributor": "Collaboratore",
+      "description": "Grazie per aver valutato almeno 3 lettere!"
+    },
+    "scrollIndicator": {
+      "waitingForFeedback": "In attesa del tuo feedback...",
+      "readingComplete": "Lettura completata",
+      "percentRead": "{percent}% letto"
+    }
   }
 }

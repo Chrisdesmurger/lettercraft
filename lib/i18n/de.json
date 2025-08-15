@@ -732,5 +732,60 @@
     "premiumOnly": "Nur Premium",
     "upgradeRequired": "Upgrade erforderlich",
     "upgradeMessage": "Upgraden Sie auf Premium, um alle Vorlagen zu nutzen"
+  },
+  "reviews": {
+    "modal": {
+      "title": "Wie bewerten Sie diesen Brief?",
+      "description": "Ihr Feedback hilft uns, die Qualität der generierten Briefe zu verbessern."
+    },
+    "rating": {
+      "label": "Bewertung",
+      "labels": {
+        "1": "Sehr unzufrieden",
+        "2": "Unzufrieden", 
+        "3": "Neutral",
+        "4": "Zufrieden",
+        "5": "Sehr zufrieden"
+      }
+    },
+    "feedback": {
+      "label": "Kommentar (optional)",
+      "placeholder": "Teilen Sie Ihre Gedanken zu diesem Brief mit...",
+      "optional": "Optional",
+      "charactersRemaining": "{count} Zeichen verbleibend"
+    },
+    "categories": {
+      "label": "Verbesserungsbereiche (optional)",
+      "content": "Inhalt",
+      "style": "Stil", 
+      "relevance": "Relevanz",
+      "length": "Länge",
+      "categoryLabel": "Kategorie {category}",
+      "selectUpTo": "Wählen Sie bis zu {max} Kategorien (optional)",
+      "selectedCount": "{selected}/{max} Kategorien ausgewählt"
+    },
+    "actions": {
+      "skip": "Überspringen",
+      "submit": "Senden",
+      "submitting": "Wird gesendet...",
+      "leaveReview": "Bewertung abgeben",
+      "alreadyReviewed": "Bereits bewertet"
+    },
+    "submitSuccess": "Vielen Dank für Ihr Feedback!",
+    "submitError": "Fehler beim Senden Ihrer Bewertung",
+    "errors": {
+      "alreadyReviewed": "Sie haben diesen Brief bereits bewertet",
+      "rateLimitExceeded": "Zu viele Versuche. Bitte versuchen Sie es später erneut.",
+      "submissionError": "Übertragungsfehler"
+    },
+    "badge": {
+      "contributor": "Mitwirkender",
+      "description": "Vielen Dank für die Bewertung von mindestens 3 Briefen!"
+    },
+    "scrollIndicator": {
+      "waitingForFeedback": "Warten auf Ihr Feedback...",
+      "readingComplete": "Lesen abgeschlossen",
+      "percentRead": "{percent}% gelesen"
+    }
   }
 }

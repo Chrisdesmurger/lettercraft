@@ -450,6 +450,58 @@ export type Database = {
           updated_at?: string | null;
         };
       };
+      feedback_categories: {
+        Row: {
+          key: string;
+          label_fr: string;
+          label_en: string;
+          created_at: string;
+        };
+        Insert: {
+          key: string;
+          label_fr: string;
+          label_en: string;
+          created_at?: string;
+        };
+        Update: {
+          key?: string;
+          label_fr?: string;
+          label_en?: string;
+          created_at?: string;
+        };
+      };
+      letter_reviews: {
+        Row: {
+          id: string;
+          letter_id: string;
+          user_id: string;
+          rating: number;
+          feedback: string | null;
+          categories: string[];
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          letter_id: string;
+          user_id: string;
+          rating: number;
+          feedback?: string | null;
+          categories?: string[];
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          letter_id?: string;
+          user_id?: string;
+          rating?: number;
+          feedback?: string | null;
+          categories?: string[];
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
     };
   };
 };
@@ -496,4 +548,6 @@ export const db = {
   jobOffers: () => supabase.from("job_offers"),
   letterQuestionnaireResponses: () => supabase.from("letter_questionnaire_responses"),
   generatedLetters: () => supabase.from("generated_letters"),
+  letterReviews: () => supabase.from("letter_reviews"),
+  feedbackCategories: () => supabase.from("feedback_categories"),
 };

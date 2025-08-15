@@ -19,6 +19,7 @@ The application requires these environment variables in `.env.local`:
 - `NEXT_PUBLIC_SUPABASE_URL` - Supabase project URL
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Supabase anonymous key
 - `OPENAI_API_KEY` - OpenAI API key for letter generation and CV extraction
+- `NEXT_PUBLIC_REVIEW_DELAY_SECONDS` - Delay before showing review modal in seconds (default: 60)
 
 ## Architecture Overview
 

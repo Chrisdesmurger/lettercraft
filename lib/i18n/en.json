@@ -692,5 +692,60 @@
     "premiumOnly": "Premium only",
     "upgradeRequired": "Upgrade required",
     "upgradeMessage": "Upgrade to Premium to access all templates"
+  },
+  "reviews": {
+    "modal": {
+      "title": "How would you rate this letter?",
+      "description": "Your feedback helps us improve the quality of generated letters."
+    },
+    "rating": {
+      "label": "Rating",
+      "labels": {
+        "1": "Very dissatisfied",
+        "2": "Dissatisfied", 
+        "3": "Neutral",
+        "4": "Satisfied",
+        "5": "Very satisfied"
+      }
+    },
+    "feedback": {
+      "label": "Comment (optional)",
+      "placeholder": "Share your thoughts about this letter...",
+      "optional": "Optional",
+      "charactersRemaining": "{count} characters remaining"
+    },
+    "categories": {
+      "label": "Aspects to improve (optional)",
+      "content": "Content",
+      "style": "Style", 
+      "relevance": "Relevance",
+      "length": "Length",
+      "categoryLabel": "Category {category}",
+      "selectUpTo": "Select up to {max} categories (optional)",
+      "selectedCount": "{selected}/{max} categories selected"
+    },
+    "actions": {
+      "skip": "Skip",
+      "submit": "Submit",
+      "submitting": "Submitting...",
+      "leaveReview": "Leave a review",
+      "alreadyReviewed": "Already reviewed"
+    },
+    "submitSuccess": "Thank you for your feedback!",
+    "submitError": "Error submitting your review",
+    "errors": {
+      "alreadyReviewed": "You have already rated this letter",
+      "rateLimitExceeded": "Too many attempts. Please try again later.",
+      "submissionError": "Submission error"
+    },
+    "badge": {
+      "contributor": "Contributor",
+      "description": "Thank you for rating at least 3 letters!"
+    },
+    "scrollIndicator": {
+      "waitingForFeedback": "Waiting for your feedback...",
+      "readingComplete": "Reading complete",
+      "percentRead": "{percent}% read"
+    }
   }
 }
