@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { CreateReviewData, ReviewModalMemory } from '@/types/reviews'
 import { useUser } from '@/hooks/useUser'
 import { useScrollEndDetection } from '@/hooks/useScrollEndDetection'
-import { toast } from 'react-hot-toast'
 import { supabase } from '@/lib/supabase-client'
 
 const MEMORY_EXPIRY_HOURS = 24 // Remember dismissal for 24 hours
@@ -180,15 +179,7 @@ export function useReviewModal(options: UseReviewModalOptions = {}): UseReviewMo
 
       if (!response.ok) {
         const error = await response.json()
-        
-        if (error.code === 'ALREADY_REVIEWED') {
-          toast.error('Vous avez déjà noté cette lettre')
-        } else if (error.code === 'RATE_LIMIT_EXCEEDED') {
-          toast.error('Trop de tentatives. Veuillez réessayer plus tard.')
-        } else {
-          throw new Error(error.error || 'Erreur lors de l\'envoi')
-        }
-        return
+        throw new Error(error.error || error.code || 'Submission failed')
       }
 
       const result = await response.json()
