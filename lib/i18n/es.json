@@ -728,11 +728,11 @@
       "skip": "Omitir",
       "submit": "Enviar",
       "submitting": "Enviando...",
-      "leaveReview": "Dejar una reseña"
+      "leaveReview": "Dejar una reseña",
+      "alreadyReviewed": "Ya revisado"
     },
     "submitSuccess": "¡Gracias por tu comentario!",
     "submitError": "Error al enviar tu valoración",
-    "alreadyReviewed": "Ya has valorado esta carta",
     "badge": {
       "contributor": "Colaborador",
       "description": "¡Gracias por valorar al menos 3 cartas!"

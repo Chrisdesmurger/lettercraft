@@ -728,11 +728,11 @@
       "skip": "Skip",
       "submit": "Submit",
       "submitting": "Submitting...",
-      "leaveReview": "Leave a review"
+      "leaveReview": "Leave a review",
+      "alreadyReviewed": "Already reviewed"
     },
     "submitSuccess": "Thank you for your feedback!",
     "submitError": "Error submitting your review",
-    "alreadyReviewed": "You have already rated this letter",
     "badge": {
       "contributor": "Contributor",
       "description": "Thank you for rating at least 3 letters!"

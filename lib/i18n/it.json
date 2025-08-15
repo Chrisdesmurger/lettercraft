@@ -768,11 +768,11 @@
       "skip": "Salta",
       "submit": "Invia",
       "submitting": "Invio in corso...",
-      "leaveReview": "Lascia una recensione"
+      "leaveReview": "Lascia una recensione",
+      "alreadyReviewed": "Già recensito"
     },
     "submitSuccess": "Grazie per il tuo feedback!",
     "submitError": "Errore nell'invio della valutazione",
-    "alreadyReviewed": "Hai già valutato questa lettera",
     "badge": {
       "contributor": "Collaboratore",
       "description": "Grazie per aver valutato almeno 3 lettere!"

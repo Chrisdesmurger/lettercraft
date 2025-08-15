@@ -6,13 +6,11 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { 
   X, 
-  Download, 
   Copy, 
   FileText, 
   Building, 
   MapPin, 
   Calendar,
-  Loader2,
   CheckCircle
 } from 'lucide-react'
 import { format } from 'date-fns'
@@ -41,7 +39,6 @@ interface LetterViewerProps {
 export default function LetterViewer({ letter, isOpen, onClose }: LetterViewerProps) {
   const { t } = useI18n()
   const { user } = useUser()
-  const [isDownloading, setIsDownloading] = useState(false)
   const [copied, setCopied] = useState(false)
   const [hasUserReview, setHasUserReview] = useState<boolean | null>(null)
 
@@ -164,42 +161,6 @@ export default function LetterViewer({ letter, isOpen, onClose }: LetterViewerPr
     }
   }, [isOpen])
 
-  const handleDownload = async () => {
-    setIsDownloading(true)
-    try {
-      const response = await fetch('/api/generate-letter-pdf', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          letterId: letter.id
-        })
-      })
-
-      if (!response.ok) {
-        throw new Error(t('error.pdfGeneration'))
-      }
-
-      const blob = await response.blob()
-      const url = URL.createObjectURL(blob)
-      
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `lettre-motivation-${letter.job_offers?.company || 'entreprise'}-${letter.job_offers?.title || 'poste'}.pdf`
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      URL.revokeObjectURL(url)
-
-      toast.success(t('success.pdfDownloaded'))
-    } catch (error) {
-      console.error('Erreur lors du téléchargement:', error)
-      toast.error(t('error.pdfDownload'))
-    } finally {
-      setIsDownloading(false)
-    }
-  }
 
   const handleCopy = async () => {
     try {
@@ -290,43 +251,22 @@ export default function LetterViewer({ letter, isOpen, onClose }: LetterViewerPr
               )}
               {copied ? t('common.copied') : t('common.copy')}
             </Button>
-            {/* Bouton conditionnel: PDF si déjà noté, sinon Avis */}
-            {hasUserReview === true ? (
+            {/* Bouton Laisser un avis - toujours visible, grisé si déjà noté */}
+            {user && (
               <Button
                 size="sm"
-                onClick={handleDownload}
-                disabled={isDownloading}
-                className="bg-gradient-to-r from-orange-400 to-amber-500 hover:from-orange-500 hover:to-amber-600"
-              >
-                {isDownloading ? (
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                ) : (
-                  <Download className="w-4 h-4 mr-2" />
-                )}
-                {isDownloading ? t('common.downloading') : t('common.downloadPdf')}
-              </Button>
-            ) : hasUserReview === false && user ? (
-              <Button
-                size="sm"
-                onClick={handleShowReview}
-                className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+                onClick={hasUserReview ? undefined : handleShowReview}
+                disabled={hasUserReview === true}
+                className={hasUserReview 
+                  ? "bg-gray-400 text-gray-600 cursor-not-allowed" 
+                  : "bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+                }
               >
                 <Star className="w-4 h-4 mr-2" />
-                {t('reviews.actions.leaveReview') || 'Laisser un avis'}
-              </Button>
-            ) : (
-              <Button
-                size="sm"
-                onClick={handleDownload}
-                disabled={isDownloading}
-                className="bg-gradient-to-r from-orange-400 to-amber-500 hover:from-orange-500 hover:to-amber-600"
-              >
-                {isDownloading ? (
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                ) : (
-                  <Download className="w-4 h-4 mr-2" />
-                )}
-                {isDownloading ? t('common.downloading') : t('common.downloadPdf')}
+                {hasUserReview 
+                  ? t('reviews.actions.alreadyReviewed') || 'Avis déjà donné'
+                  : t('reviews.actions.leaveReview') || 'Laisser un avis'
+                }
               </Button>
             )}
           </div>

@@ -767,11 +767,11 @@
       "skip": "Passer",
       "submit": "Envoyer",
       "submitting": "Envoi...",
-      "leaveReview": "Laisser un avis"
+      "leaveReview": "Laisser un avis",
+      "alreadyReviewed": "Avis déjà donné"
     },
     "submitSuccess": "Merci pour votre avis !",
     "submitError": "Erreur lors de l'envoi de votre avis",
-    "alreadyReviewed": "Vous avez déjà noté cette lettre",
     "badge": {
       "contributor": "Contributeur",
       "description": "Merci d'avoir noté au moins 3 lettres !"

@@ -768,11 +768,11 @@
       "skip": "Überspringen",
       "submit": "Senden",
       "submitting": "Wird gesendet...",
-      "leaveReview": "Bewertung abgeben"
+      "leaveReview": "Bewertung abgeben",
+      "alreadyReviewed": "Bereits bewertet"
     },
     "submitSuccess": "Vielen Dank für Ihr Feedback!",
     "submitError": "Fehler beim Senden Ihrer Bewertung",
-    "alreadyReviewed": "Sie haben diesen Brief bereits bewertet",
     "badge": {
       "contributor": "Mitwirkender",
       "description": "Vielen Dank für die Bewertung von mindestens 3 Briefen!"
