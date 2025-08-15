@@ -733,6 +733,11 @@
     },
     "submitSuccess": "Thank you for your feedback!",
     "submitError": "Error submitting your review",
+    "errors": {
+      "alreadyReviewed": "You have already rated this letter",
+      "rateLimitExceeded": "Too many attempts. Please try again later.",
+      "submissionError": "Submission error"
+    },
     "badge": {
       "contributor": "Contributor",
       "description": "Thank you for rating at least 3 letters!"

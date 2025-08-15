@@ -733,6 +733,11 @@
     },
     "submitSuccess": "¡Gracias por tu comentario!",
     "submitError": "Error al enviar tu valoración",
+    "errors": {
+      "alreadyReviewed": "Ya has valorado esta carta",
+      "rateLimitExceeded": "Demasiados intentos. Inténtalo más tarde.",
+      "submissionError": "Error en el envío"
+    },
     "badge": {
       "contributor": "Colaborador",
       "description": "¡Gracias por valorar al menos 3 cartas!"

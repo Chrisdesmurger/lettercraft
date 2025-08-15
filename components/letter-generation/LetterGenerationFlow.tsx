@@ -169,11 +169,11 @@ export default function LetterGenerationFlow({ onBack }: LetterGenerationFlowPro
         const error = await response.json()
         
         if (error.code === 'ALREADY_REVIEWED') {
-          toast.error('Vous avez déjà noté cette lettre')
+          toast.error(t('reviews.errors.alreadyReviewed'))
         } else if (error.code === 'RATE_LIMIT_EXCEEDED') {
-          toast.error('Trop de tentatives. Veuillez réessayer plus tard.')
+          toast.error(t('reviews.errors.rateLimitExceeded'))
         } else {
-          throw new Error(error.error || 'Erreur lors de l\'envoi')
+          throw new Error(error.error || t('reviews.errors.submissionError'))
         }
         return
       }
@@ -187,11 +187,11 @@ export default function LetterGenerationFlow({ onBack }: LetterGenerationFlowPro
       setIsManualReviewOpen(false)
       
       // Afficher message de succès
-      toast.success('Merci pour votre avis !')
+      toast.success(t('reviews.submitSuccess'))
       
     } catch (error) {
       console.error('Error submitting review:', error)
-      toast.error('Erreur lors de l\'envoi de votre avis')
+      toast.error(t('reviews.submitError'))
     } finally {
       setIsSubmittingManual(false)
     }

@@ -772,6 +772,11 @@
     },
     "submitSuccess": "Merci pour votre avis !",
     "submitError": "Erreur lors de l'envoi de votre avis",
+    "errors": {
+      "alreadyReviewed": "Vous avez déjà noté cette lettre",
+      "rateLimitExceeded": "Trop de tentatives. Veuillez réessayer plus tard.",
+      "submissionError": "Erreur lors de l'envoi"
+    },
     "badge": {
       "contributor": "Contributeur",
       "description": "Merci d'avoir noté au moins 3 lettres !"

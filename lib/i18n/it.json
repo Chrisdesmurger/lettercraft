@@ -773,6 +773,11 @@
     },
     "submitSuccess": "Grazie per il tuo feedback!",
     "submitError": "Errore nell'invio della valutazione",
+    "errors": {
+      "alreadyReviewed": "Hai già valutato questa lettera",
+      "rateLimitExceeded": "Troppi tentativi. Riprova più tardi.",
+      "submissionError": "Errore di invio"
+    },
     "badge": {
       "contributor": "Collaboratore",
       "description": "Grazie per aver valutato almeno 3 lettere!"
