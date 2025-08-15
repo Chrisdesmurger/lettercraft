@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { Tables } from '@/lib/supabase-client'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -19,6 +19,13 @@ import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import toast from 'react-hot-toast'
 import { useI18n } from '@/lib/i18n-context'
+import { ReviewSystem } from '@/components/reviews/review-system'
+import { getReviewDelayForText } from '@/lib/reading-time'
+import { ReviewModal } from '@/components/reviews/review-modal'
+import { Star } from 'lucide-react'
+import { supabase } from '@/lib/supabase-client'
+import { useUser } from '@/hooks/useUser'
+import { CreateReviewData } from '@/types/reviews'
 
 type GeneratedLetter = Tables<'generated_letters'> & {
   job_offers: Tables<'job_offers'> | null
@@ -33,8 +40,117 @@ interface LetterViewerProps {
 
 export default function LetterViewer({ letter, isOpen, onClose }: LetterViewerProps) {
   const { t } = useI18n()
+  const { user } = useUser()
   const [isDownloading, setIsDownloading] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [hasUserReview, setHasUserReview] = useState<boolean | null>(null)
+
+  // Calculer le délai de review basé sur la longueur du texte
+  const defaultDelaySeconds = parseInt(process.env.NEXT_PUBLIC_REVIEW_DELAY_SECONDS || '60')
+  const reviewDelay = getReviewDelayForText(letter.content, {
+    wordsPerMinute: 200, // Un peu plus lent pour la lecture à l'écran
+    additionalDelay: 5, // 5 secondes de plus après la lecture estimée
+    minTime: Math.min(defaultDelaySeconds * 1000, 15 * 1000), // Minimum entre délai env et 15s
+    maxTime: defaultDelaySeconds * 1000 // Délai configuré dans .env.local
+  })
+
+  // État pour le modal de review manuel
+  const [isManualReviewOpen, setIsManualReviewOpen] = useState(false)
+  const [isSubmittingManual, setIsSubmittingManual] = useState(false)
+
+  // Vérifier si l'utilisateur a déjà laissé un avis pour cette lettre
+  const checkUserReview = useCallback(async () => {
+    if (!user) {
+      setHasUserReview(false)
+      return
+    }
+
+    try {
+      const { data: existingReview, error } = await supabase
+        .from('letter_reviews')
+        .select('id')
+        .eq('letter_id', letter.id)
+        .eq('user_id', user.id)
+        .single()
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error checking existing review:', error)
+        setHasUserReview(false)
+        return
+      }
+
+      setHasUserReview(!!existingReview)
+    } catch (error) {
+      console.error('Error checking user review:', error)
+      setHasUserReview(false)
+    }
+  }, [letter.id, user])
+
+  // Fonction pour déclencher manuellement le modal de review
+  const handleShowReview = () => {
+    setIsManualReviewOpen(true)
+  }
+
+  // Fonction pour fermer le modal manuel
+  const handleCloseManualReview = () => {
+    setIsManualReviewOpen(false)
+  }
+
+  // Fonction pour soumettre le review manuel
+  const handleSubmitManualReview = async (data: CreateReviewData) => {
+    setIsSubmittingManual(true)
+
+    try {
+      // Get current session for auth
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      // Call API to submit review
+      const response = await fetch('/api/reviews', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.access_token || ''}`
+        },
+        body: JSON.stringify(data)
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        
+        if (error.code === 'ALREADY_REVIEWED') {
+          toast.error('Vous avez déjà noté cette lettre')
+        } else if (error.code === 'RATE_LIMIT_EXCEEDED') {
+          toast.error('Trop de tentatives. Veuillez réessayer plus tard.')
+        } else {
+          throw new Error(error.error || 'Erreur lors de l\'envoi')
+        }
+        return
+      }
+
+      const result = await response.json()
+      
+      // Mettre à jour l'état après soumission d'un avis
+      setHasUserReview(true)
+      
+      // Fermer le modal
+      setIsManualReviewOpen(false)
+      
+      // Afficher message de succès
+      toast.success('Merci pour votre avis !')
+      
+    } catch (error) {
+      console.error('Error submitting review:', error)
+      toast.error('Erreur lors de l\'envoi de votre avis')
+    } finally {
+      setIsSubmittingManual(false)
+    }
+  }
+
+  useEffect(() => {
+    if (isOpen) {
+      checkUserReview()
+    }
+  }, [isOpen, checkUserReview])
 
   useEffect(() => {
     if (isOpen) {
@@ -174,21 +290,72 @@ export default function LetterViewer({ letter, isOpen, onClose }: LetterViewerPr
               )}
               {copied ? t('common.copied') : t('common.copy')}
             </Button>
-            <Button
-              size="sm"
-              onClick={handleDownload}
-              disabled={isDownloading}
-              className="bg-gradient-to-r from-orange-400 to-amber-500 hover:from-orange-500 hover:to-amber-600"
-            >
-              {isDownloading ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              ) : (
-                <Download className="w-4 h-4 mr-2" />
-              )}
-              {isDownloading ? t('common.downloading') : t('common.downloadPdf')}
-            </Button>
+            {/* Bouton conditionnel: PDF si déjà noté, sinon Avis */}
+            {hasUserReview === true ? (
+              <Button
+                size="sm"
+                onClick={handleDownload}
+                disabled={isDownloading}
+                className="bg-gradient-to-r from-orange-400 to-amber-500 hover:from-orange-500 hover:to-amber-600"
+              >
+                {isDownloading ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Download className="w-4 h-4 mr-2" />
+                )}
+                {isDownloading ? t('common.downloading') : t('common.downloadPdf')}
+              </Button>
+            ) : hasUserReview === false && user ? (
+              <Button
+                size="sm"
+                onClick={handleShowReview}
+                className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+              >
+                <Star className="w-4 h-4 mr-2" />
+                {t('reviews.actions.leaveReview') || 'Laisser un avis'}
+              </Button>
+            ) : (
+              <Button
+                size="sm"
+                onClick={handleDownload}
+                disabled={isDownloading}
+                className="bg-gradient-to-r from-orange-400 to-amber-500 hover:from-orange-500 hover:to-amber-600"
+              >
+                {isDownloading ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Download className="w-4 h-4 mr-2" />
+                )}
+                {isDownloading ? t('common.downloading') : t('common.downloadPdf')}
+              </Button>
+            )}
           </div>
         </div>
+
+        {/* Review System pour auto-show seulement si pas encore noté */}
+        {hasUserReview === false && (
+          <ReviewSystem 
+            letterId={letter.id}
+            delayAfterScrollEnd={reviewDelay}
+            autoShow={true}
+            showBadge={false}
+            useSimpleTimeout={true}
+            onReviewSubmitted={() => {
+              // Mettre à jour l'état après soumission d'un avis
+              setHasUserReview(true)
+            }}
+          />
+        )}
+
+        {/* Modal de review manuel */}
+        <ReviewModal
+          isOpen={isManualReviewOpen}
+          onClose={handleCloseManualReview}
+          onSubmit={handleSubmitManualReview}
+          letterId={letter.id}
+          isSubmitting={isSubmittingManual}
+        />
+
       </div>
     </div>
   )

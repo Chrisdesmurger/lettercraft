@@ -692,5 +692,55 @@
     "premiumOnly": "Solo Premium",
     "upgradeRequired": "Actualización requerida",
     "upgradeMessage": "Actualiza a Premium para acceder a todas las plantillas"
+  },
+  "reviews": {
+    "modal": {
+      "title": "¿Cómo valorarías esta carta?",
+      "description": "Tus comentarios nos ayudan a mejorar la calidad de las cartas generadas."
+    },
+    "rating": {
+      "label": "Valoración",
+      "labels": {
+        "1": "Muy insatisfecho",
+        "2": "Insatisfecho", 
+        "3": "Neutral",
+        "4": "Satisfecho",
+        "5": "Muy satisfecho"
+      }
+    },
+    "feedback": {
+      "label": "Comentario (opcional)",
+      "placeholder": "Comparte tus impresiones sobre esta carta...",
+      "optional": "Opcional",
+      "charactersRemaining": "{count} caracteres restantes"
+    },
+    "categories": {
+      "label": "Aspectos a mejorar (opcional)",
+      "content": "Contenido",
+      "style": "Estilo", 
+      "relevance": "Relevancia",
+      "length": "Longitud",
+      "categoryLabel": "Categoría {category}",
+      "selectUpTo": "Selecciona hasta {max} categorías (opcional)",
+      "selectedCount": "{selected}/{max} categorías seleccionadas"
+    },
+    "actions": {
+      "skip": "Omitir",
+      "submit": "Enviar",
+      "submitting": "Enviando...",
+      "leaveReview": "Dejar una reseña"
+    },
+    "submitSuccess": "¡Gracias por tu comentario!",
+    "submitError": "Error al enviar tu valoración",
+    "alreadyReviewed": "Ya has valorado esta carta",
+    "badge": {
+      "contributor": "Colaborador",
+      "description": "¡Gracias por valorar al menos 3 cartas!"
+    },
+    "scrollIndicator": {
+      "waitingForFeedback": "Esperando tu comentario...",
+      "readingComplete": "Lectura completada",
+      "percentRead": "{percent}% leído"
+    }
   }
 }

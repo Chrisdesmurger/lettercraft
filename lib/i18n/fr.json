@@ -731,5 +731,55 @@
     "premiumOnly": "Premium uniquement",
     "upgradeRequired": "Mise à niveau requise",
     "upgradeMessage": "Passez à Premium pour accéder à tous les modèles"
+  },
+  "reviews": {
+    "modal": {
+      "title": "Comment évaluez-vous cette lettre ?",
+      "description": "Votre avis nous aide à améliorer la qualité des lettres générées."
+    },
+    "rating": {
+      "label": "Note",
+      "labels": {
+        "1": "Très insatisfait",
+        "2": "Insatisfait", 
+        "3": "Neutre",
+        "4": "Satisfait",
+        "5": "Très satisfait"
+      }
+    },
+    "feedback": {
+      "label": "Commentaire (optionnel)",
+      "placeholder": "Partagez vos impressions sur cette lettre...",
+      "optional": "Optionnel",
+      "charactersRemaining": "{count} caractères restants"
+    },
+    "categories": {
+      "label": "Aspects à améliorer (optionnel)",
+      "content": "Contenu",
+      "style": "Style", 
+      "relevance": "Pertinence",
+      "length": "Longueur",
+      "categoryLabel": "Catégorie {category}",
+      "selectUpTo": "Sélectionnez jusqu'à {max} catégories (optionnel)",
+      "selectedCount": "{selected}/{max} catégories sélectionnées"
+    },
+    "actions": {
+      "skip": "Passer",
+      "submit": "Envoyer",
+      "submitting": "Envoi...",
+      "leaveReview": "Laisser un avis"
+    },
+    "submitSuccess": "Merci pour votre avis !",
+    "submitError": "Erreur lors de l'envoi de votre avis",
+    "alreadyReviewed": "Vous avez déjà noté cette lettre",
+    "badge": {
+      "contributor": "Contributeur",
+      "description": "Merci d'avoir noté au moins 3 lettres !"
+    },
+    "scrollIndicator": {
+      "waitingForFeedback": "En attente de votre avis...",
+      "readingComplete": "Lecture terminée",
+      "percentRead": "{percent}% lu"
+    }
   }
 }

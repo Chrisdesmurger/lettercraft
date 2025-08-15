@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -25,6 +25,11 @@ import { QuotaGuard, QuotaBanner } from '@/components/quota'
 import { usePreGenerationQuotaCheck } from '@/hooks/useQuota'
 import toast from 'react-hot-toast'
 import { useI18n } from '@/lib/i18n-context'
+import { ReviewSystem } from '@/components/reviews'
+import { ReviewModal } from '@/components/reviews/review-modal'
+import { Star } from 'lucide-react'
+import { CreateReviewData } from '@/types/reviews'
+import { supabase } from '@/lib/supabase-client'
 
 interface LetterGenerationFlowProps {
   onBack: () => void
@@ -47,6 +52,11 @@ export default function LetterGenerationFlow({ onBack }: LetterGenerationFlowPro
 
   const [jobOfferInput, setJobOfferInput] = useState('')
   const [sourceUrl, setSourceUrl] = useState('')
+  
+  // États pour le système de review
+  const [hasUserReview, setHasUserReview] = useState<boolean | null>(null)
+  const [isManualReviewOpen, setIsManualReviewOpen] = useState(false)
+  const [isSubmittingManual, setIsSubmittingManual] = useState(false)
 
 
   const handleJobOfferSubmit = async () => {
@@ -98,6 +108,101 @@ export default function LetterGenerationFlow({ onBack }: LetterGenerationFlowPro
   const handleRegenerate = async () => {
     await generateLetter({ temperature: 0.8 })
   }
+
+  // Vérifier si l'utilisateur a déjà laissé un avis pour cette lettre
+  const checkUserReview = useCallback(async () => {
+    if (!profile?.id || !flow.generatedLetter?.id) {
+      setHasUserReview(false)
+      return
+    }
+
+    try {
+      const { data: existingReview, error } = await supabase
+        .from('letter_reviews')
+        .select('id')
+        .eq('letter_id', flow.generatedLetter.id)
+        .eq('user_id', profile.id)
+        .single()
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error checking existing review:', error)
+        setHasUserReview(false)
+        return
+      }
+
+      setHasUserReview(!!existingReview)
+    } catch (error) {
+      console.error('Error checking user review:', error)
+      setHasUserReview(false)
+    }
+  }, [flow.generatedLetter?.id, profile?.id])
+
+  // Fonction pour déclencher manuellement le modal de review
+  const handleShowReview = () => {
+    setIsManualReviewOpen(true)
+  }
+
+  // Fonction pour fermer le modal manuel
+  const handleCloseManualReview = () => {
+    setIsManualReviewOpen(false)
+  }
+
+  // Fonction pour soumettre le review manuel
+  const handleSubmitManualReview = async (data: CreateReviewData) => {
+    setIsSubmittingManual(true)
+
+    try {
+      // Get current session for auth
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      // Call API to submit review
+      const response = await fetch('/api/reviews', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.access_token || ''}`
+        },
+        body: JSON.stringify(data)
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        
+        if (error.code === 'ALREADY_REVIEWED') {
+          toast.error('Vous avez déjà noté cette lettre')
+        } else if (error.code === 'RATE_LIMIT_EXCEEDED') {
+          toast.error('Trop de tentatives. Veuillez réessayer plus tard.')
+        } else {
+          throw new Error(error.error || 'Erreur lors de l\'envoi')
+        }
+        return
+      }
+
+      const result = await response.json()
+      
+      // Mettre à jour l'état après soumission d'un avis
+      setHasUserReview(true)
+      
+      // Fermer le modal
+      setIsManualReviewOpen(false)
+      
+      // Afficher message de succès
+      toast.success('Merci pour votre avis !')
+      
+    } catch (error) {
+      console.error('Error submitting review:', error)
+      toast.error('Erreur lors de l\'envoi de votre avis')
+    } finally {
+      setIsSubmittingManual(false)
+    }
+  }
+
+  // Vérifier le statut du review quand la lettre est générée
+  useEffect(() => {
+    if (flow.generatedLetter?.id && flow.step === 'preview') {
+      checkUserReview()
+    }
+  }, [flow.generatedLetter?.id, flow.step, checkUserReview])
 
   const renderJobOfferStep = () => (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white p-4">
@@ -300,6 +405,18 @@ export default function LetterGenerationFlow({ onBack }: LetterGenerationFlowPro
                     {t('flow.regenerate')}
                   </Button>
                 </QuotaGuard>
+
+                {/* Bouton Laisser un avis */}
+                {hasUserReview === false && profile?.id && (
+                  <Button
+                    onClick={handleShowReview}
+                    variant="outline"
+                    className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white border-none"
+                  >
+                    <Star className="w-4 h-4 mr-2" />
+                    {t('reviews.actions.leaveReview') || 'Laisser un avis'}
+                  </Button>
+                )}
               </CardContent>
             </Card>
 
@@ -330,6 +447,32 @@ export default function LetterGenerationFlow({ onBack }: LetterGenerationFlowPro
                 </div>
               </CardContent>
             </Card>
+
+            {/* Review System */}
+            {flow.generatedLetter?.id && (
+              <ReviewSystem 
+                letterId={flow.generatedLetter.id}
+                autoShow={true}
+                showBadge={true}
+                onReviewSubmitted={(review) => {
+                  console.log('Review submitted in LetterGenerationFlow:', review)
+                  setHasUserReview(true)
+                  toast.success(t('reviews.submitSuccess') || 'Merci pour votre avis !')
+                }}
+                className="mt-4"
+              />
+            )}
+            
+            {/* Modal de review manuel */}
+            {flow.generatedLetter?.id && (
+              <ReviewModal
+                isOpen={isManualReviewOpen}
+                onClose={handleCloseManualReview}
+                onSubmit={handleSubmitManualReview}
+                letterId={flow.generatedLetter.id}
+                isSubmitting={isSubmittingManual}
+              />
+            )}
           </div>
         </div>
       </div>

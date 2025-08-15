@@ -25,6 +25,8 @@ import { useI18n } from '@/lib/i18n-context'
 import { generatePdfFromElement, generateTextFile, generateLetterPdfWithTemplate } from '@/lib/pdf'
 import { type LetterData } from '@/lib/pdf-templates'
 import PdfExportControls from '@/components/pdf/PdfExportControls'
+import { ReviewSystem, ScrollProgressIndicator } from '@/components/reviews'
+import { useScrollEndDetection } from '@/hooks/useScrollEndDetection'
 
 interface LetterPreviewProps {
   data?: any
@@ -42,6 +44,23 @@ export default function LetterPreview({ data, onUpdate, onNext }: LetterPreviewP
   const [saving, setSaving] = useState(false)
   const [useNewPdfSystem, setUseNewPdfSystem] = useState(true) // Toggle pour nouveau/ancien système
   const letterRef = useRef<HTMLDivElement>(null)
+  const [generatedLetterId, setGeneratedLetterId] = useState<string | null>(data?.letterId || null)
+  const [showScrollIndicator, setShowScrollIndicator] = useState(false)
+
+  // Détection du scroll pour l'indicateur de progression
+  const { isAtEnd, scrollPercentage } = useScrollEndDetection({
+    element: letterRef,
+    threshold: 100,
+    delay: 2000,
+    enabled: !!generatedLetterId && showScrollIndicator
+  })
+
+  // Activer l'indicateur de scroll une fois que la lettre est générée
+  React.useEffect(() => {
+    if (generatedLetterId && editedLetter) {
+      setShowScrollIndicator(true)
+    }
+  }, [generatedLetterId, editedLetter])
 
   // Convertir les données actuelles vers le format LetterData pour les modèles
   const letterData: LetterData = {
@@ -65,6 +84,52 @@ export default function LetterPreview({ data, onUpdate, onNext }: LetterPreviewP
   }
 
   const fileName = `lettre-motivation-${data?.jobOffer?.company || 'entreprise'}`
+
+  // Create generated letter entry in database if not exists (for review system)
+  React.useEffect(() => {
+    const createLetterEntry = async () => {
+      if (!user || !editedLetter || generatedLetterId) return
+
+      try {
+        console.log('Attempting to create letter entry for user:', user.id)
+        console.log('Letter content length:', editedLetter.length)
+        
+        const { data: letterData, error } = await supabase
+          .from('generated_letters')
+          .insert({
+            user_id: user.id,
+            content: editedLetter,
+            html_content: null,
+            pdf_url: null,
+            generation_settings: {
+              language: data?.letterLanguage || 'fr',
+              tone: data?.letterTone || 'professional',
+              length: data?.letterLength || 300
+            },
+            openai_model: 'gpt-4',
+            // These fields are required by schema but we'll set them to temporary values
+            questionnaire_response_id: 'temp-' + Date.now(),
+            job_offer_id: 'temp-' + Date.now(),
+            cv_id: 'temp-' + Date.now()
+          })
+          .select()
+          .single()
+
+        if (error) {
+          console.error('Error creating letter entry:', error)
+          console.error('Error details:', JSON.stringify(error, null, 2))
+          return
+        }
+
+        setGeneratedLetterId(letterData.id)
+        console.log('Created letter entry for reviews:', letterData.id)
+      } catch (error) {
+        console.error('Unexpected error creating letter entry:', error)
+      }
+    }
+
+    createLetterEntry()
+  }, [user, editedLetter, generatedLetterId, data])
 
   const handleCopy = async () => {
     try {
@@ -305,6 +370,34 @@ export default function LetterPreview({ data, onUpdate, onNext }: LetterPreviewP
           </div>
         )}
       </Card>
+
+      {/* Review System - appears after letter display with auto-modal */}
+      {generatedLetterId && (
+        <>
+          <ReviewSystem 
+            letterId={generatedLetterId}
+            autoShow={true}
+            showBadge={true}
+            letterContentRef={letterRef}
+            delayAfterScrollEnd={2000}
+            onReviewSubmitted={(review) => {
+              console.log('Review submitted in LetterPreview:', review)
+              toast.success(t('reviews.submitSuccess') || 'Merci pour votre avis !')
+              setShowScrollIndicator(false) // Masquer l'indicateur après soumission
+            }}
+          />
+          
+          {/* Scroll Progress Indicator */}
+          {showScrollIndicator && (
+            <ScrollProgressIndicator
+              scrollPercentage={scrollPercentage}
+              isAtEnd={isAtEnd}
+              hasPendingReview={!!generatedLetterId}
+              showOnlyWhenScrolling={true}
+            />
+          )}
+        </>
+      )}
 
       {/* Summary and final actions */}
       <Card className="p-6 bg-green-50 border-green-200">

@@ -105,6 +105,7 @@ interface FlowData {
 
     // Lettre générée
     generatedLetter?: string
+    letterId?: string
     letterLanguage?: string
 }
 
