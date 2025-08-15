@@ -457,7 +457,8 @@ export default function LetterGenerationFlow({ onBack }: LetterGenerationFlowPro
                 onReviewSubmitted={(review) => {
                   console.log('Review submitted in LetterGenerationFlow:', review)
                   setHasUserReview(true)
-                  toast.success(t('reviews.submitSuccess'))
+                  // Ne pas afficher de toast ici pour éviter les doublons
+                  // Le toast est géré par handleSubmitManualReview
                 }}
                 className="mt-4"
               />
