@@ -18,6 +18,16 @@ interface AnalyticsResponse {
   }
 }
 
+interface ReviewStatsData {
+  total_reviews?: number
+  average_rating?: string | number
+  rating_distribution?: Record<string, number>
+  total_users_with_reviews?: number
+  total_users_with_letters?: number
+  participation_rate?: string | number
+  category_breakdown?: Record<string, number>
+}
+
 /**
  * Check if user has admin/analytics access
  * For now, this is a placeholder - in production this should check proper roles
@@ -46,8 +56,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get authenticated user
-    const cookieStore = await cookies()
-    const supabaseClient = createRouteHandlerClient({ cookies: () => cookieStore })
+    const supabaseClient = createRouteHandlerClient({ cookies })
     const { data: { user }, error: authError } = await supabaseClient.auth.getUser()
 
     if (authError || !user) {
@@ -81,6 +90,8 @@ export async function GET(request: NextRequest) {
         end_date: endDate.toISOString()
       })
       .single()
+      
+    const statsData = stats as ReviewStatsData || {}
 
     if (statsError) {
       console.error('Error fetching review statistics:', statsError)
@@ -91,13 +102,13 @@ export async function GET(request: NextRequest) {
     }
 
     const response: AnalyticsResponse = {
-      total_reviews: stats.total_reviews || 0,
-      average_rating: parseFloat(stats.average_rating) || 0,
-      rating_distribution: stats.rating_distribution || {},
-      total_users_with_reviews: stats.total_users_with_reviews || 0,
-      total_users_with_letters: stats.total_users_with_letters || 0,
-      participation_rate: parseFloat(stats.participation_rate) || 0,
-      category_breakdown: stats.category_breakdown || {},
+      total_reviews: statsData.total_reviews || 0,
+      average_rating: parseFloat(String(statsData.average_rating || 0)),
+      rating_distribution: statsData.rating_distribution || {},
+      total_users_with_reviews: statsData.total_users_with_reviews || 0,
+      total_users_with_letters: statsData.total_users_with_letters || 0,
+      participation_rate: parseFloat(String(statsData.participation_rate || 0)),
+      category_breakdown: statsData.category_breakdown || {},
       period: {
         start_date: startDate.toISOString(),
         end_date: endDate.toISOString()

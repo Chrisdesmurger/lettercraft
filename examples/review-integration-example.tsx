@@ -6,7 +6,9 @@
  */
 
 import React from 'react'
-import { ReviewSystem, useReviewSystem, ContributorBadge } from '@/components/reviews'
+import { ReviewSystem, ContributorBadge } from '@/components/reviews'
+import { useContributorBadge } from '@/hooks/useContributorBadge'
+import { useReviewModal } from '@/hooks/useReviewModal'
 import { AnalyticsDashboard } from '@/components/reviews/analytics-dashboard'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -41,17 +43,17 @@ export function LetterPreviewWithReviews({ letter }: { letter: { id: string; con
 
 // Example 2: Manual control with custom hook
 export function CustomLetterComponent({ letter }: { letter: { id: string; content: string } }) {
+  const { badge, checkBadge } = useContributorBadge()
   const {
-    badge,
     isOpen,
     isSubmitting,
     showReviewModal,
     closeReviewModal,
     submitReview,
     currentLetterId
-  } = useReviewSystem({
+  } = useReviewModal({
     autoShow: false, // Disable auto-show
-    onReviewSubmitted: async (review) => {
+    onReviewSubmit: async (review) => {
       // Custom handling
       console.log('Review submitted:', review)
       
@@ -102,7 +104,7 @@ export function LetterListWithReviews({
 }: { 
   letters: Array<{ id: string; title: string; content: string; reviewed?: boolean }> 
 }) {
-  const { badge } = useReviewSystem({ autoShow: false })
+  const { badge } = useContributorBadge()
 
   return (
     <div className="space-y-4">
@@ -165,7 +167,7 @@ export function AdminDashboard() {
 
 // Example 5: Profile page with contributor status
 export function UserProfileWithBadge({ user }: { user: { name: string; email: string } }) {
-  const { badge, isLoading } = useReviewSystem({ autoShow: false })
+  const { badge, checkBadge } = useContributorBadge()
 
   return (
     <Card>
@@ -179,23 +181,21 @@ export function UserProfileWithBadge({ user }: { user: { name: string; email: st
         </div>
 
         {/* Show contributor status */}
-        {!isLoading && (
-          <div>
-            {badge.earned ? (
-              <ContributorBadge badge={badge} />
-            ) : (
-              <div className="text-sm text-gray-500">
-                <p>Évaluez {badge.requiredReviews - badge.reviewCount} lettres de plus pour débloquer le badge Contributeur</p>
-                <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                  <div 
-                    className="bg-blue-600 h-2 rounded-full" 
-                    style={{ width: `${(badge.reviewCount / badge.requiredReviews) * 100}%` }}
-                  />
-                </div>
+        <div>
+          {badge.earned ? (
+            <ContributorBadge badge={badge} />
+          ) : (
+            <div className="text-sm text-gray-500">
+              <p>Évaluez {badge.requiredReviews - badge.reviewCount} lettres de plus pour débloquer le badge Contributeur</p>
+              <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                <div 
+                  className="bg-blue-600 h-2 rounded-full" 
+                  style={{ width: `${(badge.reviewCount / badge.requiredReviews) * 100}%` }}
+                />
               </div>
-            )}
-          </div>
-        )}
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   )
@@ -209,7 +209,7 @@ export function ConditionalReviewPrompt({
   letter: { id: string; content: string }
   showReviewPrompt: boolean 
 }) {
-  const { showReviewModal } = useReviewSystem({ autoShow: false })
+  const { showReviewModal } = useReviewModal({ autoShow: false })
 
   // Only show review system if conditions are met
   if (!showReviewPrompt) {

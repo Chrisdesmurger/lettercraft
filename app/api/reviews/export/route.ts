@@ -64,8 +64,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get authenticated user
-    const cookieStore = await cookies()
-    const supabaseClient = createRouteHandlerClient({ cookies: () => cookieStore })
+    const supabaseClient = createRouteHandlerClient({ cookies })
     const { data: { user }, error: authError } = await supabaseClient.auth.getUser()
 
     if (authError || !user) {
