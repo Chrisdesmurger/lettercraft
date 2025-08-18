@@ -196,9 +196,9 @@ export type Database = {
       candidates_profile: {
         Row: {
           id: string;
-          user_id: string;
+          user_id: string | null;
           title: string;
-          language: string;
+          language: string; // NOT NULL
           description: string | null;
           file_url: string;
           uploaded_at: string;
@@ -207,17 +207,31 @@ export type Database = {
           experiences: string[] | null;
           skills: string[] | null;
           education: string[] | null;
-          file_size: number | null;
+          file_size: number | null; // BIGINT
           is_active: boolean | null;
+          // Nouveaux champs enrichis OpenAI (2025)
+          email: string | null;
+          phone: string | null;
+          location: string | null;
+          linkedin: string | null;
+          website: string | null;
+          summary: string | null;
+          projects: any | null; // JSONB
+          certifications: any | null; // JSONB
+          languages: any | null; // JSONB
+          achievements: string[] | null;
+          volunteer: string[] | null;
+          interests: string[] | null;
+          structured_data: any | null; // JSONB
         };
         Insert: {
           id?: string;
-          user_id: string;
-          title: string;
-          language: string;
+          user_id?: string | null;
+          title: string; // Requis NOT NULL
+          language: string; // Requis NOT NULL
           description?: string | null;
-          file_url: string;
-          uploaded_at?: string;
+          file_url: string; // Requis NOT NULL
+          uploaded_at?: string; // Auto-défini par la DB
           first_name?: string | null;
           last_name?: string | null;
           experiences?: string[] | null;
@@ -225,6 +239,20 @@ export type Database = {
           education?: string[] | null;
           file_size?: number | null;
           is_active?: boolean | null;
+          // Nouveaux champs enrichis OpenAI (2025)
+          email?: string | null;
+          phone?: string | null;
+          location?: string | null;
+          linkedin?: string | null;
+          website?: string | null;
+          summary?: string | null;
+          projects?: any | null; // JSONB
+          certifications?: any | null; // JSONB
+          languages?: any | null; // JSONB
+          achievements?: string[] | null;
+          volunteer?: string[] | null;
+          interests?: string[] | null;
+          structured_data?: any | null; // JSONB
         };
         Update: {
           id?: string;
@@ -241,6 +269,20 @@ export type Database = {
           education?: string[] | null;
           file_size?: number | null;
           is_active?: boolean | null;
+          // Nouveaux champs enrichis OpenAI (2025)
+          email?: string | null;
+          phone?: string | null;
+          location?: string | null;
+          linkedin?: string | null;
+          website?: string | null;
+          summary?: string | null;
+          projects?: any | null; // JSONB
+          certifications?: any | null; // JSONB
+          languages?: any | null; // JSONB
+          achievements?: string[] | null;
+          volunteer?: string[] | null;
+          interests?: string[] | null;
+          structured_data?: any | null; // JSONB
         };
       };
       job_offers: {

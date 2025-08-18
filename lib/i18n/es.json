@@ -406,7 +406,8 @@
     "uploading": "Enviando...",
     "uploadSuccess": "¡Documento subido con éxito!",
     "uploadError": "Error durante la subida",
-    "generateLetter": "Generar mi carta de presentación"
+    "generateLetter": "Generar mi carta de presentación",
+    "cvPrefix": "Currículum"
   },
   "job": {
     "analysisSuccess": "Análisis de la oferta completado con éxito",

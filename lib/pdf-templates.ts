@@ -182,7 +182,7 @@ const classicTemplate: PdfTemplate = {
       </div>
       
       <div class="subject">
-        <strong>${subjectLabel}</strong> ${translations.subject_prefix}
+        <strong>${subjectLabel}</strong> ${data.jobTitle ? `Candidature pour le poste de ${data.jobTitle}` : translations.subject_prefix}
       </div>
       
       <div class="greeting">
@@ -314,7 +314,7 @@ const modernTemplate: PdfTemplate = {
       </div>
       
       <div class="subject">
-        ${translations.subject_prefix}
+        ${data.jobTitle ? `Candidature pour le poste de ${data.jobTitle}` : translations.subject_prefix}
       </div>
       
       <div class="greeting">
@@ -454,7 +454,7 @@ const elegantTemplate: PdfTemplate = {
       </div>
       
       <div class="subject">
-        ${translations.subject_prefix}
+        ${data.jobTitle ? `Candidature pour le poste de ${data.jobTitle}` : translations.subject_prefix}
       </div>
       
       <div class="greeting">
@@ -609,7 +609,7 @@ const creativeTemplate: PdfTemplate = {
           </div>
           
           <div class="subject">
-            ✨ ${translations.subject_prefix} ✨
+            ✨ ${data.jobTitle ? `Candidature pour le poste de ${data.jobTitle}` : translations.subject_prefix} ✨
           </div>
           
           <div class="greeting">

@@ -406,7 +406,8 @@
     "uploading": "Invio...",
     "uploadSuccess": "Documento caricato con successo!",
     "uploadError": "Errore durante il caricamento",
-    "generateLetter": "Genera la mia lettera di presentazione"
+    "generateLetter": "Genera la mia lettera di presentazione",
+    "cvPrefix": "Curriculum"
   },
   "job": {
     "analysisSuccess": "Analisi dell'offerta completata con successo",

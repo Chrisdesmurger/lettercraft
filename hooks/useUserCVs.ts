@@ -53,13 +53,18 @@ export function useUserCVs(): UseUserCVsReturn {
 
   const setActiveCV = async (cvId: string): Promise<boolean> => {
     try {
+      console.log('🔍 [useUserCVs] setActiveCV called with cvId:', cvId)
+      console.trace('🔍 [useUserCVs] Call stack trace')
+      
       const { data: { session } } = await supabase.auth.getSession()
       
       if (!session?.user) {
+        console.error('❌ [useUserCVs] No user session')
         setError('Utilisateur non authentifié')
         return false
       }
 
+      console.log('🔍 [useUserCVs] Deactivating all CVs for user:', session.user.id)
       // D'abord, désactiver tous les CV de l'utilisateur
       const { error: deactivateError } = await supabase
         .from('candidates_profile')
@@ -67,10 +72,12 @@ export function useUserCVs(): UseUserCVsReturn {
         .eq('user_id', session.user.id)
 
       if (deactivateError) {
+        console.error('❌ [useUserCVs] Deactivate error:', deactivateError)
         setError(deactivateError.message)
         return false
       }
 
+      console.log('🔍 [useUserCVs] Activating CV:', cvId)
       // Ensuite, activer le CV sélectionné
       const { error: activateError } = await supabase
         .from('candidates_profile')
@@ -79,6 +86,13 @@ export function useUserCVs(): UseUserCVsReturn {
         .eq('user_id', session.user.id)
 
       if (activateError) {
+        console.error('❌ [useUserCVs] Activate error:', activateError)
+        console.error('❌ [useUserCVs] Error details:', {
+          message: activateError.message,
+          code: activateError.code,
+          details: activateError.details,
+          hint: activateError.hint
+        })
         setError(activateError.message)
         return false
       }

@@ -406,7 +406,8 @@
     "uploading": "Sending...",
     "uploadSuccess": "Document uploaded successfully!",
     "uploadError": "Error during upload",
-    "generateLetter": "Generate my cover letter"
+    "generateLetter": "Generate my cover letter",
+    "cvPrefix": "Resume"
   },
   "job": {
     "analysisSuccess": "Job offer analysis completed successfully",

@@ -441,7 +441,8 @@
     "uploading": "Envoi...",
     "uploadSuccess": "Document téléversé avec succès!",
     "uploadError": "Erreur lors du téléversement",
-    "generateLetter": "Générer ma lettre de motivation"
+    "generateLetter": "Générer ma lettre de motivation",
+    "cvPrefix": "CV"
   },
   "job": {
     "analysisSuccess": "Analyse de l'offre terminée avec succès",

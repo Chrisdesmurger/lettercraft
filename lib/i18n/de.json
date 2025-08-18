@@ -406,7 +406,8 @@
     "uploading": "Senden...",
     "uploadSuccess": "Dokument erfolgreich hochgeladen!",
     "uploadError": "Fehler beim Hochladen",
-    "generateLetter": "Mein Bewerbungsschreiben generieren"
+    "generateLetter": "Mein Bewerbungsschreiben generieren",
+    "cvPrefix": "Lebenslauf"
   },
   "job": {
     "analysisSuccess": "Stellenausschreibungs-Analyse erfolgreich abgeschlossen",

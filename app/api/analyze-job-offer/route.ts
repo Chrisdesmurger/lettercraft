@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import OpenAI from 'openai'
+import { getOpenAIConfig } from '@/lib/openai-config'
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -23,8 +24,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Analyser l'offre d'emploi avec OpenAI
+    const jobConfig = getOpenAIConfig('JOB_ANALYSIS')
     const completion = await openai.chat.completions.create({
-      model: "gpt-4-turbo",
+      model: jobConfig.model,
       messages: [
         {
           role: "system",
@@ -61,8 +63,8 @@ Si une information n'est pas disponible, utilise null (sauf pour la langue qui d
           content: `Analyse cette offre d'emploi:\n\n${jobOfferText}`
         }
       ],
-      temperature: 0.1,
-      max_tokens: 2000
+      temperature: jobConfig.temperature,
+      max_tokens: jobConfig.max_tokens
     })
 
     const analysisText = completion.choices[0].message.content
