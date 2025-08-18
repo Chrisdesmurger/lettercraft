@@ -39,15 +39,26 @@ async function generateLetterHandler(request: NextRequest, userId: string) {
     - Longueur: environ ${settings.length} mots
     - Mettre en avant l'expérience: ${settings.emphasizeExperience ? 'Oui' : 'Non'}
     
-    IMPORTANT: Ne génère QUE le contenu principal de la lettre, sans :
-    - Les informations de contact du candidat
-    - L'adresse du destinataire
-    - La date et le lieu
-    - Les formules de salutation (Madame, Monsieur)
-    - Les formules de politesse de fin
-    - La signature
+    IMPORTANT: Génère le contenu complet de la lettre avec :
+    - L'objet/sujet de la lettre (ex: "Subject: Application for ${jobOffer.title} Position")
+    - Une salutation appropriée (ex: "Dear Hiring Manager," ou "Madame, Monsieur,")
+    - Le contenu persuasif structuré en paragraphes
+    - Une conclusion professionnelle (sans signature ni nom)
     
-    Commence directement par le contenu de la lettre, structuré en paragraphes clairs et convaincants.
+    Ne génère PAS :
+    - Les informations de contact du candidat
+    - L'adresse du destinataire  
+    - La date et le lieu
+    - La signature avec le nom
+    
+    Structure recommandée :
+    Subject: [Objet approprié]
+    
+    [Salutation]
+    
+    [Contenu persuasif en paragraphes]
+    
+    [Conclusion professionnelle]
     `
 
         const completion = await openai.chat.completions.create({
@@ -55,7 +66,7 @@ async function generateLetterHandler(request: NextRequest, userId: string) {
             messages: [
                 {
                     role: "system",
-                    content: "Tu es un expert en rédaction de lettres de motivation professionnelles. Tu génères UNIQUEMENT le contenu principal de la lettre, sans les informations de contact, dates, salutations ou formules de politesse. Commence directement par le contenu persuasif."
+                    content: "Tu es un expert en rédaction de lettres de motivation professionnelles. Tu génères le contenu complet de la lettre incluant l'objet, la salutation, le contenu persuasif et une conclusion professionnelle, mais SANS les informations de contact, dates ou signature avec nom."
                 },
                 {
                     role: "user",

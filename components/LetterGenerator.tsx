@@ -64,8 +64,12 @@ export default function LetterGenerator({ data, onUpdate, onNext }: LetterGenera
             // Generation simulation (replace with your OpenAI API call)
             await new Promise(resolve => setTimeout(resolve, 3000))
 
-            // Generated letter (implement with your logic) - Contenu principal uniquement
-            const letter = `C'est avec un grand intérêt que je vous adresse ma candidature pour le poste de ${data?.jobOffer?.title} au sein de ${data?.jobOffer?.company}.
+            // Generated letter (implement with your logic) - Contenu complet avec sujet et salutation
+            const letter = `Subject: Candidature pour le poste de ${data?.jobOffer?.title}
+
+Madame, Monsieur,
+
+C'est avec un grand intérêt que je vous adresse ma candidature pour le poste de ${data?.jobOffer?.title} au sein de ${data?.jobOffer?.company}.
 
 Fort de mon expérience en développement web et de ma maîtrise des technologies ${data?.responses?.stack_expertise || 'React et Node.js'}, je suis convaincu de pouvoir apporter une réelle valeur ajoutée à votre équipe.
 
@@ -75,7 +79,9 @@ ${data?.responses?.problem_solving || 'Ma capacité à résoudre des problèmes 
 
 ${emphasizeExperience ? `Ce qui me distingue particulièrement, c'est ${data?.responses?.career_goals || 'ma passion pour l\'innovation technologique et mon désir constant d\'apprentissage'}.` : ''}
 
-Je serais ravi de pouvoir discuter plus en détail de la manière dont mes compétences et mon expérience peuvent contribuer au succès de ${data?.jobOffer?.company}.`
+Je serais ravi de pouvoir discuter plus en détail de la manière dont mes compétences et mon expérience peuvent contribuer au succès de ${data?.jobOffer?.company}.
+
+Dans l'attente de votre réponse, je vous prie d'agréer mes salutations distinguées.`
 
             setGeneratedLetter(letter)
 
@@ -106,8 +112,12 @@ Je serais ravi de pouvoir discuter plus en détail de la manière dont mes comp�
             // Generation simulation (replace with your OpenAI API call)
             await new Promise(resolve => setTimeout(resolve, 3000))
 
-            // Generated letter (implement with your logic) - Contenu principal uniquement
-            const letter = `C'est avec un grand intérêt que je vous adresse ma candidature pour le poste de ${data?.jobOffer?.title} au sein de ${data?.jobOffer?.company}.
+            // Generated letter (implement with your logic) - Contenu complet avec sujet et salutation
+            const letter = `Subject: Candidature pour le poste de ${data?.jobOffer?.title}
+
+Madame, Monsieur,
+
+C'est avec un grand intérêt que je vous adresse ma candidature pour le poste de ${data?.jobOffer?.title} au sein de ${data?.jobOffer?.company}.
 
 Fort de mon expérience en développement web et de ma maîtrise des technologies ${data?.responses?.stack_expertise || 'React et Node.js'}, je suis convaincu de pouvoir apporter une réelle valeur ajoutée à votre équipe.
 
@@ -117,7 +127,9 @@ ${data?.responses?.problem_solving || 'Ma capacité à résoudre des problèmes 
 
 ${emphasizeExperience ? `Ce qui me distingue particulièrement, c'est ${data?.responses?.career_goals || 'ma passion pour l\'innovation technologique et mon désir constant d\'apprentissage'}.` : ''}
 
-Je serais ravi de pouvoir discuter plus en détail de la manière dont mes compétences et mon expérience peuvent contribuer au succès de ${data?.jobOffer?.company}.`
+Je serais ravi de pouvoir discuter plus en détail de la manière dont mes compétences et mon expérience peuvent contribuer au succès de ${data?.jobOffer?.company}.
+
+Dans l'attente de votre réponse, je vous prie d'agréer mes salutations distinguées.`
 
             setGeneratedLetter(letter)
 

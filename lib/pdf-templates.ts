@@ -279,13 +279,6 @@ const modernTemplate: PdfTemplate = {
           color: #7f8c8d; 
           font-size: 10pt;
         }
-        .recipient-info { 
-          background: #f8f9fa; 
-          padding: 15px; 
-          margin-bottom: 2cm; 
-          border-left: 4px solid #3498db;
-          border-radius: 0 4px 4px 0;
-        }
         .subject { 
           font-weight: 600; 
           margin-bottom: 2cm; 
@@ -299,7 +292,6 @@ const modernTemplate: PdfTemplate = {
           margin-bottom: 2.5cm; 
           white-space: pre-wrap;
         }
-        .signature { text-align: right; color: #34495e; }
         .greeting { 
           margin-bottom: 1.5cm; 
           font-weight: 500;

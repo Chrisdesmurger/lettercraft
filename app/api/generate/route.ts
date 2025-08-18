@@ -41,15 +41,26 @@ export async function POST(request: Request) {
       - Être structurée avec une introduction, un développement et une conclusion
       - Faire environ 300-400 mots
       
-      IMPORTANT: Ne génère QUE le contenu principal, sans :
+      IMPORTANT: Génère le contenu complet de la lettre avec :
+      - L'objet/sujet de la lettre approprié
+      - Une salutation appropriée (Dear Hiring Manager, Madame Monsieur, etc.)
+      - Le contenu persuasif structuré en paragraphes
+      - Une conclusion professionnelle
+      
+      Ne génère PAS :
       - Les informations de contact du candidat
       - L'adresse du destinataire  
       - La date et le lieu
-      - Les formules de salutation (Madame, Monsieur, etc.)
-      - Les formules de politesse de fin (cordialement, etc.)
-      - La signature
+      - La signature avec le nom
       
-      Commence directement par le contenu persuasif de la lettre.
+      Structure recommandée :
+      Subject: [Objet approprié]
+      
+      [Salutation]
+      
+      [Contenu persuasif]
+      
+      [Conclusion professionnelle]
     `
 
     const completion = await openai.chat.completions.create({
@@ -57,7 +68,7 @@ export async function POST(request: Request) {
       messages: [
         {
           role: "system",
-          content: "Tu es un expert en ressources humaines et en rédaction de lettres de motivation. Tu génères UNIQUEMENT le contenu principal de la lettre, sans les informations de contact, dates, salutations ou formules de politesse. Commence directement par le contenu persuasif."
+          content: "Tu es un expert en ressources humaines et en rédaction de lettres de motivation. Tu génères le contenu complet de la lettre incluant l'objet, la salutation, le contenu persuasif et une conclusion professionnelle, mais SANS les informations de contact, dates ou signature avec nom."
         },
         {
           role: "user",
