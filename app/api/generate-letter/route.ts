@@ -18,7 +18,7 @@ async function generateLetterHandler(request: NextRequest, userId: string) {
 
         // Construire le prompt pour OpenAI
         const prompt = `
-    Génère une lettre de motivation professionnelle avec les informations suivantes:
+    Génère UNIQUEMENT le contenu principal d'une lettre de motivation avec les informations suivantes:
     
     Profil du candidat:
     - Catégorie: ${profile.category}
@@ -39,7 +39,15 @@ async function generateLetterHandler(request: NextRequest, userId: string) {
     - Longueur: environ ${settings.length} mots
     - Mettre en avant l'expérience: ${settings.emphasizeExperience ? 'Oui' : 'Non'}
     
-    La lettre doit être structurée, personnalisée et convaincante.
+    IMPORTANT: Ne génère QUE le contenu principal de la lettre, sans :
+    - Les informations de contact du candidat
+    - L'adresse du destinataire
+    - La date et le lieu
+    - Les formules de salutation (Madame, Monsieur)
+    - Les formules de politesse de fin
+    - La signature
+    
+    Commence directement par le contenu de la lettre, structuré en paragraphes clairs et convaincants.
     `
 
         const completion = await openai.chat.completions.create({
@@ -47,7 +55,7 @@ async function generateLetterHandler(request: NextRequest, userId: string) {
             messages: [
                 {
                     role: "system",
-                    content: "Tu es un expert en rédaction de lettres de motivation professionnelles."
+                    content: "Tu es un expert en rédaction de lettres de motivation professionnelles. Tu génères UNIQUEMENT le contenu principal de la lettre, sans les informations de contact, dates, salutations ou formules de politesse. Commence directement par le contenu persuasif."
                 },
                 {
                     role: "user",

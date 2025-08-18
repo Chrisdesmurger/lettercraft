@@ -20,9 +20,7 @@ export async function POST(request: Request) {
 
     // Construction du prompt
     const prompt = `
-      Tu es un expert en rédaction de lettres de motivation professionnelles.
-      
-      Génère une lettre de motivation en ${language} pour la candidature suivante:
+      Génère UNIQUEMENT le contenu principal d'une lettre de motivation en ${language} pour la candidature suivante:
       
       CV du candidat:
       ${cvSummary}
@@ -42,7 +40,16 @@ export async function POST(request: Request) {
       - Montrer l'adéquation avec le poste
       - Être structurée avec une introduction, un développement et une conclusion
       - Faire environ 300-400 mots
-      - Inclure les formules de politesse appropriées
+      
+      IMPORTANT: Ne génère QUE le contenu principal, sans :
+      - Les informations de contact du candidat
+      - L'adresse du destinataire  
+      - La date et le lieu
+      - Les formules de salutation (Madame, Monsieur, etc.)
+      - Les formules de politesse de fin (cordialement, etc.)
+      - La signature
+      
+      Commence directement par le contenu persuasif de la lettre.
     `
 
     const completion = await openai.chat.completions.create({
@@ -50,7 +57,7 @@ export async function POST(request: Request) {
       messages: [
         {
           role: "system",
-          content: "Tu es un expert en ressources humaines et en rédaction de lettres de motivation."
+          content: "Tu es un expert en ressources humaines et en rédaction de lettres de motivation. Tu génères UNIQUEMENT le contenu principal de la lettre, sans les informations de contact, dates, salutations ou formules de politesse. Commence directement par le contenu persuasif."
         },
         {
           role: "user",

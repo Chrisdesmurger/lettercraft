@@ -54,7 +54,7 @@ async function generatePersonalizedLetterHandler(request: NextRequest, userId: s
 
 PRECISE INSTRUCTIONS:
 1. Use the CV and questionnaire information to personalize the letter
-2. Follow the classic English structure: header, subject, body, closing
+2. Generate ONLY the main content without header, contact details, subject line, greetings or closing formulas
 3. Adopt a ${context.settings.tone} tone and adapt the length according to: ${context.settings.length}
 4. Highlight the selected experience and matching skills
 5. Naturally integrate the expressed motivation
@@ -62,14 +62,19 @@ PRECISE INSTRUCTIONS:
 7. Avoid clichés and overly generic formulations
 
 EXPECTED STRUCTURE:
-- Header with contact details (if available)
-- Clear subject line
-- Engaging introduction
+- Engaging introduction paragraph
 - Development in 2-3 paragraphs
 - Conclusion with call to action
-- Professional closing
 
-Generate only the letter content, without additional comments.`,
+IMPORTANT: Do NOT include:
+- Contact information
+- Header details
+- Subject line
+- Greetings (Dear Sir/Madam, etc.)
+- Closing formulas (Sincerely, Best regards, etc.)
+- Signature
+
+Generate only the persuasive content, without additional comments.`,
             prompt: `Generate a cover letter for:`
           }
         case 'es':
@@ -78,7 +83,7 @@ Generate only the letter content, without additional comments.`,
 
 INSTRUCCIONES PRECISAS:
 1. Utiliza la información del CV y del cuestionario para personalizar la carta
-2. Respeta la estructura clásica española: encabezado, asunto, cuerpo, fórmula de cortesía
+2. Genera ÚNICAMENTE el contenido principal sin encabezado, datos de contacto, asunto, saludos o fórmulas de cortesía
 3. Adopta un tono ${context.settings.tone} y adapta la longitud según: ${context.settings.length}
 4. Destaca la experiencia seleccionada y las competencias que coinciden
 5. Integra naturalmente la motivación expresada
@@ -86,14 +91,19 @@ INSTRUCCIONES PRECISAS:
 7. Evita clichés y formulaciones demasiado genéricas
 
 ESTRUCTURA ESPERADA:
-- Encabezado con datos de contacto (si están disponibles)
-- Asunto claro
 - Introducción atractiva
 - Desarrollo en 2-3 párrafos
 - Conclusión con llamada a la acción
-- Fórmula de cortesía
 
-Genera únicamente el contenido de la carta, sin comentarios adicionales.`,
+IMPORTANTE: NO incluyas:
+- Información de contacto
+- Datos del encabezado
+- Línea de asunto
+- Saludos (Estimados señores, etc.)
+- Fórmulas de cortesía (Atentamente, etc.)
+- Firma
+
+Genera únicamente el contenido persuasivo, sin comentarios adicionales.`,
             prompt: `Genera una carta de presentación para:`
           }
         default: // français
@@ -102,7 +112,7 @@ Genera únicamente el contenido de la carta, sin comentarios adicionales.`,
 
 INSTRUCTIONS PRÉCISES:
 1. Utilise les informations du CV et du questionnaire pour personnaliser la lettre
-2. Respecte la structure classique française : en-tête, objet, corps, formule de politesse
+2. Génère UNIQUEMENT le contenu principal sans en-tête, coordonnées, objet, salutations ou formules de politesse
 3. Adopte un ton ${context.settings.tone} et adapte la longueur selon: ${context.settings.length}
 4. Mets en valeur l'expérience sélectionnée et les compétences qui correspondent
 5. Intègre naturellement la motivation exprimée
@@ -110,14 +120,19 @@ INSTRUCTIONS PRÉCISES:
 7. Évite les clichés et les formulations trop génériques
 
 STRUCTURE ATTENDUE:
-- En-tête avec coordonnées (si disponibles)
-- Objet clair
 - Introduction accrocheuse
 - Développement en 2-3 paragraphes
 - Conclusion avec appel à l'action
-- Formule de politesse
 
-Génère uniquement le contenu de la lettre, sans commentaires supplémentaires.`,
+IMPORTANT: N'inclus PAS:
+- Informations de contact
+- Données d'en-tête
+- Ligne d'objet
+- Salutations (Madame, Monsieur, etc.)
+- Formules de politesse (Cordialement, etc.)
+- Signature
+
+Génère uniquement le contenu persuasif, sans commentaires supplémentaires.`,
             prompt: `Génère une lettre de motivation pour:`
           }
       }

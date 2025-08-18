@@ -109,97 +109,114 @@ const classicTemplate: PdfTemplate = {
     const locale = data.language === 'en' ? 'en-US' : data.language === 'de' ? 'de-DE' : data.language === 'es' ? 'es-ES' : data.language === 'it' ? 'it-IT' : 'fr-FR';
     const subjectLabel = data.language === 'fr' ? 'Objet :' : data.language === 'en' ? 'Subject:' : data.language === 'es' ? 'Asunto:' : data.language === 'de' ? 'Betreff:' : 'Oggetto:';
     
-    return `
-    <!DOCTYPE html>
-    <html lang="fr">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Lettre de Motivation - ${data.jobTitle || 'Poste'}</title>
-      <style>
-        @page { size: A4; margin: 2.5cm 2cm; }
-        body { 
-          font-family: 'Times New Roman', Times, serif; 
-          font-size: 12pt; 
-          line-height: 1.6; 
-          color: #000; 
-          margin: 0; 
-          padding: 0;
-          background: white;
-        }
-        .header { 
-          display: flex; 
-          justify-content: space-between; 
-          align-items: flex-start; 
-          margin-bottom: 2cm; 
-        }
-        .sender-info { 
-          font-size: 11pt; 
-          line-height: 1.4; 
-          text-align: left;
-        }
-        .date-location { 
-          font-size: 11pt; 
-          text-align: right;
-          white-space: nowrap;
-        }
-        .recipient-info { margin-bottom: 2cm; font-size: 11pt; }
-        .subject { 
-          font-weight: bold; 
-          margin-bottom: 1.5cm; 
-          text-decoration: underline; 
-          font-size: 12pt; 
-        }
-        .content { 
-          text-align: justify; 
-          margin-bottom: 2cm; 
-          white-space: pre-wrap;
-          text-indent: 1.5em;
-        }
-        .signature { text-align: right; margin-top: 2cm; }
-        .greeting { margin-bottom: 1cm; }
-      </style>
-    </head>
-    <body>
-      <div class="header">
-        <div class="sender-info">
-          <strong>${data.candidateName || ''}</strong><br>
-          ${data.candidateAddress ? data.candidateAddress + '<br>' : ''}
-          ${data.candidatePhone || ''}${data.candidatePhone && data.candidateEmail ? ' • ' : ''}${data.candidateEmail || ''}
-        </div>
-        <div class="date-location">
-          ${data.location || ''}, ${translations.the} ${data.date || new Date().toLocaleDateString(locale, { 
-            day: 'numeric', 
-            month: 'long', 
-            year: 'numeric' 
-          })}
-        </div>
+       return `
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>lettre de motivation</title>
+  <style>
+    /* Page */
+    @page { size: A4; margin: 2.5cm 2cm; }
+    body {
+      font-family: "Times New Roman", Times, serif;
+      font-size: 12pt;
+      line-height: 1.6;
+      color: #000;
+      margin: 0;
+      background: #fff;
+    }
+
+    /* En-tête */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 22mm;
+    }
+    .sender {
+      display: grid;
+      grid-template-columns: 4px 1fr;
+      gap: 10px;
+      align-items: start;
+    }
+    .sender-accent {
+      background: #1f4e79; /* bleu sobre rappel PDF */
+      border-radius: 2px;
+      height: 100%;
+      min-height: 42px;
+    }
+    .sender-content {
+      font-size: 11pt;
+      line-height: 1.35;
+    }
+    .sender-content strong {
+      display: inline-block;
+      margin-bottom: 2px;
+      font-size: 12pt;
+    }
+    .date-loc {
+      font-size: 11pt;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    /* Sujet */
+    .subject {
+      font-weight: bold;
+      font-size: 12pt;
+      margin: 0 0 14mm 0;
+      text-decoration: underline;
+    }
+
+    /* Corps */
+    .greeting { margin: 0 0 7mm 0; }
+    .content {
+      text-align: justify;
+      white-space: pre-wrap; /* respecte les \\n générés */
+    }
+    .content p { margin: 0 0 5mm 0; }
+    .content p + p { text-indent: 1.5em; }
+
+    /* Signature */
+    .closing { margin-top: 14mm; }
+    .signature {
+      margin-top: 6mm;
+      font-weight: bold;
+    }
+
+    /* Petites aides à l’impression (contraste, orphelines) */
+    @media print {
+      a { color: inherit; text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="sender" role="contentinfo" aria-label="Sender">
+      <div class="sender-accent" aria-hidden="true"></div>
+      <div class="sender-content">
+        <strong>${data.candidateName || ''}</strong><br/>
+        ${data.candidateAddress ? `${data.candidateAddress}<br/>` : ''}
+        ${[data.candidatePhone, data.candidateEmail].filter(Boolean).join(' • ')}
       </div>
-      
-      <div class="recipient-info">
-        ${translations.to_attention}<br>
-        ${data.company || translations.company}
-      </div>
-      
-      <div class="subject">
-        <strong>${subjectLabel}</strong> ${data.jobTitle ? `Candidature pour le poste de ${data.jobTitle}` : translations.subject_prefix}
-      </div>
-      
-      <div class="greeting">
-        ${translations.greeting_formal}
-      </div>
-      
-      <div class="content">${data.content || 'Contenu de la lettre'}</div>
-      
-      <div class="signature">
-        ${translations.closing_formal}<br>
-        <br>
-        <br>
-        ${data.candidateName || ''}
-      </div>
-    </body>
-    </html>
-    `;
+    </div>
+    <div class="date-loc">
+      ${[data.location || '', (data.date ||
+        new Date().toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' })
+      )] .filter(Boolean).join(', ')}
+    </div>
+  </header>
+
+  <main>
+    <div class="content">
+      ${data.content || 'Contenu de la lettre'}
+    </div>
+  </main>
+</body>
+</html>`;
   }
 }
 
@@ -308,26 +325,7 @@ const modernTemplate: PdfTemplate = {
         </div>
       </div>
       
-      <div class="recipient-info">
-        <strong>${recruitmentDept}</strong><br>
-        ${data.company || translations.company}
-      </div>
-      
-      <div class="subject">
-        ${data.jobTitle ? `Candidature pour le poste de ${data.jobTitle}` : translations.subject_prefix}
-      </div>
-      
-      <div class="greeting">
-        ${translations.greeting_formal}
-      </div>
-      
       <div class="content">${data.content || 'Contenu de la lettre'}</div>
-      
-      <div class="signature">
-        ${translations.closing_modern}<br>
-        <br>
-        <strong>${data.candidateName || ''}</strong>
-      </div>
     </body>
     </html>
     `;
@@ -448,26 +446,7 @@ const elegantTemplate: PdfTemplate = {
         </div>
       </div>
       
-      <div class="recipient-info">
-        <strong>${recruitmentDept}</strong><br>
-        ${data.company || translations.company}
-      </div>
-      
-      <div class="subject">
-        ${data.jobTitle ? `Candidature pour le poste de ${data.jobTitle}` : translations.subject_prefix}
-      </div>
-      
-      <div class="greeting">
-        ${translations.greeting_formal}
-      </div>
-      
       <div class="content">${data.content || 'Contenu de la lettre'}</div>
-      
-      <div class="signature">
-        ${translations.closing_semi_formal}<br>
-        <br>
-        <strong>${data.candidateName || ''}</strong>
-      </div>
     </body>
     </html>
     `;
@@ -603,26 +582,7 @@ const creativeTemplate: PdfTemplate = {
             </div>
           </div>
           
-          <div class="recipient-info">
-            <strong>${recruitmentDept}</strong><br>
-            ${data.company || translations.company}
-          </div>
-          
-          <div class="subject">
-            ✨ ${data.jobTitle ? `Candidature pour le poste de ${data.jobTitle}` : translations.subject_prefix} ✨
-          </div>
-          
-          <div class="greeting">
-            ${translations.greeting_casual}
-          </div>
-          
           <div class="content">${data.content || 'Contenu de la lettre'}</div>
-          
-          <div class="signature">
-            ${translations.closing_casual}<br>
-            <br>
-            <strong>${data.candidateName || ''}</strong> ✨
-          </div>
         </div>
       </div>
     </body>
