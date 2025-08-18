@@ -66,15 +66,20 @@ EXPECTED STRUCTURE:
 - Development in 2-3 paragraphs
 - Conclusion with call to action
 
-IMPORTANT: Do NOT include:
-- Contact information
-- Header details
-- Subject line
-- Greetings (Dear Sir/Madam, etc.)
-- Closing formulas (Sincerely, Best regards, etc.)
-- Signature
+IMPORTANT: Your response MUST start with:
+Subject: Application for [job title]
 
-Generate only the persuasive content, without additional comments.`,
+Dear Hiring Manager,
+
+Then continue with the persuasive content and end with a professional conclusion.
+
+Do NOT include:
+- Contact information
+- Header details  
+- Date and location
+- Signature with name
+
+Generate the complete letter content starting with Subject and greeting.`,
             prompt: `Generate a cover letter for:`
           }
         case 'es':
@@ -95,15 +100,20 @@ ESTRUCTURA ESPERADA:
 - Desarrollo en 2-3 párrafos
 - Conclusión con llamada a la acción
 
-IMPORTANTE: NO incluyas:
+IMPORTANTE: Tu respuesta DEBE empezar con:
+Subject: Candidatura para el puesto de [título del trabajo]
+
+Estimados señores,
+
+Luego continúa con el contenido persuasivo y termina con una conclusión profesional.
+
+NO incluyas:
 - Información de contacto
 - Datos del encabezado
-- Línea de asunto
-- Saludos (Estimados señores, etc.)
-- Fórmulas de cortesía (Atentamente, etc.)
-- Firma
+- Fecha y ubicación  
+- Firma con nombre
 
-Genera únicamente el contenido persuasivo, sin comentarios adicionales.`,
+Genera el contenido completo de la carta empezando con Subject y saludo.`,
             prompt: `Genera una carta de presentación para:`
           }
         default: // français
@@ -124,15 +134,20 @@ STRUCTURE ATTENDUE:
 - Développement en 2-3 paragraphes
 - Conclusion avec appel à l'action
 
-IMPORTANT: N'inclus PAS:
+IMPORTANT: Ta réponse DOIT commencer par :
+Subject: Candidature pour le poste de [titre du poste]
+
+Madame, Monsieur,
+
+Puis continue avec le contenu persuasif et termine avec une conclusion professionnelle.
+
+N'inclus PAS:
 - Informations de contact
 - Données d'en-tête
-- Ligne d'objet
-- Salutations (Madame, Monsieur, etc.)
-- Formules de politesse (Cordialement, etc.)
-- Signature
+- Date et lieu
+- Signature avec nom
 
-Génère uniquement le contenu persuasif, sans commentaires supplémentaires.`,
+Génère le contenu complet de la lettre en commençant par Subject et salutation.`,
             prompt: `Génère une lettre de motivation pour:`
           }
       }

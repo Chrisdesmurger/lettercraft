@@ -41,11 +41,13 @@ export async function POST(request: Request) {
       - Être structurée avec une introduction, un développement et une conclusion
       - Faire environ 300-400 mots
       
-      IMPORTANT: Génère le contenu complet de la lettre avec :
-      - L'objet/sujet de la lettre approprié
-      - Une salutation appropriée (Dear Hiring Manager, Madame Monsieur, etc.)
-      - Le contenu persuasif structuré en paragraphes
-      - Une conclusion professionnelle
+      IMPORTANT: Génère le contenu complet de la lettre qui DOIT COMMENCER par :
+      1. Subject: [Titre de poste approprié basé sur l'offre d'emploi]
+      2. Une ligne vide  
+      3. ${language === 'fr' ? 'Madame, Monsieur,' : language === 'en' ? 'Dear Hiring Manager,' : 'Estimados señores,'}
+      4. Une ligne vide
+      5. Le contenu persuasif en paragraphes
+      6. Une conclusion professionnelle
       
       Ne génère PAS :
       - Les informations de contact du candidat
@@ -53,14 +55,10 @@ export async function POST(request: Request) {
       - La date et le lieu
       - La signature avec le nom
       
-      Structure recommandée :
-      Subject: [Objet approprié]
+      OBLIGATOIRE: Ta réponse DOIT commencer par :
+      Subject: [titre du poste extrait de l'offre]
       
-      [Salutation]
-      
-      [Contenu persuasif]
-      
-      [Conclusion professionnelle]
+      ${language === 'fr' ? 'Madame, Monsieur,' : language === 'en' ? 'Dear Hiring Manager,' : 'Estimados señores,'}
     `
 
     const completion = await openai.chat.completions.create({
@@ -68,7 +66,7 @@ export async function POST(request: Request) {
       messages: [
         {
           role: "system",
-          content: "Tu es un expert en ressources humaines et en rédaction de lettres de motivation. Tu génères le contenu complet de la lettre incluant l'objet, la salutation, le contenu persuasif et une conclusion professionnelle, mais SANS les informations de contact, dates ou signature avec nom."
+          content: "Tu es un expert en ressources humaines et en rédaction de lettres de motivation. Tu génères le contenu complet de la lettre qui DOIT ABSOLUMENT commencer par 'Subject:' suivi de la salutation appropriée, puis le contenu persuasif et une conclusion professionnelle, mais SANS les informations de contact, dates ou signature avec nom."
         },
         {
           role: "user",

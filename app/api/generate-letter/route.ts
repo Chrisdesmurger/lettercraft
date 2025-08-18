@@ -39,11 +39,13 @@ async function generateLetterHandler(request: NextRequest, userId: string) {
     - Longueur: environ ${settings.length} mots
     - Mettre en avant l'expérience: ${settings.emphasizeExperience ? 'Oui' : 'Non'}
     
-    IMPORTANT: Génère le contenu complet de la lettre avec :
-    - L'objet/sujet de la lettre (ex: "Subject: Application for ${jobOffer.title} Position")
-    - Une salutation appropriée (ex: "Dear Hiring Manager," ou "Madame, Monsieur,")
-    - Le contenu persuasif structuré en paragraphes
-    - Une conclusion professionnelle (sans signature ni nom)
+    IMPORTANT: Génère le contenu complet de la lettre qui DOIT COMMENCER par :
+    1. Subject: Candidature pour le poste de ${jobOffer.title}
+    2. Une ligne vide
+    3. Madame, Monsieur, (ou Dear Hiring Manager, selon la langue)
+    4. Une ligne vide
+    5. Le contenu persuasif en paragraphes
+    6. Une conclusion professionnelle (sans signature ni nom)
     
     Ne génère PAS :
     - Les informations de contact du candidat
@@ -51,14 +53,10 @@ async function generateLetterHandler(request: NextRequest, userId: string) {
     - La date et le lieu
     - La signature avec le nom
     
-    Structure recommandée :
-    Subject: [Objet approprié]
+    OBLIGATOIRE: Ta réponse DOIT commencer exactement par :
+    Subject: Candidature pour le poste de ${jobOffer.title}
     
-    [Salutation]
-    
-    [Contenu persuasif en paragraphes]
-    
-    [Conclusion professionnelle]
+    ${settings.language === 'fr' ? 'Madame, Monsieur,' : settings.language === 'en' ? 'Dear Hiring Manager,' : 'Estimados señores,'}
     `
 
         const completion = await openai.chat.completions.create({
@@ -66,7 +64,7 @@ async function generateLetterHandler(request: NextRequest, userId: string) {
             messages: [
                 {
                     role: "system",
-                    content: "Tu es un expert en rédaction de lettres de motivation professionnelles. Tu génères le contenu complet de la lettre incluant l'objet, la salutation, le contenu persuasif et une conclusion professionnelle, mais SANS les informations de contact, dates ou signature avec nom."
+                    content: "Tu es un expert en rédaction de lettres de motivation professionnelles. Tu génères le contenu complet de la lettre qui DOIT ABSOLUMENT commencer par 'Subject:' suivi de la salutation appropriée, puis le contenu persuasif et une conclusion professionnelle, mais SANS les informations de contact, dates ou signature avec nom."
                 },
                 {
                     role: "user",
