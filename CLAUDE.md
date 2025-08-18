@@ -40,14 +40,15 @@ This is a Next.js 15 application for AI-powered cover letter generation in Frenc
 - `LetterPreview` - Final output with PDF export
 
 ### Data Layer
-- **Supabase Tables**: `user_profiles`, `candidates_profile`, `saved_letters`, `user_quotas`, `onboarding_responses`, `stripe_subscriptions`, `stripe_invoices`
-- **Type Safety**: Full TypeScript types in `lib/supabase-client.ts`
+- **Supabase Tables**: `user_profiles`, `candidates_profile` (enhanced), `saved_letters`, `user_quotas`, `onboarding_responses`, `stripe_subscriptions`, `stripe_invoices`
+- **Type Safety**: Full TypeScript types in `lib/supabase-client.ts` with extended CV schema
 - **Database Helpers**: Typed query helpers in `db` object
+- **CV Schema**: Enhanced with 13 new fields for AI-extracted data (contact, projects, certifications, etc.)
 
 ### API Routes
 
 #### Core Application
-- `/api/extract-cv` - Uses OpenAI File API for CV text extraction
+- `/api/extract-cv` - Enhanced AI CV extraction with OpenAI Assistants API (15+ fields, structured data)
 - `/api/generate-letter` - Letter generation endpoint
 - `/api/generate` - Generic generation endpoint
 
@@ -418,8 +419,36 @@ L'API Brevo implémente plusieurs couches de protection :
 - Bypass sécurisé pour les opérations système
 - Logging détaillé des sources d'appels
 
-### CV Extraction
-Uses OpenAI File API with GPT-4-turbo model. Files are temporarily stored in `/tmp` and cleaned up after processing.
+### CV Extraction (Enhanced 2025)
+**Advanced AI-powered CV analysis** using OpenAI Assistants API with file search capabilities:
+
+#### Features
+- **Complete data extraction**: Name, contact, experiences, skills, education, projects, certifications, languages
+- **Structured output**: 15+ categorized fields with detailed experience breakdowns 
+- **Multi-format support**: PDF, JPEG, PNG with temporary file processing
+- **Intelligent parsing**: Key points extraction, date normalization, technology identification
+- **Automatic activation**: New CVs are immediately set as active upon successful extraction
+- **🆕 Advanced Achievement Detection**: Separates measurable accomplishments from routine job descriptions
+- **🆕 Smart Title Generation**: Automatic CV title creation from extracted names or cleaned filenames
+
+#### Data Structure
+**Basic fields** (compatible with legacy):
+- `first_name`, `last_name`, `skills[]`, `experiences[]`, `education[]`
+
+**Enriched fields** (new):
+- **Contact**: `email`, `phone`, `location`, `linkedin`, `website`
+- **Professional**: `summary` (professional objective)
+- **Structured data**: `projects`, `certifications`, `languages` (JSONB)
+- **Additional**: `achievements[]`, `volunteer[]`, `interests[]`
+- **Raw data**: `structured_data` (JSONB) - complete OpenAI response
+
+#### Technical Implementation
+- **Model**: GPT-4o-mini for cost optimization
+- **API**: OpenAI Assistants with file_search tool
+- **Processing**: Temporary files in `/tmp`, automatic cleanup
+- **Normalization**: Backward compatibility + new enriched structure
+- **Database**: Extended `candidates_profile` table with 13 new columns
+- **Activation**: Automatic CV activation upon successful extraction and storage
 
 ### PDF Generation
 The application includes a comprehensive PDF generation system with multiple templates and multilingual UI:

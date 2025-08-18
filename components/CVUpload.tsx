@@ -91,6 +91,23 @@ export default function CVUpload({ data, onUpdate, onNext }: CVUploadProps) {
 
             const extractedInfo = await extractResponse.json()
             console.log('✅ [CV-UPLOAD] CV extracted successfully:', extractedInfo)
+            
+            // ATTENDRE et VALIDER que toutes les données OpenAI sont bien reçues
+            console.log('🔍 [CV-UPLOAD] Validating extracted data before DB insertion...')
+            console.log('🔍 [CV-UPLOAD] Raw OpenAI response structure:', {
+                hasFirstName: !!extractedInfo.first_name,
+                hasLastName: !!extractedInfo.last_name,
+                skillsCount: extractedInfo.skills?.length || 0,
+                experiencesCount: extractedInfo.experiences?.length || 0,
+                educationCount: extractedInfo.education?.length || 0,
+                hasStructuredData: !!extractedInfo.structured_data,
+                allKeys: Object.keys(extractedInfo)
+            })
+
+            // S'assurer que l'extraction s'est bien passée avant de continuer
+            if (!extractedInfo || typeof extractedInfo !== 'object') {
+                throw new Error('Données d\'extraction OpenAI invalides ou incomplètes')
+            }
 
             // Combine storage info with extracted data
             const extractedData = {
@@ -101,16 +118,186 @@ export default function CVUpload({ data, onUpdate, onNext }: CVUploadProps) {
                 last_name: extractedInfo.last_name || '',
                 skills: extractedInfo.skills || [],
                 experiences: extractedInfo.experiences || [],
-                education: extractedInfo.education || []
+                education: extractedInfo.education || [],
+                structured_data: extractedInfo.structured_data || null
             }
 
             setCvData(extractedData)
 
-            // Update the flow
+            // ATTENDRE un petit délai pour s'assurer que tout est bien traité
+            await new Promise(resolve => setTimeout(resolve, 500))
+
+            // Sauvegarder le CV dans la base de données et l'activer automatiquement
+            console.log('🔍 [CV-UPLOAD] Starting database insertion after OpenAI processing complete...')
+            console.log('🔍 [CV-UPLOAD] Data to insert:', {
+                first_name: extractedInfo.first_name,
+                last_name: extractedInfo.last_name,
+                email: extractedInfo.email,
+                phone: extractedInfo.phone,
+                skills_length: extractedInfo.skills?.length,
+                experiences_length: extractedInfo.experiences?.length,
+                education_length: extractedInfo.education?.length,
+                has_structured_data: !!extractedInfo.structured_data
+            })
+            
+            // Debugging: Afficher les données exactes qu'on va insérer
+            console.log('🔍 [CV-UPLOAD] DEBUGGING - Full extractedInfo object:', extractedInfo)
+            
+            // D'abord, désactiver tous les CV existants de l'utilisateur
+            const { error: deactivateError } = await supabase
+                .from('candidates_profile')
+                .update({ is_active: false })
+                .eq('user_id', user.id)
+
+            if (deactivateError) {
+                console.error('❌ [CV-UPLOAD] Error deactivating existing CVs:', deactivateError)
+            }
+
+            // Créer l'URL publique du fichier
+            const { data: { publicUrl } } = supabase.storage
+                .from('documents')
+                .getPublicUrl(uploadResult.data.path)
+
+            // Créer le titre : utiliser le nom/prénom extrait ou fallback sur nom de fichier
+            const cvTitle = (() => {
+                const firstName = extractedInfo.first_name?.trim() || ''
+                const lastName = extractedInfo.last_name?.trim() || ''
+                
+                console.log('🔍 [CV-UPLOAD] Title generation - Raw extracted data:', { 
+                    first_name: extractedInfo.first_name, 
+                    last_name: extractedInfo.last_name,
+                    firstName, 
+                    lastName,
+                    fileName: file.name 
+                })
+                
+                if (firstName && lastName) {
+                    const title = `CV ${firstName} ${lastName}`
+                    console.log('🔍 [CV-UPLOAD] Using full name title:', title)
+                    return title
+                } else if (firstName || lastName) {
+                    const title = `CV ${firstName || lastName}`
+                    console.log('🔍 [CV-UPLOAD] Using single name title:', title)
+                    return title
+                } else {
+                    // Fallback: utiliser le nom du fichier sans extension, nettoyé
+                    const rawFileName = file.name
+                    console.log('🔍 [CV-UPLOAD] No names extracted, using filename fallback. Raw filename:', rawFileName)
+                    
+                    const cleanFileName = rawFileName
+                        .replace(/\.[^/.]+$/, '') // Supprimer l'extension
+                        .replace(/[_-]/g, ' ') // Remplacer _ et - par des espaces
+                        .replace(/\s+/g, ' ') // Normaliser les espaces multiples
+                        .trim()
+                    
+                    console.log('🔍 [CV-UPLOAD] Cleaned filename:', cleanFileName)
+                    
+                    if (cleanFileName && cleanFileName.length > 0) {
+                        const title = cleanFileName
+                        console.log('🔍 [CV-UPLOAD] Using cleaned filename as title:', title)
+                        return title
+                    } else {
+                        const dateTitle = `CV ${new Date().toLocaleDateString('fr-FR')}`
+                        console.log('🔍 [CV-UPLOAD] Using date fallback title:', dateTitle)
+                        return dateTitle
+                    }
+                }
+            })()
+
+            console.log('🔍 [CV-UPLOAD] Generated title:', cvTitle)
+            
+            // Vérification de sécurité : s'assurer que le titre n'est jamais vide
+            const finalTitle = cvTitle && cvTitle.trim().length > 0 
+                ? cvTitle.trim() 
+                : `CV ${new Date().toLocaleDateString('fr-FR')} ${new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`
+            
+            console.log('🔍 [CV-UPLOAD] Final title after safety check:', finalTitle)
+            
+            // Préparer les données avec les types corrects selon la vraie structure de la table
+            const insertData = {
+                user_id: user.id, // UUID requis
+                title: finalTitle, // TEXT NOT NULL - GARANTI NON VIDE
+                language: 'fr', // TEXT NOT NULL - CRITIQUE !
+                description: extractedInfo.structured_data?.professional_summary?.trim() || null, // TEXT nullable
+                file_url: publicUrl, // TEXT NOT NULL
+                file_size: file.size, // BIGINT nullable
+                first_name: extractedInfo.first_name?.trim() || null, // TEXT nullable
+                last_name: extractedInfo.last_name?.trim() || null, // TEXT nullable
+                skills: extractedInfo.skills || [], // ARRAY nullable
+                experiences: extractedInfo.experiences || [], // ARRAY nullable  
+                education: extractedInfo.education || [], // ARRAY nullable
+                is_active: true // BOOLEAN nullable, default false
+                // uploaded_at sera automatiquement défini par la DB (default now())
+            }
+
+            console.log('🔍 [CV-UPLOAD] Final insert data with correct types:', insertData)
+
+            // Insérer le nouveau CV et l'activer immédiatement
+            const { data: cvRecord, error: insertError } = await supabase
+                .from('candidates_profile')
+                .insert(insertData)
+                .select()
+                .single()
+
+            if (insertError) {
+                console.error('❌ [CV-UPLOAD] Error saving CV metadata:', insertError)
+                console.error('❌ [CV-UPLOAD] Full error details:', {
+                    message: insertError.message,
+                    code: insertError.code,
+                    details: insertError.details,
+                    hint: insertError.hint
+                })
+                console.error('❌ [CV-UPLOAD] Failed insertion data was:', {
+                    user_id: user.id,
+                    title: cvTitle,
+                    language: 'fr',
+                    description: extractedInfo.structured_data?.professional_summary || `CV extrait automatiquement le ${new Date().toLocaleDateString('fr-FR')}`,
+                    file_url: publicUrl,
+                    file_size: file.size,
+                    first_name: extractedInfo.first_name?.trim() || null,
+                    last_name: extractedInfo.last_name?.trim() || null,
+                    skills: extractedInfo.skills || [],
+                    experiences: extractedInfo.experiences || [],
+                    education: extractedInfo.education || [],
+                    is_active: true
+                })
+                
+                // Test avec API de debug
+                console.log('🔍 [CV-UPLOAD] Testing with debug API...')
+                try {
+                    const testResponse = await fetch('/api/test-cv-insert', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    })
+                    const testResult = await testResponse.json()
+                    console.log('🔍 [CV-UPLOAD] Test API result:', testResult)
+                } catch (testError) {
+                    console.error('❌ [CV-UPLOAD] Test API failed:', testError)
+                }
+                
+                toast.error(`CV uploadé mais erreur lors de la sauvegarde: ${insertError.message} (Code: ${insertError.code})`)
+            } else {
+                console.log('✅ [CV-UPLOAD] CV metadata saved and activated successfully!')
+                console.log('✅ [CV-UPLOAD] Saved CV record:', cvRecord)
+                console.log('✅ [CV-UPLOAD] CV is now active with ID:', cvRecord?.id)
+            }
+
+            // Update the flow - ATTENTION: ne pas passer toutes les données à onUpdate !
             if (onUpdate) {
+                console.log('🔍 [CV-UPLOAD] Calling onUpdate with basic data only')
                 onUpdate({
                     cvUploaded: true,
-                    cvData: extractedData
+                    cvData: {
+                        // Passer seulement les données de base pour éviter le PATCH qui échoue
+                        fileName: file.name,
+                        uploadPath: uploadResult.data.path,
+                        first_name: extractedInfo.first_name || '',
+                        last_name: extractedInfo.last_name || '',
+                        skills: extractedInfo.skills || [],
+                        experiences: extractedInfo.experiences || [],
+                        education: extractedInfo.education || [],
+                        is_active: true
+                    }
                 })
             }
 

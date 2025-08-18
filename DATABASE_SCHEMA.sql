@@ -47,8 +47,22 @@ CREATE TABLE candidates_profile (
   experiences TEXT[],
   skills TEXT[],
   education TEXT[],
-  file_size INTEGER,
-  is_active BOOLEAN DEFAULT FALSE
+  file_size BIGINT,
+  is_active BOOLEAN DEFAULT FALSE,
+  -- Nouveaux champs pour les données enrichies d'OpenAI (2025)
+  email TEXT,
+  phone TEXT,
+  location TEXT,
+  linkedin TEXT,
+  website TEXT,
+  summary TEXT,
+  projects JSONB,
+  certifications JSONB,
+  languages JSONB,
+  achievements TEXT[],
+  volunteer TEXT[],
+  interests TEXT[],
+  structured_data JSONB
 );
 
 -- =============================================================================

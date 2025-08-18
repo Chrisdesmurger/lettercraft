@@ -62,10 +62,38 @@ export default function DocumentUploadPage() {
       
       const data = await extractResumeDataFromFile(file)
       
-      // Mettre à jour le CV avec les données extraites ET l'activer
+      // Générer un titre automatique si l'utilisateur n'en a pas fourni
+      let finalTitle = title.trim()
+      if (!finalTitle) {
+        const firstName = data.first_name?.trim() || ''
+        const lastName = data.last_name?.trim() || ''
+        
+        if (firstName && lastName) {
+          finalTitle = `${t('upload.cvPrefix')} ${firstName} ${lastName}`
+        } else if (firstName || lastName) {
+          finalTitle = `${t('upload.cvPrefix')} ${firstName || lastName}`
+        } else {
+          // Fallback sur le nom de fichier nettoyé
+          const cleanFileName = file.name
+            .replace(/\.[^/.]+$/, '') // Supprimer l'extension
+            .replace(/[_-]/g, ' ') // Remplacer _ et - par des espaces
+            .replace(/\s+/g, ' ') // Normaliser les espaces multiples
+            .trim()
+          
+          finalTitle = cleanFileName || `${t('upload.cvPrefix')} ${new Date().toLocaleDateString()}`
+        }
+        
+        console.log('🔍 [UPLOAD] Generated automatic title:', finalTitle)
+      }
+      
+      // Mettre à jour le CV avec les données extraites, le titre généré ET l'activer
       await supabase
         .from('candidates_profile')
-        .update({ ...data, is_active: true })
+        .update({ 
+          ...data, 
+          title: finalTitle, // Assurer que le titre est défini
+          is_active: true 
+        })
         .eq('id', id)
       
       setExtracted(data)
