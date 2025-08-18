@@ -182,7 +182,7 @@ const classicTemplate: PdfTemplate = {
       </div>
       
       <div class="subject">
-        <strong>${subjectLabel}</strong> ${translations.subject_prefix}
+        <strong>${subjectLabel}</strong> ${data.jobTitle ? `Candidature pour le poste de ${data.jobTitle}` : translations.subject_prefix}
       </div>
       
       <div class="greeting">
@@ -314,7 +314,7 @@ const modernTemplate: PdfTemplate = {
       </div>
       
       <div class="subject">
-        ${translations.subject_prefix}
+        ${data.jobTitle ? `Candidature pour le poste de ${data.jobTitle}` : translations.subject_prefix}
       </div>
       
       <div class="greeting">
@@ -370,8 +370,8 @@ const elegantTemplate: PdfTemplate = {
           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
           color: white;
           padding: 20px 25px;
-          margin: -15px -15px 2.5cm -15px;
-          border-radius: 0 0 10px 10px;
+          margin: 0 0 2.5cm 0;
+          border-radius: 10px;
           display: flex;
           justify-content: space-between;
           align-items: center;
@@ -454,7 +454,7 @@ const elegantTemplate: PdfTemplate = {
       </div>
       
       <div class="subject">
-        ${translations.subject_prefix}
+        ${data.jobTitle ? `Candidature pour le poste de ${data.jobTitle}` : translations.subject_prefix}
       </div>
       
       <div class="greeting">
@@ -525,7 +525,7 @@ const creativeTemplate: PdfTemplate = {
           color: white;
           padding: 20px;
           border-radius: 8px;
-          margin: -10px -10px 2cm -10px;
+          margin: 0 0 2cm 0;
         }
         .sender-block {
           flex: 1;
@@ -609,7 +609,7 @@ const creativeTemplate: PdfTemplate = {
           </div>
           
           <div class="subject">
-            ✨ ${translations.subject_prefix} ✨
+            ✨ ${data.jobTitle ? `Candidature pour le poste de ${data.jobTitle}` : translations.subject_prefix} ✨
           </div>
           
           <div class="greeting">

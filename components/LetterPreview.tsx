@@ -62,20 +62,36 @@ export default function LetterPreview({ data, onUpdate, onNext }: LetterPreviewP
     }
   }, [generatedLetterId, editedLetter])
 
+  // Normaliser les données candidat avec une logique de fallback cohérente
+  const getCandidateData = () => {
+    // Priorité : profile existant > user_metadata > user direct > valeurs par défaut
+    const profile = data?.profile
+    const userMeta = user?.user_metadata
+    
+    return {
+      firstName: profile?.first_name || userMeta?.first_name || '',
+      lastName: profile?.last_name || userMeta?.last_name || '',
+      email: profile?.email || user?.email || '',
+      phone: profile?.phone || userMeta?.phone || '',
+      address: profile?.address || userMeta?.address || '',
+      city: profile?.city || userMeta?.city || 'Paris'
+    }
+  }
+
+  const candidateData = getCandidateData()
+  
   // Convertir les données actuelles vers le format LetterData pour les modèles
   const letterData: LetterData = {
     content: editedLetter || data?.generatedLetter || '',
     jobTitle: data?.jobOffer?.title || '',
     company: data?.jobOffer?.company || '',
-    candidateName: data?.profile?.first_name && data?.profile?.last_name 
-      ? `${data.profile.first_name} ${data.profile.last_name}`
-      : user?.user_metadata?.first_name && user?.user_metadata?.last_name
-      ? `${user.user_metadata.first_name} ${user.user_metadata.last_name}`
-      : '',
-    candidateEmail: data?.profile?.email || user?.email || '',
-    candidatePhone: data?.profile?.phone || user?.user_metadata?.phone || '',
-    candidateAddress: data?.profile?.address || '',
-    location: data?.profile?.city || 'Paris',
+    candidateName: candidateData.firstName && candidateData.lastName 
+      ? `${candidateData.firstName} ${candidateData.lastName}`
+      : candidateData.firstName || candidateData.lastName || '',
+    candidateEmail: candidateData.email,
+    candidatePhone: candidateData.phone,
+    candidateAddress: candidateData.address,
+    location: candidateData.city,
     date: new Date().toLocaleDateString('fr-FR', { 
       day: 'numeric', 
       month: 'long', 
