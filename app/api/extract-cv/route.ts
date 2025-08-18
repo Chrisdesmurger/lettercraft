@@ -3,6 +3,7 @@ import OpenAI from 'openai';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
+import { getOpenAIConfig } from '@/lib/openai-config';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -45,7 +46,7 @@ export async function POST(request: NextRequest) {
   "education": ["array of education/qualifications"]
 }
 Return only the JSON, no other text.`,
-      model: "gpt-4-turbo",
+      model: getOpenAIConfig('CV_EXTRACTION').model,
       tools: [{ type: "file_search" }]
     });
 

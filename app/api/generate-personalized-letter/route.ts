@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import OpenAI from 'openai'
 import { withQuotaCheck } from '@/lib/middleware/quota-middleware'
+import { getOpenAIConfig } from '@/lib/openai-config'
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -126,8 +127,9 @@ Génère uniquement le contenu de la lettre, sans commentaires supplémentaires.
     const languageInstructions = getLanguageInstructions(context.settings.language)
 
     // Générer la lettre de motivation avec OpenAI
+    const letterConfig = getOpenAIConfig('LETTER_GENERATION')
     const completion = await openai.chat.completions.create({
-      model: "gpt-4-turbo",
+      model: letterConfig.model,
       messages: [
         {
           role: "system",
@@ -158,8 +160,8 @@ ${context.settings.language === 'en' ? 'QUESTIONNAIRE RESPONSES:' : context.sett
 ${context.settings.language === 'en' ? 'Generate a professional and personalized cover letter.' : context.settings.language === 'es' ? 'Genera una carta de presentación profesional y personalizada.' : 'Génère une lettre de motivation professionnelle et personnalisée.'}`
         }
       ],
-      temperature: 0.7,
-      max_tokens: 3000
+      temperature: letterConfig.temperature,
+      max_tokens: letterConfig.max_tokens
     })
 
     const letterContent = completion.choices[0].message.content
@@ -213,8 +215,9 @@ Estructura HTML:
 Genera únicamente el código HTML completo, sin comentarios.`
     }
 
+    const htmlConfig = getOpenAIConfig('HTML_FORMATTING')
     const htmlCompletion = await openai.chat.completions.create({
-      model: "gpt-4-turbo",
+      model: htmlConfig.model,
       messages: [
         {
           role: "system",
@@ -225,8 +228,8 @@ Genera únicamente el código HTML completo, sin comentarios.`
           content: `${context.settings.language === 'en' ? 'Convert this letter to HTML:' : context.settings.language === 'es' ? 'Convierte esta carta en HTML:' : 'Convertis cette lettre en HTML:'}\n\n${letterContent}`
         }
       ],
-      temperature: 0.3,
-      max_tokens: 3000
+      temperature: htmlConfig.temperature,
+      max_tokens: htmlConfig.max_tokens
     })
 
     const htmlContent = htmlCompletion.choices[0].message.content || letterContent
@@ -236,7 +239,7 @@ Genera únicamente el código HTML completo, sin comentarios.`
       html_content: htmlContent,
       metadata: {
         generated_at: new Date().toISOString(),
-        model: 'gpt-4-turbo',
+        model: letterConfig.model,
         user_id: userId,
         context_used: {
           job_title: context.jobOffer.title,

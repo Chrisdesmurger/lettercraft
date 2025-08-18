@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { supabase } from '@/lib/supabase-client'
+import { getOpenAIConfig } from '@/lib/openai-config'
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -45,8 +46,9 @@ export async function POST(request: Request) {
       - Inclure les formules de politesse appropriées
     `
 
+    const letterConfig = getOpenAIConfig('LETTER_GENERATION')
     const completion = await openai.chat.completions.create({
-      model: "gpt-4",
+      model: letterConfig.model,
       messages: [
         {
           role: "system",
@@ -57,8 +59,8 @@ export async function POST(request: Request) {
           content: prompt
         }
       ],
-      temperature: 0.7,
-      max_tokens: 1000,
+      temperature: letterConfig.temperature,
+      max_tokens: letterConfig.max_tokens,
     })
 
     const letter = completion.choices[0].message.content
