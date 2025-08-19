@@ -5,6 +5,7 @@ import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 import { withQuotaCheck } from '@/lib/middleware/quota-middleware'
 import { generateStructuredPrompt, parseLetterResponse, cleanLetterSections, validateContentCleanliness } from '@/lib/letter-sections'
+import { getOpenAIConfig } from '@/lib/openai-config'
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY
@@ -20,8 +21,9 @@ async function generateLetterHandler(request: NextRequest, userId: string) {
         // Générer le prompt structuré pour obtenir les sections séparées
         const prompt = generateStructuredPrompt(profile, cv, jobOffer, settings)
 
+        const letterConfig = getOpenAIConfig('LETTER_GENERATION')
         const completion = await openai.chat.completions.create({
-            model: "gpt-4",
+            model: letterConfig.model,
             messages: [
                 {
                     role: "system",
@@ -32,8 +34,8 @@ async function generateLetterHandler(request: NextRequest, userId: string) {
                     content: prompt
                 }
             ],
-            temperature: 0.7,
-            max_tokens: 1500
+            temperature: letterConfig.temperature,
+            max_tokens: letterConfig.max_tokens
         })
 
         const aiResponse = completion.choices[0].message.content
@@ -67,7 +69,7 @@ async function generateLetterHandler(request: NextRequest, userId: string) {
                 html_content: null,
                 pdf_url: null,
                 generation_settings: settings,
-                openai_model: 'gpt-4',
+                openai_model: letterConfig.model,
                 // Ces champs sont requis selon le schéma mais on peut les laisser vides pour l'instant
                 questionnaire_response_id: 'temp-' + Date.now(),
                 job_offer_id: 'temp-' + Date.now(),
