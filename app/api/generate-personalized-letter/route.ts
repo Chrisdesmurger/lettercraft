@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import OpenAI from 'openai'
 import { withQuotaCheck } from '@/lib/middleware/quota-middleware'
+import { parseLetterResponse, cleanLetterSections, formatLetterSections, validateContentCleanliness } from '@/lib/letter-sections'
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -45,85 +46,178 @@ async function generatePersonalizedLetterHandler(request: NextRequest, userId: s
       }
     }
 
-    // Définir les instructions selon la langue
-    const getLanguageInstructions = (language: string) => {
-      switch (language) {
-        case 'en':
-          return {
-            system: `You are an expert in writing professional cover letters in English. You must create a personalized and convincing cover letter.
+    // Système de prompt hybride : qualité de l'ancien + structure de sections
+    const generateStructuredPromptPersonalized = (context: any) => {
+      const getLanguageInstructions = (language: string) => {
+        switch (language) {
+          case 'en':
+            return {
+              language: 'English',
+              greeting: 'Dear Hiring Manager,',
+              system: `You are an expert in writing professional cover letters in English. You must create a personalized and convincing cover letter.
 
-PRECISE INSTRUCTIONS:
-1. Use the CV and questionnaire information to personalize the letter
-2. Follow the classic English structure: header, subject, body, closing
-3. Adopt a ${context.settings.tone} tone and adapt the length according to: ${context.settings.length}
-4. Highlight the selected experience and matching skills
-5. Naturally integrate the expressed motivation
-6. Show alignment with company values
-7. Avoid clichés and overly generic formulations
+QUALITY GUIDELINES:
+1. Use the CV and questionnaire information to personalize the letter deeply with SPECIFIC details
+2. Adopt a ${context.settings.tone} tone and adapt the length according to: ${context.settings.length}
+3. Highlight the selected experience and matching skills with measurable examples and concrete achievements
+4. Naturally integrate the expressed motivation with authentic enthusiasm using the exact wording provided
+5. Show genuine alignment with company values using specific references to company culture/mission
+6. STRICTLY avoid clichés like "I am writing to", "esteemed company", "with great interest", "I would welcome the opportunity"
+7. Create engaging storytelling that connects specific candidate achievements to exact role requirements
+8. Use compelling language with concrete metrics, technologies, and business impact
 
-EXPECTED STRUCTURE:
-- Header with contact details (if available)
-- Clear subject line
-- Engaging introduction
-- Development in 2-3 paragraphs
-- Conclusion with call to action
-- Professional closing
+CONTENT QUALITY:
+- Direct opening with specific motivation and company knowledge (NO generic introductions)
+- Development with concrete examples including numbers, technologies, and measurable results
+- Clear demonstration of exact skills-to-requirements matching with specific evidence
+- Authentic expression using questionnaire responses verbatim when relevant
+- Strong conclusion with specific next steps and confident value proposition
 
-Generate only the letter content, without additional comments.`,
-            prompt: `Generate a cover letter for:`
-          }
-        case 'es':
-          return {
-            system: `Eres un experto en redacción de cartas de presentación profesionales en español. Debes crear una carta de presentación personalizada y convincente.
+BANNED PHRASES: "I am writing to", "with great interest", "esteemed company", "I would welcome", "please find attached", "thank you for your consideration"`,
+              
+              subjectPrefix: 'Application for',
+              bodyInstructions: 'Write a compelling and deeply personalized cover letter body that tells a specific story using concrete details from the candidate\'s experience, demonstrates clear measurable value, and shows authentic enthusiasm with specific references to the company and role'
+            }
+          case 'es':
+            return {
+              language: 'Spanish',
+              greeting: 'Estimado/a responsable de contratación,',
+              system: `Eres un experto en redacción de cartas de presentación profesionales en español. Debes crear una carta de presentación personalizada y convincente.
 
-INSTRUCCIONES PRECISAS:
-1. Utiliza la información del CV y del cuestionario para personalizar la carta
-2. Respeta la estructura clásica española: encabezado, asunto, cuerpo, fórmula de cortesía
-3. Adopta un tono ${context.settings.tone} y adapta la longitud según: ${context.settings.length}
-4. Destaca la experiencia seleccionada y las competencias que coinciden
-5. Integra naturalmente la motivación expresada
-6. Muestra la alineación con los valores de la empresa
-7. Evita clichés y formulaciones demasiado genéricas
+DIRECTRICES DE CALIDAD:
+1. Utiliza la información del CV y del cuestionario para personalizar profundamente la carta
+2. Adopta un tono ${context.settings.tone} y adapta la longitud según: ${context.settings.length}
+3. Destaca la experiencia seleccionada y las competencias correspondientes con ejemplos específicos
+4. Integra naturalmente la motivación expresada con entusiasmo auténtico
+5. Muestra una alineación genuina con los valores y la cultura de la empresa
+6. Evita clichés y formulaciones demasiado genéricas
+7. Crea una narrativa atractiva que conecte el recorrido del candidato con el puesto
+8. Usa un lenguaje convincente que demuestre la propuesta de valor
 
-ESTRUCTURA ESPERADA:
-- Encabezado con datos de contacto (si están disponibles)
-- Asunto claro
-- Introducción atractiva
-- Desarrollo en 2-3 párrafos
-- Conclusión con llamada a la acción
-- Fórmula de cortesía
+CALIDAD DEL CONTENIDO:
+- Introducción atractiva que capte inmediatamente la atención
+- Desarrollo en 2-3 párrafos enfocados con ejemplos concretos
+- Demostración clara de la correspondencia entre habilidades y requisitos
+- Expresión auténtica de motivación y encaje cultural
+- Conclusión sólida con llamada a la acción segura`,
+              
+              subjectPrefix: 'Candidatura para',
+              bodyInstructions: 'Escribe un cuerpo de carta convincente y profundamente personalizado que cuente una historia específica usando detalles concretos de la experiencia del candidato, demuestre valor medible claro, y muestre entusiasmo auténtico con referencias específicas a la empresa y el puesto'
+            }
+          default: // français
+            return {
+              language: 'French',
+              greeting: 'Madame, Monsieur,',
+              system: `Tu es un expert en rédaction de lettres de motivation professionnelles en français. Tu dois créer une lettre de motivation personnalisée et convaincante.
 
-Genera únicamente el contenido de la carta, sin comentarios adicionales.`,
-            prompt: `Genera una carta de presentación para:`
-          }
-        default: // français
-          return {
-            system: `Tu es un expert en rédaction de lettres de motivation professionnelles en français. Tu dois créer une lettre de motivation personnalisée et convaincante.
+DIRECTIVES DE QUALITÉ:
+1. Utilise les informations du CV et du questionnaire pour personnaliser en profondeur avec des détails SPÉCIFIQUES
+2. Adopte un ton ${context.settings.tone} et adapte la longueur selon: ${context.settings.length}
+3. Mets en valeur l'expérience sélectionnée avec des exemples mesurables et des réalisations concrètes
+4. Intègre naturellement la motivation exprimée en utilisant les mots exacts fournis
+5. Montre un alignement véritable avec les valeurs en utilisant des références spécifiques à la culture/mission de l'entreprise
+6. ÉVITE STRICTEMENT les clichés comme "C'est avec grand intérêt", "votre estimée entreprise", "Je me permets de vous adresser"
+7. Crée une narration captivante qui relie des réalisations spécifiques aux exigences exactes du poste
+8. Utilise un langage convaincant avec des métriques concrètes, technologies, et impact business
 
-INSTRUCTIONS PRÉCISES:
-1. Utilise les informations du CV et du questionnaire pour personnaliser la lettre
-2. Respecte la structure classique française : en-tête, objet, corps, formule de politesse
-3. Adopte un ton ${context.settings.tone} et adapte la longueur selon: ${context.settings.length}
-4. Mets en valeur l'expérience sélectionnée et les compétences qui correspondent
-5. Intègre naturellement la motivation exprimée
-6. Montre l'alignement avec les valeurs de l'entreprise
-7. Évite les clichés et les formulations trop génériques
+QUALITÉ DU CONTENU:
+- Ouverture directe avec motivation spécifique et connaissance de l'entreprise (PAS d'introductions génériques)
+- Développement avec exemples concrets incluant chiffres, technologies, et résultats mesurables
+- Démonstration claire de l'adéquation exacte compétences-exigences avec preuves spécifiques
+- Expression authentique utilisant les réponses du questionnaire textuellement quand pertinent
+- Conclusion forte avec étapes spécifiques et proposition de valeur confiante
 
-STRUCTURE ATTENDUE:
-- En-tête avec coordonnées (si disponibles)
-- Objet clair
-- Introduction accrocheuse
-- Développement en 2-3 paragraphes
-- Conclusion avec appel à l'action
-- Formule de politesse
-
-Génère uniquement le contenu de la lettre, sans commentaires supplémentaires.`,
-            prompt: `Génère une lettre de motivation pour:`
-          }
+PHRASES BANNIES: "C'est avec grand intérêt", "votre estimée entreprise", "Je me permets", "J'aimerais avoir l'opportunité", "Veuillez trouver ci-joint", "Je vous remercie de l'attention"`,
+              
+              subjectPrefix: 'Candidature pour le poste de',
+              bodyInstructions: 'Rédige un corps de lettre convaincant et profondément personnalisé qui raconte une histoire spécifique en utilisant des détails concrets de l\'expérience du candidat, démontre une valeur mesurable claire, et montre un enthousiasme authentique avec des références spécifiques à l\'entreprise et au poste'
+            }
+        }
       }
+
+      const langInstructions = getLanguageInstructions(context.settings.language)
+      
+      return `${langInstructions.system}
+
+CONTEXTE RICHE POUR PERSONNALISATION:
+
+OFFRE D'EMPLOI:
+- Poste: ${context.jobOffer.title}
+- Entreprise: ${context.jobOffer.company}
+- Description: ${context.jobOffer.description}
+- Exigences: ${Array.isArray(context.jobOffer.requirements) ? context.jobOffer.requirements.join(', ') : 'Non spécifiées'}
+- Localisation: ${context.jobOffer.location || 'Non spécifiée'}
+
+PROFIL CANDIDAT:
+- Expériences: ${JSON.stringify(context.candidate.experiences || [])}
+- Compétences: ${context.candidate.skills.join(', ') || 'Non spécifiées'}
+- Formation: ${JSON.stringify(context.candidate.education || [])}
+
+RÉPONSES QUESTIONNAIRE (À INTÉGRER SUBTILEMENT):
+- Motivation exprimée: ${context.responses.motivation}
+- Expérience à valoriser: ${JSON.stringify(context.responses.experience_highlight)}
+- Compétences correspondantes: ${context.responses.skills_match.join(', ')}
+- Alignement valeurs entreprise: ${context.responses.company_values}
+- Contexte supplémentaire: ${context.responses.additional_context || 'Aucun'}
+
+INSTRUCTIONS CRITIQUES:
+1. Réponds UNIQUEMENT avec le format structuré ci-dessous
+2. N'inclus AUCUNE information personnelle (nom, adresse, téléphone, email, date)
+3. N'inclus AUCUN en-tête, coordonnées, signature ou formule de fin
+4. Utilise exactement ces balises: SUBJECT:, GREETING:, BODY:
+5. Écris en ${langInstructions.language}
+6. Longueur BODY: environ ${context.settings.length === 'court' ? '200' : context.settings.length === 'long' ? '400' : '300'} mots
+
+FORMAT OBLIGATOIRE:
+
+SUBJECT: ${langInstructions.subjectPrefix} ${context.jobOffer.title} chez ${context.jobOffer.company}
+
+GREETING: ${langInstructions.greeting}
+
+BODY: ${langInstructions.bodyInstructions}. 
+
+EXEMPLE DE DÉBUT ATTENDU:
+"My decade of experience managing secure payment environments, particularly my role providing virtual infrastructure for 100 users during a critical core banking upgrade, makes me excited about Technology company's mission to build scalable payment systems for socially conscious organizations..."
+
+OBLIGATIONS SPÉCIFIQUES POUR LE BODY:
+1. CITE PRÉCISÉMENT l'expérience à valoriser: "${context.responses.experience_highlight.experience_title}" avec des détails de cette expérience
+2. MENTIONNE EXPLICITEMENT les compétences correspondantes: ${context.responses.skills_match.join(', ')}
+3. INTÈGRE TEXTUELLEMENT la motivation: "${context.responses.motivation}"
+4. RÉFÉRENCE DIRECTEMENT les valeurs de l'entreprise: "${context.responses.company_values}"
+5. UTILISE des chiffres/métrics spécifiques des expériences du CV
+6. ÉVOQUE des éléments concrets de la description du poste: "${context.jobOffer.description}"
+7. AJOUTE le contexte supplémentaire s'il existe: "${context.responses.additional_context}"
+
+STRUCTURE OBLIGATOIRE DU BODY:
+Paragraphe 1: Ouverture avec motivation spécifique + référence précise à l'entreprise/poste
+Paragraphe 2: Détails concrets de l'expérience valorisée avec métrics/résultats 
+Paragraphe 3: Alignement valeurs + compétences correspondantes + contribution future
+Paragraphe 4: Conclusion avec appel à l'action confiant
+
+RAPPEL CRITIQUE: 
+- Aucun nom, adresse, téléphone, email, date, en-tête ou signature
+- IMPÉRATIF: Utiliser tous les éléments du questionnaire de manière naturelle mais visible
+- Bannir les formulations génériques comme "votre esteemed company" ou "I am writing to express"
+- Commencer directement par des éléments spécifiques et concrets
+
+ATTENTION: Réponds EXACTEMENT dans ce format, sans aucun texte avant ou après:
+
+SUBJECT: [votre objet ici]
+
+GREETING: [votre salutation ici]
+
+BODY: [votre corps de lettre de 300 mots intégrant TOUTES les obligations spécifiques listées ci-dessus]`
     }
 
-    const languageInstructions = getLanguageInstructions(context.settings.language)
+    // LOGS CONTEXTE pour diagnostic
+    console.log('=== CONTEXTE REÇU ===')
+    console.log('Job Offer:', JSON.stringify(context.jobOffer, null, 2))
+    console.log('Candidate:', JSON.stringify(context.candidate, null, 2))
+    console.log('Responses:', JSON.stringify(context.responses, null, 2))
+    console.log('Settings:', JSON.stringify(context.settings, null, 2))
+
+    // Générer le prompt structuré
+    const structuredPrompt = generateStructuredPromptPersonalized(context)
 
     // Générer la lettre de motivation avec OpenAI
     const completion = await openai.chat.completions.create({
@@ -131,41 +225,57 @@ Génère uniquement le contenu de la lettre, sans commentaires supplémentaires.
       messages: [
         {
           role: "system",
-          content: languageInstructions.system
+          content: "Tu es un expert en rédaction de lettres de motivation professionnelles. Tu DOIS impérativement respecter TOUTES les instructions données. Utilise OBLIGATOIREMENT les phrases exactes fournies dans le questionnaire. Réponds toujours avec la structure demandée utilisant les balises SUBJECT:, GREETING:, et BODY:. Commence directement par SUBJECT: sans aucun texte avant."
         },
         {
           role: "user",
-          content: `${languageInstructions.prompt}
-
-${context.settings.language === 'en' ? 'JOB OFFER:' : context.settings.language === 'es' ? 'OFERTA DE EMPLEO:' : 'OFFRE D\'EMPLOI:'}
-- ${context.settings.language === 'en' ? 'Position:' : context.settings.language === 'es' ? 'Puesto:' : 'Poste:'} ${context.jobOffer.title}
-- ${context.settings.language === 'en' ? 'Company:' : context.settings.language === 'es' ? 'Empresa:' : 'Entreprise:'} ${context.jobOffer.company}
-- ${context.settings.language === 'en' ? 'Description:' : context.settings.language === 'es' ? 'Descripción:' : 'Description:'} ${context.jobOffer.description}
-- ${context.settings.language === 'en' ? 'Location:' : context.settings.language === 'es' ? 'Localización:' : 'Localisation:'} ${context.jobOffer.location || (context.settings.language === 'en' ? 'Not specified' : context.settings.language === 'es' ? 'No especificada' : 'Non spécifiée')}
-
-${context.settings.language === 'en' ? 'CANDIDATE:' : context.settings.language === 'es' ? 'CANDIDATO:' : 'CANDIDAT:'}
-- ${context.settings.language === 'en' ? 'Name:' : context.settings.language === 'es' ? 'Nombre:' : 'Nom:'} ${context.candidate.name || (context.settings.language === 'en' ? 'Candidate' : context.settings.language === 'es' ? 'Candidato' : 'Candidat')}
-- ${context.settings.language === 'en' ? 'Experiences:' : context.settings.language === 'es' ? 'Experiencias:' : 'Expériences:'} ${JSON.stringify(context.candidate.experiences)}
-- ${context.settings.language === 'en' ? 'Skills:' : context.settings.language === 'es' ? 'Habilidades:' : 'Compétences:'} ${context.candidate.skills.join(', ')}
-
-${context.settings.language === 'en' ? 'QUESTIONNAIRE RESPONSES:' : context.settings.language === 'es' ? 'RESPUESTAS DEL CUESTIONARIO:' : 'RÉPONSES DU QUESTIONNAIRE:'}
-- ${context.settings.language === 'en' ? 'Motivation:' : context.settings.language === 'es' ? 'Motivación:' : 'Motivation:'} ${context.responses.motivation}
-- ${context.settings.language === 'en' ? 'Experience to highlight:' : context.settings.language === 'es' ? 'Experiencia a destacar:' : 'Expérience à valoriser:'} ${JSON.stringify(context.responses.experience_highlight)}
-- ${context.settings.language === 'en' ? 'Matching skills:' : context.settings.language === 'es' ? 'Habilidades correspondientes:' : 'Compétences correspondantes:'} ${context.responses.skills_match.join(', ')}
-- ${context.settings.language === 'en' ? 'Values alignment:' : context.settings.language === 'es' ? 'Alineación con valores:' : 'Alignement avec les valeurs:'} ${context.responses.company_values}
-- ${context.settings.language === 'en' ? 'Additional context:' : context.settings.language === 'es' ? 'Contexto adicional:' : 'Contexte supplémentaire:'} ${context.responses.additional_context || (context.settings.language === 'en' ? 'None' : context.settings.language === 'es' ? 'Ninguno' : 'Aucun')}
-
-${context.settings.language === 'en' ? 'Generate a professional and personalized cover letter.' : context.settings.language === 'es' ? 'Genera una carta de presentación profesional y personalizada.' : 'Génère une lettre de motivation professionnelle et personnalisée.'}`
+          content: structuredPrompt
         }
       ],
-      temperature: 0.7,
-      max_tokens: 3000
+      temperature: 0.3, // Réduire pour plus de précision
+      max_tokens: 2000 // Augmenter pour éviter les coupures
     })
 
-    const letterContent = completion.choices[0].message.content
-    if (!letterContent) {
+    const aiResponse = completion.choices[0].message.content
+    if (!aiResponse) {
       throw new Error('Aucune réponse reçue d\'OpenAI')
     }
+
+    // LOGS DÉTAILLÉS pour diagnostic
+    console.log('=== PROMPT ENVOYÉ À OPENAI ===')
+    console.log(structuredPrompt)
+    console.log('\n=== RÉPONSE BRUTE DE OPENAI ===')
+    console.log(aiResponse)
+    console.log('\n=== LONGUEUR RÉPONSE ===')
+    console.log(`${aiResponse.length} caractères`)
+
+    // Parser la réponse pour extraire les sections
+    const { sections, fullContent } = parseLetterResponse(aiResponse)
+    
+    console.log('\n=== SECTIONS PARSÉES ===')
+    console.log('Subject:', sections.subject)
+    console.log('Greeting:', sections.greeting) 
+    console.log('Body:', sections.body)
+    
+    // Nettoyer les sections pour enlever les informations personnelles
+    const cleanedSections = cleanLetterSections(sections)
+    
+    console.log('\n=== SECTIONS NETTOYÉES ===')
+    console.log('Subject:', cleanedSections.subject)
+    console.log('Greeting:', cleanedSections.greeting)
+    console.log('Body:', cleanedSections.body)
+    
+    // Valider que le contenu est propre
+    const validation = validateContentCleanliness(fullContent)
+    console.log('\n=== VALIDATION ===')
+    console.log('Is clean:', validation.isClean)
+    console.log('Issues:', validation.issues)
+    
+    if (!validation.isClean) {
+        console.warn('Generated content contains personal information:', validation.issues)
+    }
+
+    const letterContent = formatLetterSections(cleanedSections)
 
     // Générer également la version HTML pour le PDF
     const htmlInstructions = {
@@ -233,6 +343,7 @@ Genera únicamente el código HTML completo, sin comentarios.`
 
     return NextResponse.json({
       content: letterContent,
+      sections: cleanedSections, // Ajouter les sections séparées
       html_content: htmlContent,
       metadata: {
         generated_at: new Date().toISOString(),
@@ -244,7 +355,8 @@ Genera únicamente el código HTML completo, sin comentarios.`
           candidate_name: context.candidate.name,
           experience_highlighted: context.responses.experience_highlight.experience_title,
           skills_count: context.responses.skills_match.length
-        }
+        },
+        validation: validation // Inclure les résultats de validation
       }
     })
 

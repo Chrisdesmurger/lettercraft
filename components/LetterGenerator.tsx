@@ -23,6 +23,7 @@ import {
 import toast from 'react-hot-toast'
 import { useI18n } from '@/lib/i18n-context'
 import { QuotaGuard, usePreGenerationQuotaCheck } from '@/components/quota'
+import { generateLetter } from '@/lib/api/letter-generation'
 
 interface LetterGeneratorProps {
     data?: any
@@ -57,44 +58,47 @@ export default function LetterGenerator({ data, onUpdate, onNext }: LetterGenera
     const [includeHobbies, setIncludeHobbies] = useState(false)
     const [emphasizeExperience, setEmphasizeExperience] = useState(true)
 
-    const generateLetter = async () => {
+    const generateLetterFromAPI = async () => {
         setGenerating(true)
 
         const success = await executeWithQuotaCheck(async () => {
-            // Generation simulation (replace with your OpenAI API call)
-            await new Promise(resolve => setTimeout(resolve, 3000))
-
-            // Generated letter (implement with your logic)
-            const letter = `Madame, Monsieur,
-
-C'est avec un grand intérêt que je vous adresse ma candidature pour le poste de ${data?.jobOffer?.title} au sein de ${data?.jobOffer?.company}.
-
-Fort de mon expérience en développement web et de ma maîtrise des technologies ${data?.responses?.stack_expertise || 'React et Node.js'}, je suis convaincu de pouvoir apporter une réelle valeur ajoutée à votre équipe.
-
-${data?.responses?.project_proud || 'Au cours de mes précédentes expériences, j\'ai eu l\'opportunité de mener à bien plusieurs projets d\'envergure qui ont significativement amélioré les performances et l\'expérience utilisateur.'}
-
-${data?.responses?.problem_solving || 'Ma capacité à résoudre des problèmes complexes et mon approche méthodique me permettent d\'aborder chaque défi avec créativité et rigueur.'}
-
-${emphasizeExperience ? `Ce qui me distingue particulièrement, c'est ${data?.responses?.career_goals || 'ma passion pour l\'innovation technologique et mon désir constant d\'apprentissage'}.` : ''}
-
-Je serais ravi de pouvoir discuter plus en détail de la manière dont mes compétences et mon expérience peuvent contribuer au succès de ${data?.jobOffer?.company}.
-
-Je vous prie d'agréer, Madame, Monsieur, l'expression de mes salutations distinguées.
-
-${data?.userName || 'Votre nom'}`
-
-            setGeneratedLetter(letter)
-
-            if (onUpdate) {
-                onUpdate({
-                    generatedLetter: letter,
-                    letterLanguage: language,
-                    letterTone: tone,
-                    letterLength: length[0]
+            try {
+                // Utiliser la vraie API de génération avec notre système de sections
+                const response = await generateLetter({
+                    profile: {
+                        category: data?.category || 'développeur',
+                        responses: data?.responses || {}
+                    },
+                    cv: data?.cv || {},
+                    jobOffer: data?.jobOffer || { title: '', company: '', description: '' },
+                    settings: {
+                        language,
+                        tone,
+                        length: length[0],
+                        includeHobbies,
+                        emphasizeExperience
+                    }
                 })
-            }
 
-            toast.success(t('letter.generateSuccess'))
+                // Utiliser la réponse complète avec sections
+                setGeneratedLetter(response.letter)
+
+                if (onUpdate) {
+                    onUpdate({
+                        generatedLetter: response.letter,
+                        sections: response.sections, // Inclure les sections
+                        letterId: response.letterId, // Inclure l'ID pour les reviews
+                        letterLanguage: language,
+                        letterTone: tone,
+                        letterLength: length[0]
+                    })
+                }
+
+                toast.success(t('letter.generateSuccess'))
+            } catch (error) {
+                console.error('Error generating letter:', error)
+                throw error // Relancer l'erreur pour que executeWithQuotaCheck la gère
+            }
         })
 
         if (!success) {

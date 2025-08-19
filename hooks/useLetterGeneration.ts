@@ -205,7 +205,7 @@ export function useLetterGeneration() {
 
       const generationResult = await response.json()
 
-      // Sauvegarder la lettre générée
+      // Sauvegarder la lettre générée avec les sections séparées
       const { data: generatedLetter, error: insertError } = await supabase
         .from('generated_letters')
         .insert({
@@ -214,6 +214,9 @@ export function useLetterGeneration() {
           job_offer_id: flow.jobOffer?.id || '',
           cv_id: activeCV.id,
           content: generationResult.content,
+          subject: generationResult.sections?.subject, // Nouvelle colonne
+          greeting: generationResult.sections?.greeting, // Nouvelle colonne  
+          body: generationResult.sections?.body, // Nouvelle colonne
           html_content: generationResult.html_content,
           generation_settings: settings || {},
           openai_model: 'gpt-4-turbo'

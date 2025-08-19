@@ -4,6 +4,7 @@ import OpenAI from 'openai'
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 import { withQuotaCheck } from '@/lib/middleware/quota-middleware'
+import { generateStructuredPrompt, parseLetterResponse, cleanLetterSections, validateContentCleanliness } from '@/lib/letter-sections'
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY
@@ -16,38 +17,15 @@ async function generateLetterHandler(request: NextRequest, userId: string) {
         const body = await request.json()
         const { profile, cv, jobOffer, settings } = body
 
-        // Construire le prompt pour OpenAI
-        const prompt = `
-    Génère une lettre de motivation professionnelle avec les informations suivantes:
-    
-    Profil du candidat:
-    - Catégorie: ${profile.category}
-    - Stack/Expertise: ${profile.responses.stack_expertise}
-    - Projet phare: ${profile.responses.project_proud}
-    - Résolution de problèmes: ${profile.responses.problem_solving}
-    - Culture d'apprentissage: ${profile.responses.learning_culture}
-    - Objectifs de carrière: ${profile.responses.career_goals}
-    
-    Offre d'emploi:
-    - Poste: ${jobOffer.title}
-    - Entreprise: ${jobOffer.company}
-    - Description: ${jobOffer.description}
-    
-    Paramètres:
-    - Langue: ${settings.language}
-    - Ton: ${settings.tone}
-    - Longueur: environ ${settings.length} mots
-    - Mettre en avant l'expérience: ${settings.emphasizeExperience ? 'Oui' : 'Non'}
-    
-    La lettre doit être structurée, personnalisée et convaincante.
-    `
+        // Générer le prompt structuré pour obtenir les sections séparées
+        const prompt = generateStructuredPrompt(profile, cv, jobOffer, settings)
 
         const completion = await openai.chat.completions.create({
             model: "gpt-4",
             messages: [
                 {
                     role: "system",
-                    content: "Tu es un expert en rédaction de lettres de motivation professionnelles."
+                    content: "Tu es un expert en rédaction de lettres de motivation professionnelles. Réponds toujours avec la structure demandée utilisant les balises SUBJECT:, GREETING:, et BODY:."
                 },
                 {
                     role: "user",
@@ -55,17 +33,37 @@ async function generateLetterHandler(request: NextRequest, userId: string) {
                 }
             ],
             temperature: 0.7,
-            max_tokens: 1000
+            max_tokens: 1500
         })
 
-        const letter = completion.choices[0].message.content
+        const aiResponse = completion.choices[0].message.content
 
-        // Sauvegarder la lettre générée dans la base de données
+        if (!aiResponse) {
+            throw new Error('Aucune réponse de l\'IA')
+        }
+
+        // Parser la réponse pour extraire les sections
+        const { sections, fullContent } = parseLetterResponse(aiResponse)
+        
+        // Nettoyer les sections pour enlever les informations personnelles
+        const cleanedSections = cleanLetterSections(sections)
+        
+        // Valider que le contenu est propre
+        const validation = validateContentCleanliness(fullContent)
+        if (!validation.isClean) {
+            console.warn('Generated content contains personal information:', validation.issues)
+            // On peut continuer mais on log les problèmes pour surveillance
+        }
+
+        // Sauvegarder la lettre générée avec les sections séparées
         const { data: savedLetter, error: saveError } = await supabase
             .from('generated_letters')
             .insert({
                 user_id: userId,
-                content: letter || '',
+                content: fullContent,
+                subject: cleanedSections.subject,
+                greeting: cleanedSections.greeting,
+                body: cleanedSections.body,
                 html_content: null,
                 pdf_url: null,
                 generation_settings: settings,
@@ -85,7 +83,11 @@ async function generateLetterHandler(request: NextRequest, userId: string) {
 
         // Le quota sera automatiquement incrémenté par le middleware après succès
 
-        return NextResponse.json({ letter, letterId: savedLetter?.id })
+        return NextResponse.json({ 
+            letter: fullContent,
+            sections: cleanedSections,
+            letterId: savedLetter?.id 
+        })
     } catch (error) {
         console.error('Erreur:', error)
         return NextResponse.json(

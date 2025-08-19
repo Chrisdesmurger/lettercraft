@@ -27,6 +27,8 @@ import { type LetterData } from '@/lib/pdf-templates'
 import PdfExportControls from '@/components/pdf/PdfExportControls'
 import { ReviewSystem, ScrollProgressIndicator } from '@/components/reviews'
 import { useScrollEndDetection } from '@/hooks/useScrollEndDetection'
+import { LetterSections } from '@/types'
+import { formatLetterSections } from '@/lib/letter-sections'
 
 interface LetterPreviewProps {
   data?: any
@@ -40,6 +42,7 @@ export default function LetterPreview({ data, onUpdate, onNext }: LetterPreviewP
   const router = useRouter()
   const [isEditing, setIsEditing] = useState(false)
   const [editedLetter, setEditedLetter] = useState(data?.generatedLetter || '')
+  const [letterSections, setLetterSections] = useState<LetterSections | null>(data?.sections || null)
   const [copied, setCopied] = useState(false)
   const [saving, setSaving] = useState(false)
   const [useNewPdfSystem, setUseNewPdfSystem] = useState(true) // Toggle pour nouveau/ancien système
@@ -133,7 +136,8 @@ export default function LetterPreview({ data, onUpdate, onNext }: LetterPreviewP
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(editedLetter)
+      const contentToCopy = letterSections ? formatLetterSections(letterSections) : editedLetter
+      await navigator.clipboard.writeText(contentToCopy)
       setCopied(true)
       toast.success(t('letter.copySuccess'))
       setTimeout(() => setCopied(false), 2000)
@@ -178,7 +182,8 @@ export default function LetterPreview({ data, onUpdate, onNext }: LetterPreviewP
     const fileName = `lettre-motivation-${data?.jobOffer?.company || 'document'}`
     
     try {
-      generateTextFile(editedLetter, fileName)
+      const contentToDownload = letterSections ? formatLetterSections(letterSections) : editedLetter
+      generateTextFile(contentToDownload, fileName)
       toast.success(t('letter.txtDownloaded'))
     } catch (error) {
       console.error('TXT generation error:', error)
@@ -191,6 +196,8 @@ export default function LetterPreview({ data, onUpdate, onNext }: LetterPreviewP
 
     setSaving(true)
     try {
+      const contentToSave = letterSections ? formatLetterSections(letterSections) : editedLetter
+      
       // Save to Supabase
       const { error } = await supabase
         .from('saved_letters')
@@ -198,12 +205,13 @@ export default function LetterPreview({ data, onUpdate, onNext }: LetterPreviewP
           user_id: user.id,
           job_title: data?.jobOffer?.title,
           company: data?.jobOffer?.company,
-          content: editedLetter,
+          content: contentToSave,
           language: data?.letterLanguage,
           metadata: {
             category: data?.category,
             tone: data?.letterTone,
-            length: data?.letterLength
+            length: data?.letterLength,
+            sections: letterSections // Sauvegarder aussi les sections si disponibles
           }
         })
 
@@ -219,9 +227,21 @@ export default function LetterPreview({ data, onUpdate, onNext }: LetterPreviewP
   }
 
   const toggleEdit = () => {
-    if (isEditing && editedLetter !== data?.generatedLetter) {
-      if (onUpdate) {
-        onUpdate({ generatedLetter: editedLetter })
+    if (isEditing) {
+      // Si on a des sections, reconstruire le contenu complet
+      if (letterSections) {
+        const fullContent = formatLetterSections(letterSections)
+        setEditedLetter(fullContent)
+        if (onUpdate) {
+          onUpdate({ 
+            generatedLetter: fullContent,
+            sections: letterSections
+          })
+        }
+      } else if (editedLetter !== data?.generatedLetter) {
+        if (onUpdate) {
+          onUpdate({ generatedLetter: editedLetter })
+        }
       }
       toast.success(t('letter.changesSuccess'))
     }
@@ -356,17 +376,88 @@ export default function LetterPreview({ data, onUpdate, onNext }: LetterPreviewP
       {/* Letter preview/edit */}
       <Card className="p-8">
         {isEditing ? (
-          <Textarea
-            value={editedLetter}
-            onChange={(e) => setEditedLetter(e.target.value)}
-            className="min-h-[600px] font-sans text-base leading-relaxed"
-            placeholder={t('letter.placeholder')}
-          />
+          <div className="space-y-4">
+            {letterSections ? (
+              // Edition par sections si disponibles
+              <>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Objet :</label>
+                  <input
+                    type="text"
+                    value={letterSections.subject}
+                    onChange={(e) => setLetterSections({
+                      ...letterSections,
+                      subject: e.target.value
+                    })}
+                    className="w-full p-2 border border-gray-300 rounded-md"
+                    placeholder="Objet de la lettre..."
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Salutations :</label>
+                  <input
+                    type="text"
+                    value={letterSections.greeting}
+                    onChange={(e) => setLetterSections({
+                      ...letterSections,
+                      greeting: e.target.value
+                    })}
+                    className="w-full p-2 border border-gray-300 rounded-md"
+                    placeholder="Madame, Monsieur,"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Corps de la lettre :</label>
+                  <Textarea
+                    value={letterSections.body}
+                    onChange={(e) => setLetterSections({
+                      ...letterSections,
+                      body: e.target.value
+                    })}
+                    className="min-h-[400px] font-sans text-base leading-relaxed"
+                    placeholder="Corps principal de la lettre..."
+                  />
+                </div>
+              </>
+            ) : (
+              // Edition simple si pas de sections
+              <Textarea
+                value={editedLetter}
+                onChange={(e) => setEditedLetter(e.target.value)}
+                className="min-h-[600px] font-sans text-base leading-relaxed"
+                placeholder={t('letter.placeholder')}
+              />
+            )}
+          </div>
         ) : (
           <div ref={letterRef} className="prose max-w-none">
-            <pre className="whitespace-pre-wrap font-sans text-base leading-relaxed">
-              {editedLetter}
-            </pre>
+            {letterSections ? (
+              // Affichage par sections avec styles différents
+              <div className="space-y-6">
+                <section className="letter-subject">
+                  <h1 className="text-lg font-semibold text-gray-900 mb-4">
+                    Objet : {letterSections.subject}
+                  </h1>
+                </section>
+                
+                <section className="letter-greeting">
+                  <div className="text-base font-medium text-gray-800 mb-4">
+                    {letterSections.greeting}
+                  </div>
+                </section>
+                
+                <section className="letter-body">
+                  <div className="text-base leading-relaxed text-gray-700 whitespace-pre-wrap">
+                    {letterSections.body}
+                  </div>
+                </section>
+              </div>
+            ) : (
+              // Affichage simple pour compatibilité descendante
+              <pre className="whitespace-pre-wrap font-sans text-base leading-relaxed">
+                {editedLetter}
+              </pre>
+            )}
           </div>
         )}
       </Card>
