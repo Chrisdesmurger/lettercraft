@@ -221,10 +221,7 @@ async function executePendingDeletions() {
     // Trouver les demandes confirmées prêtes pour suppression
     const { data: pendingDeletions, error } = await supabaseAdmin
       .from('account_deletion_requests')
-      .select(`
-        id, user_id, deletion_type, reason, scheduled_deletion_at,
-        users_with_profiles!inner(email, first_name, last_name, stripe_customer_id, stripe_subscription_id)
-      `)
+      .select('id, user_id, deletion_type, reason, scheduled_deletion_at')
       .eq('status', 'confirmed')
       .lte('scheduled_deletion_at', new Date().toISOString())
 
@@ -250,8 +247,21 @@ async function executePendingDeletions() {
 
     for (const deletion of pendingDeletions) {
       try {
-        const userProfile = deletion.users_with_profiles as any
-        console.log(`🗑️ Processing deletion for user ${deletion.user_id} (${userProfile.email})`)
+        // Récupérer les données utilisateur de manière sécurisée (bypass RLS)
+        const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(deletion.user_id)
+        const { data: userProfile } = await supabaseAdmin
+          .from('user_profiles')
+          .select('first_name, last_name, stripe_customer_id, stripe_subscription_id')
+          .eq('user_id', deletion.user_id)
+          .single()
+
+        if (!authUser?.user) {
+          console.warn(`⚠️ User ${deletion.user_id} not found in auth, skipping...`)
+          continue
+        }
+
+        const userEmail = authUser.user.email!
+        console.log(`🗑️ Processing deletion for user ${deletion.user_id} (${userEmail})`)
         
         // Exécuter la suppression selon le type
         let deletionResult: boolean
@@ -269,7 +279,7 @@ async function executePendingDeletions() {
           executed++
           results.push({
             userId: deletion.user_id,
-            email: userProfile.email,
+            email: userEmail,
             status: 'success',
             deletionType: deletion.deletion_type
           })
@@ -278,7 +288,7 @@ async function executePendingDeletions() {
           failed++
           results.push({
             userId: deletion.user_id,
-            email: userProfile.email,
+            email: userEmail,
             status: 'failed',
             error: 'Deletion function returned false'
           })

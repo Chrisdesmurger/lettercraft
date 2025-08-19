@@ -15,16 +15,17 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Check if user exists using the view
+    // Check if user exists (bypass RLS)
+    const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(userId)
     const { data: userProfile, error: getUserError } = await supabaseAdmin
-      .from('users_with_profiles')
-      .select('id, subscription_tier')
-      .eq('id', userId)
+      .from('user_profiles')
+      .select('user_id, subscription_tier')
+      .eq('user_id', userId)
       .single()
     
-    console.log('User profile lookup result:', { userProfile, getUserError })
+    console.log('User profile lookup result:', { authUser: !!authUser?.user, userProfile, getUserError })
 
-    if (getUserError || !userProfile) {
+    if (!authUser?.user || getUserError || !userProfile) {
       console.error('User not found:', getUserError)
       return NextResponse.json(
         { error: 'User not found' },

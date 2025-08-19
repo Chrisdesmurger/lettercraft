@@ -57,15 +57,24 @@ async function upsertStripeSubscription(customerId: string, subscriptionData: St
     // Find user by customer ID or email
     let foundUser = null
     
-    // First, try by customer ID
+    // First, try by customer ID (bypass RLS)
     const { data: userByCustomerId, error: customerError } = await supabaseAdmin
-      .from('users_with_profiles')
-      .select('*')
+      .from('user_profiles')
+      .select('user_id, first_name, last_name, stripe_customer_id, stripe_subscription_id, subscription_tier, language')
       .eq('stripe_customer_id', customerId)
       .single()
 
     console.log(`🔍 [upsertStripeSubscription] User by customer ID:`, { userByCustomerId, customerError })
-    foundUser = userByCustomerId
+    
+    if (userByCustomerId) {
+      // Get email from auth.users
+      const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(userByCustomerId.user_id)
+      foundUser = {
+        id: userByCustomerId.user_id,
+        email: authUser?.user?.email,
+        ...userByCustomerId
+      }
+    }
 
     // If not found, try by email
     if (!foundUser) {
@@ -77,24 +86,34 @@ async function upsertStripeSubscription(customerId: string, subscriptionData: St
         if (customer.email) {
           console.log(`📧 Looking for user with email: ${customer.email}`)
 
-          const { data: userByEmail, error: emailError } = await supabaseAdmin
-            .from('users_with_profiles')
-            .select('*')
-            .eq('email', customer.email)
-            .single()
-          
-          console.log(`📧 [upsertStripeSubscription] User by email:`, { userByEmail, emailError })
+          // Search in auth.users first, then get profile
+          const { data: authUser } = await supabaseAdmin.auth.admin.listUsers()
+          const userByEmail = authUser.users?.find(u => u.email === customer.email)
           
           if (userByEmail) {
-            foundUser = userByEmail
+            const { data: userProfile } = await supabaseAdmin
+              .from('user_profiles')
+              .select('user_id, first_name, last_name, stripe_customer_id, stripe_subscription_id, subscription_tier, language')
+              .eq('user_id', userByEmail.id)
+              .single()
             
-            // Link customer ID to user
-            await supabaseAdmin.rpc('update_user_profile', {
-              p_user_id: foundUser.id,
-              p_stripe_customer_id: customerId
-            })
+            console.log(`📧 [upsertStripeSubscription] User by email:`, { userByEmail: userByEmail.email, userProfile })
             
-            console.log(`🔗 Linked customer ${customerId} to user ${foundUser.id}`)
+            if (userProfile) {
+              foundUser = {
+                id: userByEmail.id,
+                email: userByEmail.email,
+                ...userProfile
+              }
+              
+              // Link customer ID to user
+              await supabaseAdmin.rpc('update_user_profile', {
+                p_user_id: foundUser.id,
+                p_stripe_customer_id: customerId
+              })
+              
+              console.log(`🔗 Linked customer ${customerId} to user ${foundUser.id}`)
+            }
           }
         }
       } catch (stripeError) {
@@ -163,7 +182,7 @@ async function upsertStripeSubscription(customerId: string, subscriptionData: St
       // Ne pas faire échouer le webhook si la sync échoue
     }
     // Gestion des emails selon le statut de l'abonnement
-    console.log(`📧 [EMAIL CHECK] Status: ${subscriptionData.status}, CancelAtPeriodEnd: ${subscriptionData.cancel_at_period_end}, User: ${foundUser.email}`)
+    console.log(`📧 [EMAIL CHECK] Status: ${subscriptionData.status}, CancelAtPeriodEnd: ${subscriptionData.cancel_at_period_end}, User: ${foundUser.email || 'email manquant'}`)
     
     const userName = `${foundUser.first_name || ''} ${foundUser.last_name || ''}`.trim() || 'utilisateur'
     const userLanguage = foundUser.language || 'fr'
@@ -171,6 +190,11 @@ async function upsertStripeSubscription(customerId: string, subscriptionData: St
     // Si l'abonnement est marqué pour annulation (cancel_at_period_end = true)
     if (subscriptionData.status === 'active' && subscriptionData.cancel_at_period_end) {
       try {
+        if (!foundUser.email) {
+          console.warn(`⚠️ [CANCELLATION EMAIL] Email manquant pour l'utilisateur ${foundUser.id}`)
+          return true // Continue without sending email
+        }
+        
         console.log(`📧 [CANCELLATION EMAIL] Envoi email d'annulation à ${foundUser.email}`)
         
         const emailResult = await brevoEmailService.sendSubscriptionCancelledEmail(
@@ -188,6 +212,11 @@ async function upsertStripeSubscription(customerId: string, subscriptionData: St
     // Envoyer l'email de confirmation d'abonnement premium SEULEMENT pour les nouveaux abonnements actifs
     else if (subscriptionData.status === 'active' && !subscriptionData.cancel_at_period_end && !hadPreviousSubscription) {
       try {
+        if (!foundUser.email) {
+          console.warn(`⚠️ [EMAIL SENDING] Email manquant pour l'utilisateur ${foundUser.id}`)
+          return true // Continue without sending email
+        }
+        
         console.log(`📧 [EMAIL SENDING] Tentative d'envoi à ${foundUser.email}, nom: ${userName}, langue: ${userLanguage}`)
         
         const emailResult = await brevoEmailService.sendSubscriptionConfirmationEmail(
@@ -224,14 +253,24 @@ async function upsertStripeInvoice(customerId: string, invoiceData: StripeInvoic
     // Find user by customer ID or email (same logic as subscription)
     let foundUser = null
     
+    // First, try by customer ID (bypass RLS)
     const { data: userByCustomerId, error: customerError } = await supabaseAdmin
-      .from('users_with_profiles')
-      .select('*')
+      .from('user_profiles')
+      .select('user_id, first_name, last_name, stripe_customer_id, stripe_subscription_id, subscription_tier, language')
       .eq('stripe_customer_id', customerId)
       .single()
 
     console.log(`💰 [upsertStripeInvoice] User by customer ID:`, { userByCustomerId, customerError })
-    foundUser = userByCustomerId
+    
+    if (userByCustomerId) {
+      // Get email from auth.users
+      const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(userByCustomerId.user_id)
+      foundUser = {
+        id: userByCustomerId.user_id,
+        email: authUser?.user?.email,
+        ...userByCustomerId
+      }
+    }
 
     if (!foundUser) {
       console.log(`💰 User not found by customer ID ${customerId}, trying by email...`)
@@ -242,24 +281,34 @@ async function upsertStripeInvoice(customerId: string, invoiceData: StripeInvoic
         if (customer.email) {
           console.log(`📧 Looking for user with email: ${customer.email}`)
 
-          const { data: userByEmail, error: emailError } = await supabaseAdmin
-            .from('users_with_profiles')
-            .select('*')
-            .eq('email', customer.email)
-            .single()
-          
-          console.log(`💰 [upsertStripeInvoice] User by email:`, { userByEmail, emailError })
+          // Search in auth.users first, then get profile
+          const { data: authUser } = await supabaseAdmin.auth.admin.listUsers()
+          const userByEmail = authUser.users?.find(u => u.email === customer.email)
           
           if (userByEmail) {
-            foundUser = userByEmail
+            const { data: userProfile } = await supabaseAdmin
+              .from('user_profiles')
+              .select('user_id, first_name, last_name, stripe_customer_id, stripe_subscription_id, subscription_tier, language')
+              .eq('user_id', userByEmail.id)
+              .single()
             
-            // Link customer ID to user if not already linked
-            await supabaseAdmin.rpc('update_user_profile', {
-              p_user_id: foundUser.id,
-              p_stripe_customer_id: customerId
-            })
+            console.log(`💰 [upsertStripeInvoice] User by email:`, { userByEmail: userByEmail.email, userProfile })
             
-            console.log(`🔗 Linked customer ${customerId} to user ${foundUser.id}`)
+            if (userProfile) {
+              foundUser = {
+                id: userByEmail.id,
+                email: userByEmail.email,
+                ...userProfile
+              }
+              
+              // Link customer ID to user if not already linked
+              await supabaseAdmin.rpc('update_user_profile', {
+                p_user_id: foundUser.id,
+                p_stripe_customer_id: customerId
+              })
+              
+              console.log(`🔗 Linked customer ${customerId} to user ${foundUser.id}`)
+            }
           }
         }
       } catch (stripeError) {
@@ -327,6 +376,11 @@ async function upsertStripeInvoice(customerId: string, invoiceData: StripeInvoic
         console.log(`💰 [INVOICE EMAIL] IsSubscriptionInvoice: ${isSubscriptionInvoice}`)
         
         if (isSubscriptionInvoice) {
+          if (!foundUser.email) {
+            console.warn(`⚠️ [INVOICE EMAIL] Email manquant pour l'utilisateur ${foundUser.id}`)
+            return true // Continue without sending email
+          }
+          
           console.log(`💰 [INVOICE EMAIL SENDING] Tentative d'envoi à ${foundUser.email}`)
           
           const emailResult = await brevoEmailService.sendSubscriptionConfirmationEmail(
@@ -348,6 +402,11 @@ async function upsertStripeInvoice(customerId: string, invoiceData: StripeInvoic
     // Envoyer un email pour les factures en échec de paiement
     if (invoiceData.status === 'open' && invoiceData.attempt_count && invoiceData.attempt_count > 0) {
       try {
+        if (!foundUser.email) {
+          console.warn(`⚠️ [PAYMENT FAILED EMAIL] Email manquant pour l'utilisateur ${foundUser.id}`)
+          return true // Continue without sending email
+        }
+        
         const userName = `${foundUser.first_name || ''} ${foundUser.last_name || ''}`.trim() || 'utilisateur'
         const userLanguage = foundUser.language || 'fr'
         
@@ -613,14 +672,21 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
   // Envoyer l'email d'échec de paiement
   if (invoiceResult) {
     try {
-      // Récupérer les infos utilisateur
-      const { data: userData } = await supabaseAdmin
-        .from('users_with_profiles')
-        .select('email, first_name, last_name, language')
+      // Récupérer les infos utilisateur (bypass RLS)
+      const { data: userProfile } = await supabaseAdmin
+        .from('user_profiles')
+        .select('user_id, first_name, last_name, language')
         .eq('stripe_customer_id', customerId)
         .single()
 
-      if (userData) {
+      if (userProfile) {
+        const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(userProfile.user_id)
+        const userData = {
+          email: authUser?.user?.email,
+          first_name: userProfile.first_name,
+          last_name: userProfile.last_name,
+          language: userProfile.language
+        }
         await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/send-email`, {
           method: 'POST',
           headers: {
