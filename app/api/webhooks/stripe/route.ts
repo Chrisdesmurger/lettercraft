@@ -182,7 +182,7 @@ async function upsertStripeSubscription(customerId: string, subscriptionData: St
       // Ne pas faire échouer le webhook si la sync échoue
     }
     // Gestion des emails selon le statut de l'abonnement
-    console.log(`📧 [EMAIL CHECK] Status: ${subscriptionData.status}, CancelAtPeriodEnd: ${subscriptionData.cancel_at_period_end}, User: ${foundUser.email}`)
+    console.log(`📧 [EMAIL CHECK] Status: ${subscriptionData.status}, CancelAtPeriodEnd: ${subscriptionData.cancel_at_period_end}, User: ${foundUser.email || 'email manquant'}`)
     
     const userName = `${foundUser.first_name || ''} ${foundUser.last_name || ''}`.trim() || 'utilisateur'
     const userLanguage = foundUser.language || 'fr'
@@ -190,6 +190,11 @@ async function upsertStripeSubscription(customerId: string, subscriptionData: St
     // Si l'abonnement est marqué pour annulation (cancel_at_period_end = true)
     if (subscriptionData.status === 'active' && subscriptionData.cancel_at_period_end) {
       try {
+        if (!foundUser.email) {
+          console.warn(`⚠️ [CANCELLATION EMAIL] Email manquant pour l'utilisateur ${foundUser.id}`)
+          return true // Continue without sending email
+        }
+        
         console.log(`📧 [CANCELLATION EMAIL] Envoi email d'annulation à ${foundUser.email}`)
         
         const emailResult = await brevoEmailService.sendSubscriptionCancelledEmail(
@@ -207,6 +212,11 @@ async function upsertStripeSubscription(customerId: string, subscriptionData: St
     // Envoyer l'email de confirmation d'abonnement premium SEULEMENT pour les nouveaux abonnements actifs
     else if (subscriptionData.status === 'active' && !subscriptionData.cancel_at_period_end && !hadPreviousSubscription) {
       try {
+        if (!foundUser.email) {
+          console.warn(`⚠️ [EMAIL SENDING] Email manquant pour l'utilisateur ${foundUser.id}`)
+          return true // Continue without sending email
+        }
+        
         console.log(`📧 [EMAIL SENDING] Tentative d'envoi à ${foundUser.email}, nom: ${userName}, langue: ${userLanguage}`)
         
         const emailResult = await brevoEmailService.sendSubscriptionConfirmationEmail(
@@ -366,6 +376,11 @@ async function upsertStripeInvoice(customerId: string, invoiceData: StripeInvoic
         console.log(`💰 [INVOICE EMAIL] IsSubscriptionInvoice: ${isSubscriptionInvoice}`)
         
         if (isSubscriptionInvoice) {
+          if (!foundUser.email) {
+            console.warn(`⚠️ [INVOICE EMAIL] Email manquant pour l'utilisateur ${foundUser.id}`)
+            return true // Continue without sending email
+          }
+          
           console.log(`💰 [INVOICE EMAIL SENDING] Tentative d'envoi à ${foundUser.email}`)
           
           const emailResult = await brevoEmailService.sendSubscriptionConfirmationEmail(
@@ -387,6 +402,11 @@ async function upsertStripeInvoice(customerId: string, invoiceData: StripeInvoic
     // Envoyer un email pour les factures en échec de paiement
     if (invoiceData.status === 'open' && invoiceData.attempt_count && invoiceData.attempt_count > 0) {
       try {
+        if (!foundUser.email) {
+          console.warn(`⚠️ [PAYMENT FAILED EMAIL] Email manquant pour l'utilisateur ${foundUser.id}`)
+          return true // Continue without sending email
+        }
+        
         const userName = `${foundUser.first_name || ''} ${foundUser.last_name || ''}`.trim() || 'utilisateur'
         const userLanguage = foundUser.language || 'fr'
         
