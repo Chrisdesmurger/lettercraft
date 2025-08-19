@@ -162,16 +162,26 @@ const classicTemplate: PdfTemplate = {
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>Lettre de Motivation</title>
       <style>
-        @page { size: A4; margin: 1.5cm 1cm; }
-        body { 
-          font-family: 'Times New Roman', Times, serif; 
-          font-size: 10pt; 
-          line-height: 1.3; 
-          color: #000; 
-          margin: 0; 
-          padding: 0;
-          background: white;
-        }
+        @page { size: A4; margin: 25mm; }
+         html, body {
+          margin: 25mm;
+          padding: 50mm 50mm;
+          height: 100%;
+          background: #fff;
+          font-family: 'Times New Roman', Times, serif;
+          font-size: 10pt;
+          line-height: 1.3;
+          color: #000;
+  }
+        .page {
+        /* Choisis ton padding exact (exemples : 12mm haut/bas, 10mm côtés) */
+      
+          box-sizing: border-box;
+          width: 210mm;   /* A4 largeur */
+          min-height: 297mm; /* A4 hauteur */
+          margin: 25mm; /* évite tout recentrage parasite */
+          padding: 12mm 20mm;
+  }
         .header { 
           display: flex; 
           justify-content: space-between; 
@@ -263,15 +273,22 @@ const modernTemplate: PdfTemplate = {
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>Lettre de Motivation</title>
       <style>
-        @page { size: A4; margin: 0.5cm; }
+        @page { size: A4; margin: 0; }
         body { 
           font-family: 'Helvetica', Arial, sans-serif; 
           font-size: 10pt; 
-          line-height: 0.3; 
+          line-height: 1.3; 
           color: #2c3e50; 
           margin: 0; 
           padding: 0;
           background: white;
+        }
+        .page {
+          padding: 15mm 12mm;
+          box-sizing: border-box;
+          width: 210mm;
+          min-height: 297mm;
+          margin: 0 auto;
         }
         .header { 
           display: flex;
@@ -382,7 +399,7 @@ const elegantTemplate: PdfTemplate = {
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>Lettre de Motivation</title>
       <style>
-        @page { size: A4; margin: 1.5cm; }
+        @page { size: A4; margin: 0; }
         body { 
           font-family: 'Georgia', 'Times New Roman', serif; 
           font-size: 10pt; 
@@ -391,6 +408,13 @@ const elegantTemplate: PdfTemplate = {
           margin: 0; 
           padding: 0;
           background: white;
+        }
+        .page {
+          padding: 15mm 12mm;
+          box-sizing: border-box;
+          width: 210mm;
+          min-height: 297mm;
+          margin: 0 auto;
         }
         .header { 
           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -510,7 +534,7 @@ const creativeTemplate: PdfTemplate = {
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>Lettre de Motivation</title>
       <style>
-        @page { size: A4; margin: 1.5cm; }
+        @page { size: A4; margin: 0; }
         body { 
           font-family: 'Helvetica', Arial, sans-serif; 
           font-size: 10pt; 
@@ -519,6 +543,13 @@ const creativeTemplate: PdfTemplate = {
           margin: 0; 
           padding: 0;
           background: white;
+        }
+        .page {
+          padding: 15mm 12mm;
+          box-sizing: border-box;
+          width: 210mm;
+          min-height: 297mm;
+          margin: 0 auto;
         }
         .container {
           background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
