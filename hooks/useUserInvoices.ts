@@ -117,8 +117,7 @@ export function useUserInvoices(user: User | null): UseUserInvoicesReturn {
         throw fetchError
       }
 
-      console.log('🧾 [useUserInvoices] Final success - setting invoices:', data?.length || 0, 'items')
-      console.log('🧾 [useUserInvoices] Sample invoice data:', data?.[0] ? JSON.stringify(data[0], null, 2) : 'no data')
+      console.log('🧾 [useUserInvoices] Successfully loaded', data?.length || 0, 'invoices')
       setInvoices(data || [])
     } catch (err) {
       console.error('🧾 [useUserInvoices] Error fetching invoices:', err)
