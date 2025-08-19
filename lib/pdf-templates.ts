@@ -162,26 +162,23 @@ const classicTemplate: PdfTemplate = {
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>Lettre de Motivation</title>
       <style>
-        @page { size: A4; margin: 25mm; }
-         html, body {
-          margin: 25mm;
-          padding: 50mm 50mm;
+        @page { size: A4; margin: 0mm; }
+        html, body {
+          padding: 20mm 20mm;
           height: 100%;
           background: #fff;
           font-family: 'Times New Roman', Times, serif;
           font-size: 10pt;
           line-height: 1.3;
           color: #000;
-  }
+        }
         .page {
-        /* Choisis ton padding exact (exemples : 12mm haut/bas, 10mm côtés) */
-      
           box-sizing: border-box;
-          width: 210mm;   /* A4 largeur */
-          min-height: 297mm; /* A4 hauteur */
-          margin: 25mm; /* évite tout recentrage parasite */
-          padding: 12mm 20mm;
-  }
+          width: 210mm;
+          min-height: 297mm;
+          margin: 0;
+          padding: 0;
+        }
         .header { 
           display: flex; 
           justify-content: space-between; 
@@ -216,11 +213,12 @@ const classicTemplate: PdfTemplate = {
       </style>
     </head>
     <body>
-      <div class="header">
-        <div class="sender-info">
-          ${data.candidateAddress ? data.candidateAddress + '<br>' : ''}
-          ${data.candidatePhone || ''}${data.candidatePhone && data.candidateEmail ? ' • ' : ''}${data.candidateEmail || ''}
-        </div>
+      <div class="page">
+        <div class="header">
+          <div class="sender-info">
+            ${data.candidateAddress ? data.candidateAddress + '<br>' : ''}
+            ${data.candidatePhone || ''}${data.candidatePhone && data.candidateEmail ? ' • ' : ''}${data.candidateEmail || ''}
+          </div>
         <div class="date-location">
           ${data.location || ''}, ${translations.the} ${data.date || new Date().toLocaleDateString(locale, { 
             day: 'numeric', 
@@ -242,6 +240,7 @@ const classicTemplate: PdfTemplate = {
       
       <div class="signature">
         ${data.candidateName || ''}
+      </div>
       </div>
     </body>
     </html>
