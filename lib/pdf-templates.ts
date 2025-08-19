@@ -164,7 +164,6 @@ const classicTemplate: PdfTemplate = {
       <style>
         @page { size: A4; margin: 0mm; }
         html, body {
-          padding: 20mm 20mm;
           height: 100%;
           background: #fff;
           font-family: 'Times New Roman', Times, serif;
@@ -175,9 +174,12 @@ const classicTemplate: PdfTemplate = {
         .page {
           box-sizing: border-box;
           width: 210mm;
-          min-height: 297mm;
-          margin: 0;
-          padding: 0;
+          margin: 0mm;
+          padding: 20mm;
+          overflow-wrap: anywhere; /* casse mots/URLs longues */
+          word-break: break-word;
+          hyphens: auto;
+          flex-wrap: wrap;     /* permet de passer à la ligne si besoin */
         }
         .header { 
           display: flex; 
@@ -204,9 +206,12 @@ const classicTemplate: PdfTemplate = {
         .content { 
           font-size: 10pt; 
           text-align: justify; 
-          margin-bottom: 0.6cm; 
+          margin-bottom: 0cm; 
           white-space: pre-wrap;
-          text-indent: 1.5em;
+          overflow-wrap: anywhere; /* casse mots/URLs longues */
+          word-break: break-word;
+          hyphens: auto;
+          flex-wrap: wrap; 
         }
         .signature { text-align: right; margin-top: 1cm; }
         .greeting { margin-bottom: 0.5cm; }
@@ -283,10 +288,9 @@ const modernTemplate: PdfTemplate = {
           background: white;
         }
         .page {
-          padding: 15mm 12mm;
+          padding: 15mm 25mm;
           box-sizing: border-box;
           width: 210mm;
-          min-height: 297mm;
           margin: 0 auto;
         }
         .header { 
@@ -337,21 +341,22 @@ const modernTemplate: PdfTemplate = {
       </style>
     </head>
     <body>
-      <div class="header">
-        <div class="sender-block">
-          <div class="sender-contact">
-            ${data.candidateAddress ? data.candidateAddress + '<br>' : ''}
-            ${data.candidatePhone || ''}${data.candidatePhone && data.candidateEmail ? ' • ' : ''}${data.candidateEmail || ''}
+      <div class="page">
+        <div class="header">
+          <div class="sender-block">
+            <div class="sender-contact">
+              ${data.candidateAddress ? data.candidateAddress + '<br>' : ''}
+              ${data.candidatePhone || ''}${data.candidatePhone && data.candidateEmail ? ' • ' : ''}${data.candidateEmail || ''}
+            </div>
           </div>
-        </div>
-        <div class="date-block">
-          ${data.location || ''}<br>
-          ${data.date || new Date().toLocaleDateString(locale, { 
-            day: 'numeric', 
-            month: 'long', 
-            year: 'numeric' 
-          })}
-        </div>
+          <div class="date-block">
+            ${data.location || ''}<br>
+            ${data.date || new Date().toLocaleDateString(locale, { 
+              day: 'numeric', 
+              month: 'long', 
+              year: 'numeric' 
+            })}
+          </div>
       </div>
       
       
@@ -367,6 +372,7 @@ const modernTemplate: PdfTemplate = {
       
       <div class="signature">
         <strong>${data.candidateName || ''}</strong>
+      </div>
       </div>
     </body>
     </html>
@@ -409,17 +415,16 @@ const elegantTemplate: PdfTemplate = {
           background: white;
         }
         .page {
-          padding: 15mm 12mm;
+          padding: 12mm;
           box-sizing: border-box;
           width: 210mm;
-          min-height: 297mm;
           margin: 0 auto;
         }
         .header { 
           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
           color: white;
           padding: 20px 25px;
-          margin: -15px -15px 2.5cm -15px;
+          margin: -15px -15px 0cm -15px;
           border-radius: 0 0 10px 10px;
           display: flex;
           justify-content: space-between;
@@ -448,6 +453,7 @@ const elegantTemplate: PdfTemplate = {
           background: #f1f3f9;
           border-left: 4px solid #667eea;
           padding: 8px 15px;
+          border-radius: 0 0 10px 10px;
           margin-bottom: 0.8cm; 
           font-weight: 600;
           color: #2c3e50;
@@ -457,6 +463,8 @@ const elegantTemplate: PdfTemplate = {
           font-size: 10pt;
           text-align: justify; 
           margin-bottom: 1.2cm; 
+          margin-left: -5mm;
+          margin-right: 5mm;
           white-space: pre-wrap;
         }
         .signature { 
@@ -472,6 +480,7 @@ const elegantTemplate: PdfTemplate = {
       </style>
     </head>
     <body>
+    <div class="page">
       <div class="header">
         <div class="sender-block">
           <div class="sender-contact">
@@ -502,6 +511,7 @@ const elegantTemplate: PdfTemplate = {
       
       <div class="signature">
         <strong>${data.candidateName || ''}</strong>
+      </div>
       </div>
     </body>
     </html>
@@ -565,7 +575,7 @@ const creativeTemplate: PdfTemplate = {
           justify-content: space-between;
           align-items: center;
           margin-bottom: 0.6cm;
-          background: linear-gradient(135deg, #667eea, #764ba2);
+          background: linear-gradient(135deg, #66c5eaff, #4ba296ff);
           color: white;
           padding: 20px;
           border-radius: 8px;
