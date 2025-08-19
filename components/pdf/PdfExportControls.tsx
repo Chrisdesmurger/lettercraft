@@ -80,7 +80,7 @@ export default function PdfExportControls({
   const handleDownloadTXT = () => {
     setIsGeneratingTxt(true)
     try {
-      generateTextFile(letterData.content, fileName)
+      generateTextFile(letterData.content || '', fileName)
       toast.success(t('letter.txtDownloaded'))
     } catch (error) {
       console.error('TXT generation error:', error)

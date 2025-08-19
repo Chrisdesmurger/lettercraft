@@ -84,7 +84,7 @@ export default function LetterCard({ letter, onView }: LetterCardProps) {
   const handleDownloadTxt = async () => {
     setIsDownloading(true)
     try {
-      generateTextFile(letterData.content, fileName)
+      generateTextFile(letterData.content || '', fileName)
       toast.success('Fichier texte téléchargé')
     } catch (error) {
       console.error('TXT download error:', error)

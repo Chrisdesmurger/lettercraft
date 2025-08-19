@@ -6,7 +6,13 @@
  */
 
 export interface LetterData {
-  content: string
+  // Legacy content for backward compatibility
+  content?: string
+  // New section-based structure
+  subject?: string
+  greeting?: string
+  body?: string
+  // Metadata
   jobTitle?: string
   company?: string
   candidateName?: string
@@ -29,63 +35,38 @@ export interface PdfTemplate {
 // Traductions pour les éléments fixes des modèles PDF
 const PDF_TRANSLATIONS = {
   fr: {
-    to_attention: 'À l\'attention du service recrutement',
     company: 'Entreprise',
     subject_prefix: 'Candidature spontanée',
     greeting_formal: 'Madame, Monsieur,',
     greeting_casual: 'Bonjour !',
-    closing_formal: 'Je vous prie d\'agréer, Madame, Monsieur, l\'expression de mes salutations distinguées.',
-    closing_semi_formal: 'Dans l\'attente de votre réponse, veuillez agréer mes salutations distinguées.',
-    closing_modern: 'Cordialement,',
-    closing_casual: 'À très bientôt !',
     the: 'le'
   },
   en: {
-    to_attention: 'To the attention of the recruitment department',
     company: 'Company',
     subject_prefix: 'Application',
     greeting_formal: 'Dear Sir or Madam,',
     greeting_casual: 'Hello!',
-    closing_formal: 'I look forward to hearing from you and thank you for your consideration.',
-    closing_semi_formal: 'I look forward to your response. Yours sincerely,',
-    closing_modern: 'Best regards,',
-    closing_casual: 'Looking forward to hearing from you!',
     the: ''
   },
   es: {
-    to_attention: 'A la atención del departamento de reclutamiento',
     company: 'Empresa',
     subject_prefix: 'Candidatura espontánea',
     greeting_formal: 'Estimados señores,',
     greeting_casual: '¡Hola!',
-    closing_formal: 'Les saluda atentamente,',
-    closing_semi_formal: 'En espera de su respuesta, les saluda atentamente,',
-    closing_modern: 'Cordialmente,',
-    closing_casual: '¡Hasta pronto!',
     the: 'el'
   },
   de: {
-    to_attention: 'An die Personalabteilung',
     company: 'Unternehmen',
     subject_prefix: 'Initiativbewerbung',
     greeting_formal: 'Sehr geehrte Damen und Herren,',
     greeting_casual: 'Hallo!',
-    closing_formal: 'Mit freundlichen Grüßen,',
-    closing_semi_formal: 'Ich freue mich auf Ihre Antwort. Mit freundlichen Grüßen,',
-    closing_modern: 'Mit freundlichen Grüßen,',
-    closing_casual: 'Bis bald!',
     the: 'den'
   },
   it: {
-    to_attention: 'All\'attenzione del dipartimento di reclutamento',
     company: 'Azienda',
     subject_prefix: 'Candidatura spontanea',
     greeting_formal: 'Gentili Signori,',
     greeting_casual: 'Ciao!',
-    closing_formal: 'In attesa di un Vostro cortese riscontro, porgo cordiali saluti.',
-    closing_semi_formal: 'In attesa della Vostra risposta, cordiali saluti.',
-    closing_modern: 'Cordiali saluti,',
-    closing_casual: 'A presto!',
     the: 'il'
   }
 }
@@ -93,6 +74,67 @@ const PDF_TRANSLATIONS = {
 // Fonction pour obtenir les traductions
 function getTranslations(language: string = 'fr') {
   return PDF_TRANSLATIONS[language as keyof typeof PDF_TRANSLATIONS] || PDF_TRANSLATIONS.fr
+}
+
+// Fonction pour extraire les sections depuis LetterData
+function extractSections(data: LetterData) {
+  // If we have structured sections, use them
+  if (data.subject || data.greeting || data.body) {
+    return {
+      subject: data.subject || '',
+      greeting: data.greeting || '',
+      body: data.body || ''
+    }
+  }
+  
+  // Fallback to legacy content for backward compatibility
+  if (data.content) {
+    const sections = parseLetterContent(data.content)
+    return sections
+  }
+  
+  // Default empty sections
+  return {
+    subject: '',
+    greeting: '',
+    body: ''
+  }
+}
+
+// Parse legacy content to extract sections for backward compatibility
+function parseLetterContent(content: string) {
+  let subject = ''
+  let greeting = ''
+  let body = content
+  
+  // Extract subject if present
+  const subjectMatch = content.match(/^(Objet\s*:?|Subject\s*:?|Asunto\s*:?|Betreff\s*:?|Oggetto\s*:?)\s*(.+?)(\n|$)/im)
+  if (subjectMatch) {
+    subject = subjectMatch[2].trim()
+    body = body.replace(subjectMatch[0], '').trim()
+  }
+  
+  // Extract greeting from the beginning
+  const lines = body.split('\n')
+  const firstFewLines = lines.slice(0, 3)
+  for (let i = 0; i < firstFewLines.length; i++) {
+    const line = firstFewLines[i].trim()
+    if (line && (
+      line.toLowerCase().includes('madame') ||
+      line.toLowerCase().includes('monsieur') ||
+      line.toLowerCase().includes('dear') ||
+      line.toLowerCase().includes('bonjour') ||
+      line.toLowerCase().includes('hello')
+    )) {
+      greeting = line
+      // Remove greeting from body
+      const remainingLines = lines.slice(i + 1)
+      body = remainingLines.join('\n').trim()
+      break
+    }
+  }
+  
+  return { subject, greeting, body }
 }
 
 /**
@@ -109,64 +151,79 @@ const classicTemplate: PdfTemplate = {
     const locale = data.language === 'en' ? 'en-US' : data.language === 'de' ? 'de-DE' : data.language === 'es' ? 'es-ES' : data.language === 'it' ? 'it-IT' : 'fr-FR';
     const subjectLabel = data.language === 'fr' ? 'Objet :' : data.language === 'en' ? 'Subject:' : data.language === 'es' ? 'Asunto:' : data.language === 'de' ? 'Betreff:' : 'Oggetto:';
     
+    // Extract sections from data
+    const sections = extractSections(data);
+    
     return `
     <!DOCTYPE html>
     <html lang="fr">
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Lettre de Motivation - ${data.jobTitle || 'Poste'}</title>
+      <title>Lettre de Motivation</title>
       <style>
-        @page { size: A4; margin: 2.5cm 2cm; }
-        body { 
-          font-family: 'Times New Roman', Times, serif; 
-          font-size: 12pt; 
-          line-height: 1.6; 
-          color: #000; 
-          margin: 0; 
-          padding: 0;
-          background: white;
+        @page { size: A4; margin: 0mm; }
+        html, body {
+          height: 100%;
+          background: #fff;
+          font-family: 'Times New Roman', Times, serif;
+          font-size: 10pt;
+          line-height: 1.3;
+          color: #000;
+        }
+        .page {
+          box-sizing: border-box;
+          width: 210mm;
+          margin: 0mm;
+          padding: 20mm;
+          overflow-wrap: anywhere; /* casse mots/URLs longues */
+          word-break: break-word;
+          hyphens: auto;
+          flex-wrap: wrap;     /* permet de passer à la ligne si besoin */
         }
         .header { 
           display: flex; 
           justify-content: space-between; 
           align-items: flex-start; 
-          margin-bottom: 2cm; 
+          margin-bottom: 0.6cm; 
         }
         .sender-info { 
-          font-size: 11pt; 
-          line-height: 1.4; 
+          font-size: 10pt; 
+          line-height: 1.2; 
           text-align: left;
         }
         .date-location { 
-          font-size: 11pt; 
+          font-size: 10pt; 
           text-align: right;
           white-space: nowrap;
         }
-        .recipient-info { margin-bottom: 2cm; font-size: 11pt; }
         .subject { 
           font-weight: bold; 
-          margin-bottom: 1.5cm; 
+          margin-bottom: 0.8cm; 
           text-decoration: underline; 
-          font-size: 12pt; 
+          font-size: 9pt; 
         }
         .content { 
+          font-size: 10pt; 
           text-align: justify; 
-          margin-bottom: 2cm; 
+          margin-bottom: 0cm; 
           white-space: pre-wrap;
-          text-indent: 1.5em;
+          overflow-wrap: anywhere; /* casse mots/URLs longues */
+          word-break: break-word;
+          hyphens: auto;
+          flex-wrap: wrap; 
         }
-        .signature { text-align: right; margin-top: 2cm; }
-        .greeting { margin-bottom: 1cm; }
+        .signature { text-align: right; margin-top: 1cm; }
+        .greeting { margin-bottom: 0.5cm; }
       </style>
     </head>
     <body>
-      <div class="header">
-        <div class="sender-info">
-          <strong>${data.candidateName || ''}</strong><br>
-          ${data.candidateAddress ? data.candidateAddress + '<br>' : ''}
-          ${data.candidatePhone || ''}${data.candidatePhone && data.candidateEmail ? ' • ' : ''}${data.candidateEmail || ''}
-        </div>
+      <div class="page">
+        <div class="header">
+          <div class="sender-info">
+            ${data.candidateAddress ? data.candidateAddress + '<br>' : ''}
+            ${data.candidatePhone || ''}${data.candidatePhone && data.candidateEmail ? ' • ' : ''}${data.candidateEmail || ''}
+          </div>
         <div class="date-location">
           ${data.location || ''}, ${translations.the} ${data.date || new Date().toLocaleDateString(locale, { 
             day: 'numeric', 
@@ -176,26 +233,19 @@ const classicTemplate: PdfTemplate = {
         </div>
       </div>
       
-      <div class="recipient-info">
-        ${translations.to_attention}<br>
-        ${data.company || translations.company}
-      </div>
-      
       <div class="subject">
-        <strong>${subjectLabel}</strong> ${data.jobTitle ? `Candidature pour le poste de ${data.jobTitle}` : translations.subject_prefix}
+        <strong>${subjectLabel}</strong> ${sections.subject || (data.jobTitle ? `Candidature pour le poste de ${data.jobTitle}` : translations.subject_prefix)}
       </div>
       
       <div class="greeting">
-        ${translations.greeting_formal}
+        ${sections.greeting || translations.greeting_formal}
       </div>
       
-      <div class="content">${data.content || 'Contenu de la lettre'}</div>
+      <div class="content">${sections.body || data.content || 'Contenu de la lettre'}</div>
       
       <div class="signature">
-        ${translations.closing_formal}<br>
-        <br>
-        <br>
         ${data.candidateName || ''}
+      </div>
       </div>
     </body>
     </html>
@@ -215,7 +265,9 @@ const modernTemplate: PdfTemplate = {
   generateHtml: (data: LetterData) => {
     const translations = getTranslations(data.language);
     const locale = data.language === 'en' ? 'en-US' : data.language === 'de' ? 'de-DE' : data.language === 'es' ? 'es-ES' : data.language === 'it' ? 'it-IT' : 'fr-FR';
-    const recruitmentDept = data.language === 'en' ? 'Recruitment Department' : data.language === 'es' ? 'Departamento de Reclutamiento' : data.language === 'de' ? 'Personalabteilung' : data.language === 'it' ? 'Dipartimento di Reclutamento' : 'Service Recrutement';
+    
+    // Extract sections from data
+    const sections = extractSections(data);
     
     return `
     <!DOCTYPE html>
@@ -223,110 +275,104 @@ const modernTemplate: PdfTemplate = {
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Lettre de Motivation - ${data.jobTitle || 'Poste'}</title>
+      <title>Lettre de Motivation</title>
       <style>
-        @page { size: A4; margin: 2.5cm; }
+        @page { size: A4; margin: 0; }
         body { 
           font-family: 'Helvetica', Arial, sans-serif; 
-          font-size: 11pt; 
-          line-height: 1.7; 
+          font-size: 10pt; 
+          line-height: 1.3; 
           color: #2c3e50; 
           margin: 0; 
           padding: 0;
           background: white;
+        }
+        .page {
+          padding: 15mm 25mm;
+          box-sizing: border-box;
+          width: 210mm;
+          margin: 0 auto;
         }
         .header { 
           display: flex;
           justify-content: space-between;
           align-items: center;
           border-bottom: 2px solid #3498db; 
-          padding-bottom: 15px; 
-          margin-bottom: 2.5cm; 
+          padding-bottom: 5px; 
         }
         .sender-block {
           flex: 1;
         }
         .sender-name {
-          font-size: 14pt;
+          font-size: 10pt;
           font-weight: bold;
           color: #2c3e50;
-          margin-bottom: 5px;
+          margin-bottom: 3px;
         }
         .sender-contact { 
-          font-size: 9pt; 
+          font-size: 6pt; 
           color: #7f8c8d;
-          line-height: 1.3;
+          line-height: 1.1;
         }
         .date-block {
           text-align: right;
           color: #7f8c8d; 
-          font-size: 10pt;
-        }
-        .recipient-info { 
-          background: #f8f9fa; 
-          padding: 15px; 
-          margin-bottom: 2cm; 
-          border-left: 4px solid #3498db;
-          border-radius: 0 4px 4px 0;
+          font-size: 6pt;
         }
         .subject { 
           font-weight: 600; 
-          margin-bottom: 2cm; 
+          margin-bottom: 0.8cm; 
           color: #2c3e50;
-          font-size: 12pt;
+          font-size: 10pt;
           text-transform: uppercase;
-          letter-spacing: 0.5px;
+          letter-spacing: 0.3px;
         }
         .content { 
+          font-size: 10pt;
           text-align: justify; 
-          margin-bottom: 2.5cm; 
+          margin-bottom: 1.2cm; 
           white-space: pre-wrap;
         }
         .signature { text-align: right; color: #34495e; }
         .greeting { 
-          margin-bottom: 1.5cm; 
+          margin-bottom: 0.6cm; 
           font-weight: 500;
         }
       </style>
     </head>
     <body>
-      <div class="header">
-        <div class="sender-block">
-          <div class="sender-name">${data.candidateName || ''}</div>
-          <div class="sender-contact">
-            ${data.candidateAddress ? data.candidateAddress + '<br>' : ''}
-            ${data.candidatePhone || ''}${data.candidatePhone && data.candidateEmail ? ' • ' : ''}${data.candidateEmail || ''}
+      <div class="page">
+        <div class="header">
+          <div class="sender-block">
+            <div class="sender-contact">
+              ${data.candidateAddress ? data.candidateAddress + '<br>' : ''}
+              ${data.candidatePhone || ''}${data.candidatePhone && data.candidateEmail ? ' • ' : ''}${data.candidateEmail || ''}
+            </div>
           </div>
-        </div>
-        <div class="date-block">
-          ${data.location || ''}<br>
-          ${data.date || new Date().toLocaleDateString(locale, { 
-            day: 'numeric', 
-            month: 'long', 
-            year: 'numeric' 
-          })}
-        </div>
+          <div class="date-block">
+            ${data.location || ''}<br>
+            ${data.date || new Date().toLocaleDateString(locale, { 
+              day: 'numeric', 
+              month: 'long', 
+              year: 'numeric' 
+            })}
+          </div>
       </div>
       
-      <div class="recipient-info">
-        <strong>${recruitmentDept}</strong><br>
-        ${data.company || translations.company}
-      </div>
       
       <div class="subject">
-        ${data.jobTitle ? `Candidature pour le poste de ${data.jobTitle}` : translations.subject_prefix}
+        ${sections.subject || (data.jobTitle ? `Candidature pour le poste de ${data.jobTitle}` : translations.subject_prefix)}
       </div>
       
       <div class="greeting">
-        ${translations.greeting_formal}
+        ${sections.greeting || translations.greeting_formal}
       </div>
       
-      <div class="content">${data.content || 'Contenu de la lettre'}</div>
+      <div class="content">${sections.body || data.content || 'Contenu de la lettre'}</div>
       
       <div class="signature">
-        ${translations.closing_modern}<br>
-        <br>
         <strong>${data.candidateName || ''}</strong>
+      </div>
       </div>
     </body>
     </html>
@@ -346,7 +392,9 @@ const elegantTemplate: PdfTemplate = {
   generateHtml: (data: LetterData) => {
     const translations = getTranslations(data.language);
     const locale = data.language === 'en' ? 'en-US' : data.language === 'de' ? 'de-DE' : data.language === 'es' ? 'es-ES' : data.language === 'it' ? 'it-IT' : 'fr-FR';
-    const recruitmentDept = data.language === 'en' ? 'Recruitment Department' : data.language === 'es' ? 'Departamento de Reclutamiento' : data.language === 'de' ? 'Personalabteilung' : data.language === 'it' ? 'Dipartimento di Reclutamento' : 'Service Recrutement';
+    
+    // Extract sections from data
+    const sections = extractSections(data);
     
     return `
     <!DOCTYPE html>
@@ -354,23 +402,29 @@ const elegantTemplate: PdfTemplate = {
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Lettre de Motivation - ${data.jobTitle || 'Poste'}</title>
+      <title>Lettre de Motivation</title>
       <style>
-        @page { size: A4; margin: 2.5cm; }
+        @page { size: A4; margin: 0; }
         body { 
           font-family: 'Georgia', 'Times New Roman', serif; 
-          font-size: 11pt; 
-          line-height: 1.6; 
+          font-size: 10pt; 
+          line-height: 1.3; 
           color: #2c3e50; 
           margin: 0; 
           padding: 0;
           background: white;
         }
+        .page {
+          padding: 12mm;
+          box-sizing: border-box;
+          width: 210mm;
+          margin: 0 auto;
+        }
         .header { 
           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
           color: white;
           padding: 20px 25px;
-          margin: -15px -15px 2.5cm -15px;
+          margin: -15px -15px 0cm -15px;
           border-radius: 0 0 10px 10px;
           display: flex;
           justify-content: space-between;
@@ -380,41 +434,37 @@ const elegantTemplate: PdfTemplate = {
           flex: 1;
         }
         .sender-name {
-          font-size: 16pt;
+          font-size: 10pt;
           font-weight: normal;
-          margin-bottom: 8px;
-          letter-spacing: 1px;
+          margin-bottom: 5px;
+          letter-spacing: 0.5px;
         }
         .sender-contact { 
-          font-size: 9pt; 
+          font-size: 6pt; 
           opacity: 0.9;
-          line-height: 1.3;
+          line-height: 1.1;
         }
         .date-block {
           text-align: right;
-          font-size: 9pt;
+          font-size: 6pt;
           opacity: 0.9;
-        }
-        .recipient-info { 
-          border-left: 3px solid #667eea; 
-          padding-left: 15px; 
-          margin-bottom: 2cm;
-          background: #f8f9fb;
-          padding: 15px 15px 15px 20px;
-          border-radius: 0 5px 5px 0;
         }
         .subject { 
           background: #f1f3f9;
           border-left: 4px solid #667eea;
-          padding: 12px 20px;
-          margin-bottom: 2cm; 
+          padding: 8px 15px;
+          border-radius: 0 0 10px 10px;
+          margin-bottom: 0.8cm; 
           font-weight: 600;
           color: #2c3e50;
-          font-size: 12pt;
+          font-size: 10pt;
         }
         .content { 
+          font-size: 10pt;
           text-align: justify; 
-          margin-bottom: 2.5cm; 
+          margin-bottom: 1.2cm; 
+          margin-left: -5mm;
+          margin-right: 5mm;
           white-space: pre-wrap;
         }
         .signature { 
@@ -424,15 +474,15 @@ const elegantTemplate: PdfTemplate = {
           padding-top: 20px;
         }
         .greeting { 
-          margin-bottom: 1.5cm; 
+          margin-bottom: 0.6cm; 
           font-style: italic;
         }
       </style>
     </head>
     <body>
+    <div class="page">
       <div class="header">
         <div class="sender-block">
-          <div class="sender-name">${data.candidateName || ''}</div>
           <div class="sender-contact">
             ${data.candidateAddress ? data.candidateAddress + '<br>' : ''}
             ${data.candidatePhone || ''}${data.candidatePhone && data.candidateEmail ? ' • ' : ''}${data.candidateEmail || ''}
@@ -448,25 +498,20 @@ const elegantTemplate: PdfTemplate = {
         </div>
       </div>
       
-      <div class="recipient-info">
-        <strong>${recruitmentDept}</strong><br>
-        ${data.company || translations.company}
-      </div>
       
       <div class="subject">
-        ${data.jobTitle ? `Candidature pour le poste de ${data.jobTitle}` : translations.subject_prefix}
+        ${sections.subject || (data.jobTitle ? `Candidature pour le poste de ${data.jobTitle}` : translations.subject_prefix)}
       </div>
       
       <div class="greeting">
-        ${translations.greeting_formal}
+        ${sections.greeting || translations.greeting_formal}
       </div>
       
-      <div class="content">${data.content || 'Contenu de la lettre'}</div>
+      <div class="content">${sections.body || data.content || 'Contenu de la lettre'}</div>
       
       <div class="signature">
-        ${translations.closing_semi_formal}<br>
-        <br>
         <strong>${data.candidateName || ''}</strong>
+      </div>
       </div>
     </body>
     </html>
@@ -486,7 +531,9 @@ const creativeTemplate: PdfTemplate = {
   generateHtml: (data: LetterData) => {
     const translations = getTranslations(data.language);
     const locale = data.language === 'en' ? 'en-US' : data.language === 'de' ? 'de-DE' : data.language === 'es' ? 'es-ES' : data.language === 'it' ? 'it-IT' : 'fr-FR';
-    const recruitmentDept = data.language === 'en' ? 'Recruitment Department' : data.language === 'es' ? 'Departamento de Reclutamiento' : data.language === 'de' ? 'Personalabteilung' : data.language === 'it' ? 'Dipartimento di Reclutamento' : 'Service Recrutement';
+    
+    // Extract sections from data
+    const sections = extractSections(data);
     
     return `
     <!DOCTYPE html>
@@ -494,17 +541,24 @@ const creativeTemplate: PdfTemplate = {
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Lettre de Motivation - ${data.jobTitle || 'Poste'}</title>
+      <title>Lettre de Motivation</title>
       <style>
-        @page { size: A4; margin: 1.5cm; }
+        @page { size: A4; margin: 0; }
         body { 
           font-family: 'Helvetica', Arial, sans-serif; 
-          font-size: 11pt; 
-          line-height: 1.6; 
+          font-size: 10pt; 
+          line-height: 1.3; 
           color: #2d3748; 
           margin: 0; 
           padding: 0;
           background: white;
+        }
+        .page {
+          padding: 15mm 12mm;
+          box-sizing: border-box;
+          width: 210mm;
+          min-height: 297mm;
+          margin: 0 auto;
         }
         .container {
           background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
@@ -520,52 +574,46 @@ const creativeTemplate: PdfTemplate = {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 2cm;
-          background: linear-gradient(135deg, #667eea, #764ba2);
+          margin-bottom: 0.6cm;
+          background: linear-gradient(135deg, #66c5eaff, #4ba296ff);
           color: white;
           padding: 20px;
           border-radius: 8px;
-          margin: -10px -10px 2cm -10px;
+          margin: -10px -10px 1cm -10px;
         }
         .sender-block {
           flex: 1;
         }
         .sender-name {
-          font-size: 16pt;
+          font-size: 10pt;
           font-weight: 300;
-          margin-bottom: 8px;
-          letter-spacing: 1px;
+          margin-bottom: 5px;
+          letter-spacing: 0.5px;
         }
         .sender-contact { 
-          font-size: 9pt; 
+          font-size: 6pt; 
           opacity: 0.9;
-          line-height: 1.3;
+          line-height: 1.1;
         }
         .date-block {
           text-align: right;
-          font-size: 9pt;
+          font-size: 6pt;
           opacity: 0.9;
-        }
-        .recipient-info { 
-          background: #f0f4f8;
-          padding: 15px;
-          border-radius: 8px;
-          margin-bottom: 2cm;
-          border-left: 4px solid #ff6b6b;
         }
         .subject { 
           text-align: center;
           font-weight: 600; 
-          margin-bottom: 2cm; 
+          margin-bottom: 0.8cm; 
           color: #2d3748;
-          font-size: 12pt;
+          font-size: 10pt;
           background: linear-gradient(135deg, #ffeaa7, #fab1a0);
-          padding: 15px;
-          border-radius: 20px;
+          padding: 10px;
+          border-radius: 15px;
         }
         .content { 
+          font-size: 10pt;
           text-align: justify; 
-          margin-bottom: 2.5cm; 
+          margin-bottom: 1.2cm; 
           white-space: pre-wrap;
         }
         .signature { 
@@ -576,7 +624,7 @@ const creativeTemplate: PdfTemplate = {
           color: #4a5568;
         }
         .greeting { 
-          margin-bottom: 1.5cm; 
+          margin-bottom: 0.6cm; 
           font-weight: 500;
           text-align: center;
         }
@@ -587,7 +635,6 @@ const creativeTemplate: PdfTemplate = {
         <div class="content-wrapper">
           <div class="header">
             <div class="sender-block">
-              <div class="sender-name">${data.candidateName || ''}</div>
               <div class="sender-contact">
                 ${data.candidateAddress ? data.candidateAddress + '<br>' : ''}
                 ${data.candidatePhone || ''}${data.candidatePhone && data.candidateEmail ? ' • ' : ''}${data.candidateEmail || ''}
@@ -603,25 +650,19 @@ const creativeTemplate: PdfTemplate = {
             </div>
           </div>
           
-          <div class="recipient-info">
-            <strong>${recruitmentDept}</strong><br>
-            ${data.company || translations.company}
-          </div>
           
           <div class="subject">
-            ✨ ${data.jobTitle ? `Candidature pour le poste de ${data.jobTitle}` : translations.subject_prefix} ✨
+            ${sections.subject || (data.jobTitle ? `Candidature pour le poste de ${data.jobTitle}` : translations.subject_prefix)}
           </div>
           
           <div class="greeting">
-            ${translations.greeting_casual}
+            ${sections.greeting || translations.greeting_casual}
           </div>
           
-          <div class="content">${data.content || 'Contenu de la lettre'}</div>
+          <div class="content">${sections.body || data.content || 'Contenu de la lettre'}</div>
           
           <div class="signature">
-            ${translations.closing_casual}<br>
-            <br>
-            <strong>${data.candidateName || ''}</strong> ✨
+            <strong>${data.candidateName || ''}</strong>
           </div>
         </div>
       </div>

@@ -25,7 +25,7 @@ export interface PdfOptions {
  * Default PDF generation options
  */
 const DEFAULT_PDF_OPTIONS: Required<PdfOptions> = {
-  margin: 1,
+  margin: 0,
   format: 'letter',
   orientation: 'portrait',
   quality: 0.98,
