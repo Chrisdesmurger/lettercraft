@@ -30,6 +30,7 @@ import { ReviewModal } from '@/components/reviews/review-modal'
 import { Star } from 'lucide-react'
 import { CreateReviewData } from '@/types/reviews'
 import { supabase } from '@/lib/supabase-client'
+import { formatLetterSections } from '@/lib/letter-sections'
 
 interface LetterGenerationFlowProps {
   onBack: () => void
@@ -93,8 +94,19 @@ export default function LetterGenerationFlow({ onBack }: LetterGenerationFlowPro
   }
 
   const handleCopyLetter = () => {
-    if (flow.generatedLetter?.content) {
-      navigator.clipboard.writeText(flow.generatedLetter.content)
+    if (flow.generatedLetter) {
+      // Utiliser les sections si disponibles, sinon le contenu complet
+      let contentToCopy = flow.generatedLetter.content
+      
+      if (flow.generatedLetter.subject || flow.generatedLetter.greeting || flow.generatedLetter.body) {
+        contentToCopy = formatLetterSections({
+          subject: flow.generatedLetter.subject || '',
+          greeting: flow.generatedLetter.greeting || '',
+          body: flow.generatedLetter.body || ''
+        })
+      }
+      
+      navigator.clipboard.writeText(contentToCopy)
       toast.success(t('letter.copySuccess'))
     }
   }
@@ -361,9 +373,39 @@ export default function LetterGenerationFlow({ onBack }: LetterGenerationFlowPro
               </CardHeader>
               <CardContent>
                 <div className="bg-white border rounded-lg p-6 max-h-[600px] overflow-y-auto">
-                  <div className="whitespace-pre-wrap text-sm leading-relaxed">
-                    {flow.generatedLetter?.content}
-                  </div>
+                  {flow.generatedLetter?.subject || flow.generatedLetter?.greeting || flow.generatedLetter?.body ? (
+                    // Affichage par sections si disponibles
+                    <div className="space-y-6">
+                      {flow.generatedLetter?.subject && (
+                        <section className="letter-subject">
+                          <h3 className="text-base font-semibold text-gray-900 mb-2">
+                            Objet : {flow.generatedLetter.subject}
+                          </h3>
+                        </section>
+                      )}
+                      
+                      {flow.generatedLetter?.greeting && (
+                        <section className="letter-greeting">
+                          <div className="text-sm font-medium text-gray-800 mb-3">
+                            {flow.generatedLetter.greeting}
+                          </div>
+                        </section>
+                      )}
+                      
+                      {flow.generatedLetter?.body && (
+                        <section className="letter-body">
+                          <div className="text-sm leading-relaxed text-gray-700 whitespace-pre-wrap">
+                            {flow.generatedLetter.body}
+                          </div>
+                        </section>
+                      )}
+                    </div>
+                  ) : (
+                    // Affichage simple pour compatibilité descendante
+                    <div className="whitespace-pre-wrap text-sm leading-relaxed">
+                      {flow.generatedLetter?.content}
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>

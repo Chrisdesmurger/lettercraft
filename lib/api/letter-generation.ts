@@ -24,7 +24,17 @@ interface GenerateLetterParams {
     }
 }
 
-export async function generateLetter(params: GenerateLetterParams): Promise<string> {
+export interface GenerateLetterResponse {
+    letter: string
+    sections?: {
+        subject: string
+        greeting: string
+        body: string
+    }
+    letterId?: string
+}
+
+export async function generateLetter(params: GenerateLetterParams): Promise<GenerateLetterResponse> {
     // Appel à votre API OpenAI
     const response = await fetch('/api/generate-letter', {
         method: 'POST',
@@ -43,7 +53,7 @@ export async function generateLetter(params: GenerateLetterParams): Promise<stri
         window.dispatchEvent(new CustomEvent('letter-generated'))
     }
     
-    return data.letter
+    return data
 }
 
 export async function extractJobOffer(input: string, type: 'text' | 'url'): Promise<any> {
