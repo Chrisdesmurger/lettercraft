@@ -60,31 +60,21 @@ export function useUserInvoices(user: User | null): UseUserInvoicesReturn {
     try {
       console.log('🧾 [useUserInvoices] Fetching invoices for user:', user.id)
 
-      // Essayer d'abord avec la fonction sécurisée, puis fallback sur la vue
-      let data, fetchError;
-      
-      try {
-        // Méthode 1: Utiliser la fonction sécurisée get_user_invoices
-        const result = await supabase.rpc('get_user_invoices', { 
-          target_user_id: user.id 
-        });
-        data = result.data;
-        fetchError = result.error;
-        console.log('🧾 [useUserInvoices] Using secure function, result:', { data, fetchError })
-      } catch (funcError) {
-        console.log('🧾 [useUserInvoices] Function not available, falling back to view')
-        
-        // Méthode 2: Fallback sur la vue (avec RLS amélioré)
-        const result = await supabase
-          .from('invoices_with_subscription_details')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('invoice_date', { ascending: false })
-        
-        data = result.data;
-        fetchError = result.error;
-        console.log('🧾 [useUserInvoices] Using view fallback, result:', { data, fetchError })
-      }
+      // Méthode directe sur la table stripe_invoices avec RLS existant
+      const { data, error: fetchError } = await supabase
+        .from('stripe_invoices')
+        .select(`
+          *,
+          stripe_subscriptions!inner(
+            stripe_subscription_id,
+            status,
+            stripe_price_id
+          )
+        `)
+        .eq('user_id', user.id)
+        .order('invoice_date', { ascending: false })
+
+      console.log('🧾 [useUserInvoices] Direct table query result:', { data, fetchError })
 
       if (fetchError) {
         throw fetchError
