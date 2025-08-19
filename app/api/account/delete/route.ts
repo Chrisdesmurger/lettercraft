@@ -224,14 +224,15 @@ async function handleRequestDeletion(request: NextRequest) {
     )
   }
 
-  // Récupérer les informations utilisateur
+  // Récupérer les informations utilisateur (bypass RLS)
+  const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(userId)
   const { data: userProfile, error: profileError } = await supabaseAdmin
-    .from('users_with_profiles')
+    .from('user_profiles')
     .select('*')
-    .eq('id', userId)
+    .eq('user_id', userId)
     .single()
 
-  if (profileError || !userProfile) {
+  if (!authUser?.user || profileError || !userProfile) {
     return NextResponse.json(
       { error: 'Utilisateur non trouvé' },
       { status: 404 }
@@ -267,9 +268,12 @@ async function handleRequestDeletion(request: NextRequest) {
       const userName = `${userProfile.first_name || ''} ${userProfile.last_name || ''}`.trim() || 'utilisateur'
       const userLanguage = userProfile.language || 'fr'
       const confirmationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/account/delete/confirm?token=${confirmation_token}`
+      
+      // Utiliser l'email du contexte d'authentification au lieu de celui de la vue (RLS-safe)
+      const userEmail = context.email || userProfile.email
 
       await brevoEmailService.sendAccountDeletionConfirmationEmail(
-        userProfile.email,
+        userEmail,
         userName,
         confirmationUrl,
         scheduled_deletion_at,
@@ -288,7 +292,7 @@ async function handleRequestDeletion(request: NextRequest) {
         }
       })
 
-      console.log(`📧 Email de confirmation de suppression envoyé à ${userProfile.email}`)
+      console.log(`📧 Email de confirmation de suppression envoyé à ${userEmail}`)
     } catch (emailError) {
       console.warn('Erreur lors de l\'envoi de l\'email de confirmation:', emailError)
       // Ne pas faire échouer la demande si l'email échoue
@@ -345,15 +349,17 @@ async function handleConfirmDeletion(request: NextRequest) {
   console.log(`🎯 Confirmation de suppression reçue - annulation immédiate de l'abonnement pour l'utilisateur ${userId}`)
   
   try {
-    // Récupérer les informations utilisateur pour Stripe
+    // Récupérer les informations utilisateur avec service_role (bypass RLS)
+    const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(userId)
     const { data: userProfile, error: profileError } = await supabaseAdmin
-      .from('users_with_profiles')
-      .select('email, first_name, last_name, stripe_customer_id, stripe_subscription_id, subscription_tier, language')
-      .eq('id', userId)
+      .from('user_profiles')
+      .select('first_name, last_name, stripe_customer_id, stripe_subscription_id, subscription_tier, language')
+      .eq('user_id', userId)
       .single()
 
-    if (!profileError && userProfile) {
-      console.log(`🔍 Utilisateur trouvé: ${userProfile.email}, Stripe Customer ID: ${userProfile.stripe_customer_id}, Subscription ID: ${userProfile.stripe_subscription_id}`)
+    if (authUser?.user && !profileError && userProfile) {
+      const userEmail = authUser.user.email!
+      console.log(`🔍 Utilisateur trouvé: ${userEmail}, Stripe Customer ID: ${userProfile.stripe_customer_id}, Subscription ID: ${userProfile.stripe_subscription_id}`)
 
       // Si l'utilisateur a un abonnement Stripe actif, l'annuler immédiatement
       if (userProfile.stripe_customer_id && userProfile.stripe_subscription_id) {
@@ -404,13 +410,13 @@ async function handleConfirmDeletion(request: NextRequest) {
               const userLanguage = userProfile.language || 'fr'
               
               await brevoEmailService.sendSubscriptionCancelledEmail(
-                userProfile.email,
+                userEmail,
                 userName,
                 new Date().toISOString(), // Annulé immédiatement
                 userLanguage
               )
               
-              console.log(`📧 Email d'annulation d'abonnement envoyé à ${userProfile.email}`)
+              console.log(`📧 Email d'annulation d'abonnement envoyé à ${userEmail}`)
             } catch (emailError) {
               console.warn('Erreur lors de l\'envoi de l\'email d\'annulation d\'abonnement:', emailError)
             }
@@ -533,10 +539,7 @@ async function executeScheduledDeletions() {
   // Trouver les demandes confirmées prêtes pour suppression
   const { data: pendingDeletions, error } = await supabaseAdmin
     .from('account_deletion_requests')
-    .select(`
-      id, user_id, deletion_type, reason, scheduled_deletion_at,
-      users_with_profiles!inner(email, first_name, last_name, stripe_customer_id, stripe_subscription_id)
-    `)
+    .select('id, user_id, deletion_type, reason, scheduled_deletion_at')
     .eq('status', 'confirmed')
     .lte('scheduled_deletion_at', new Date().toISOString())
 
@@ -587,10 +590,7 @@ async function executeUserDeletion(userId: string) {
   // Récupérer la demande de suppression
   const { data: deletion, error } = await supabaseAdmin
     .from('account_deletion_requests')
-    .select(`
-      *,
-      users_with_profiles!inner(email, first_name, last_name, stripe_customer_id, stripe_subscription_id)
-    `)
+    .select('*')
     .eq('user_id', userId)
     .eq('status', 'confirmed')
     .single()
@@ -612,9 +612,21 @@ async function executeUserDeletionInternal(
   deletionType: string,
   deletionData: any
 ): Promise<boolean> {
-  const userProfile = deletionData.users_with_profiles
+  // Récupérer les données utilisateur de manière sécurisée (bypass RLS)
+  const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(userId)
+  const { data: userProfile, error: profileError } = await supabaseAdmin
+    .from('user_profiles')
+    .select('first_name, last_name, stripe_customer_id, stripe_subscription_id, language')
+    .eq('user_id', userId)
+    .single()
 
-  console.log(`🗑️ Executing ${deletionType} deletion for user ${userId} (${userProfile.email})`)
+  if (!authUser?.user || profileError) {
+    console.error(`❌ Unable to fetch user data for ${userId}:`, profileError)
+    return false
+  }
+
+  const userEmail = authUser.user.email!
+  console.log(`🗑️ Executing ${deletionType} deletion for user ${userId} (${userEmail})`)
 
   try {
     // 1. Gérer l'annulation Stripe si nécessaire
@@ -650,7 +662,7 @@ async function executeUserDeletionInternal(
       const userLanguage = userProfile.language || 'fr'
 
       await brevoEmailService.sendAccountDeletedEmail(
-        userProfile.email,
+        userEmail,
         userName,
         deletionType,
         stripeResult?.refunded || false,
@@ -658,7 +670,7 @@ async function executeUserDeletionInternal(
         userLanguage
       )
 
-      console.log(`📧 Deletion confirmation email sent to ${userProfile.email}`)
+      console.log(`📧 Deletion confirmation email sent to ${userEmail}`)
     } catch (emailError) {
       console.warn('Failed to send deletion confirmation email:', emailError)
       // Ne pas faire échouer la suppression si l'email échoue

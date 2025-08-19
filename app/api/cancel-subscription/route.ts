@@ -50,20 +50,23 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Get user's subscription info
+    // Get user's subscription info (bypass RLS with admin)
+    const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(userId)
     const { data: userProfile, error: profileError } = await supabaseAdmin
-      .from('users_with_profiles')
-      .select('stripe_customer_id, stripe_subscription_id, email, first_name, last_name, language')
-      .eq('id', userId)
+      .from('user_profiles')
+      .select('stripe_customer_id, stripe_subscription_id, first_name, last_name, language')
+      .eq('user_id', userId)
       .single()
 
-    if (profileError || !userProfile) {
+    if (!authUser?.user || profileError || !userProfile) {
       console.error('Error fetching user profile:', profileError)
       return NextResponse.json(
         { error: 'User not found' },
         { status: 404 }
       )
     }
+    
+    const userEmail = authUser.user.email!
 
     if (!userProfile.stripe_subscription_id) {
       return NextResponse.json(
@@ -146,7 +149,7 @@ export async function POST(request: NextRequest) {
     console.log(`🚫 [SECURITY] Subscription cancellation:`)
     console.log(`   - Subscription ID: ${userProfile.stripe_subscription_id}`)
     console.log(`   - User ID: ${userId}`)
-    console.log(`   - Email: ${userProfile.email}`)
+    console.log(`   - Email: ${userEmail}`)
     console.log(`   - End date: ${(updatedSubscription as any).current_period_end ? new Date((updatedSubscription as any).current_period_end * 1000).toISOString() : 'unknown'}`)
     console.log(`   - Reason: ${sanitizedReason}`)
     console.log(`   - IP: ${request.headers.get('x-forwarded-for') || 'unknown'}`)
@@ -187,13 +190,13 @@ export async function POST(request: NextRequest) {
         const userLanguage = userProfile.language || 'fr'
         
         await brevoEmailService.sendSubscriptionCancelledEmail(
-          userProfile.email,
+          userEmail,
           userName,
           cancellationDate,
           userLanguage
         )
         
-        console.log(`📧 Email d'annulation envoyé à ${userProfile.email}`)
+        console.log(`📧 Email d'annulation envoyé à ${userEmail}`)
       } catch (emailError) {
         // Ne pas faire échouer l'annulation si l'email échoue
         console.warn('Erreur lors de l\'envoi de l\'email d\'annulation:', emailError)
