@@ -382,8 +382,19 @@ export default function SubscriptionTab({ user, userProfile, loading: profileLoa
               <tbody className="divide-y divide-gray-200">
                 {!invoicesLoading && invoices.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-4 py-8 text-center text-gray-500">
-                      {t('subscription.invoice.noInvoices')}
+                    <td colSpan={5} className="px-4 py-8 text-center">
+                      <div className="text-gray-500 mb-2">
+                        {t('subscription.invoice.noInvoices')}
+                      </div>
+                      <div className="text-xs text-gray-400">
+                        Debug: {JSON.stringify({ 
+                          invoicesCount: invoices.length, 
+                          loading: invoicesLoading, 
+                          error: invoicesError,
+                          hasUser: !!user,
+                          userId: user?.id?.substring(0, 8) + '...'
+                        })}
+                      </div>
                     </td>
                   </tr>
                 ) : (

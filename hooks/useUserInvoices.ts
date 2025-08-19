@@ -60,26 +60,65 @@ export function useUserInvoices(user: User | null): UseUserInvoicesReturn {
     try {
       console.log('🧾 [useUserInvoices] Fetching invoices for user:', user.id)
 
-      // Méthode directe sur la table stripe_invoices avec RLS existant
-      const { data, error: fetchError } = await supabase
-        .from('stripe_invoices')
-        .select(`
-          *,
-          stripe_subscriptions!inner(
-            stripe_subscription_id,
-            status,
-            stripe_price_id
-          )
-        `)
-        .eq('user_id', user.id)
-        .order('invoice_date', { ascending: false })
+      // Essayer plusieurs méthodes pour récupérer les factures
+      let data, fetchError;
 
-      console.log('🧾 [useUserInvoices] Direct table query result:', { data, fetchError })
+      // Méthode 1: Essayer la fonction sécurisée si elle existe
+      try {
+        console.log('🧾 [useUserInvoices] Trying secure function get_user_invoices...')
+        const result = await supabase.rpc('get_user_invoices', { 
+          target_user_id: user.id 
+        });
+        
+        if (!result.error) {
+          data = result.data;
+          fetchError = null;
+          console.log('🧾 [useUserInvoices] Success with secure function:', data?.length, 'invoices')
+        } else {
+          throw result.error;
+        }
+      } catch (funcError) {
+        console.log('🧾 [useUserInvoices] Secure function failed:', funcError)
+        
+        // Méthode 2: Essayer la vue corrigée
+        try {
+          console.log('🧾 [useUserInvoices] Trying corrected view...')
+          const result = await supabase
+            .from('invoices_with_subscription_details')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('invoice_date', { ascending: false })
+          
+          if (!result.error) {
+            data = result.data;
+            fetchError = null;
+            console.log('🧾 [useUserInvoices] Success with view:', data?.length, 'invoices')
+          } else {
+            throw result.error;
+          }
+        } catch (viewError) {
+          console.log('🧾 [useUserInvoices] View failed:', viewError)
+          
+          // Méthode 3: Fallback sur la table directe
+          console.log('🧾 [useUserInvoices] Fallback to direct table...')
+          const result = await supabase
+            .from('stripe_invoices')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('invoice_date', { ascending: false })
+          
+          data = result.data;
+          fetchError = result.error;
+          console.log('🧾 [useUserInvoices] Direct table result:', data?.length, 'invoices', fetchError)
+        }
+      }
 
       if (fetchError) {
         throw fetchError
       }
 
+      console.log('🧾 [useUserInvoices] Final success - setting invoices:', data?.length || 0, 'items')
+      console.log('🧾 [useUserInvoices] Sample invoice data:', data?.[0] ? JSON.stringify(data[0], null, 2) : 'no data')
       setInvoices(data || [])
     } catch (err) {
       console.error('🧾 [useUserInvoices] Error fetching invoices:', err)
