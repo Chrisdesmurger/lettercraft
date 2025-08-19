@@ -339,6 +339,9 @@ export type Database = {
           job_offer_id: string;
           cv_id: string;
           content: string;
+          subject: string | null;
+          greeting: string | null;
+          body: string | null;
           html_content: string | null;
           pdf_url: string | null;
           generation_settings: any;
@@ -353,6 +356,9 @@ export type Database = {
           job_offer_id: string;
           cv_id: string;
           content: string;
+          subject?: string | null;
+          greeting?: string | null;
+          body?: string | null;
           html_content?: string | null;
           pdf_url?: string | null;
           generation_settings?: any;
@@ -367,6 +373,9 @@ export type Database = {
           job_offer_id?: string;
           cv_id?: string;
           content?: string;
+          subject?: string | null;
+          greeting?: string | null;
+          body?: string | null;
           html_content?: string | null;
           pdf_url?: string | null;
           generation_settings?: any;

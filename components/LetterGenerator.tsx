@@ -159,7 +159,7 @@ ${data?.userName || 'Votre nom'}`
     // Auto-generate on load if not already done
     useEffect(() => {
         if (!generatedLetter && data?.jobOffer && data?.responses) {
-            generateLetter()
+            generateLetterFromAPI()
         }
     }, [])
 
@@ -290,7 +290,7 @@ ${data?.userName || 'Votre nom'}`
 
                         <QuotaGuard showQuotaStatus={true}>
                             <Button
-                                onClick={generateLetter}
+                                onClick={generateLetterFromAPI}
                                 className="w-full"
                                 size="lg"
                                 disabled={generating}
