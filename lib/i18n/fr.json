@@ -787,5 +787,96 @@
       "readingComplete": "Lecture terminée",
       "percentRead": "{percent}% lu"
     }
+  },
+  "tips": {
+    "title": "Conseils de candidature",
+    "subtitle": "Des astuces pour optimiser vos candidatures",
+    "categories": {
+      "cv": "CV",
+      "job_search": "Recherche d'emploi",
+      "letter_writing": "Rédaction",
+      "interview": "Entretien",
+      "application": "Candidature"
+    },
+    "cv_active_update": {
+      "title": "Maintenez votre CV à jour",
+      "description": "Mettez régulièrement à jour votre CV avec vos dernières expériences et compétences pour rester compétitif."
+    },
+    "cv_skills_keywords": {
+      "title": "Utilisez les mots-clés de l'offre",
+      "description": "Adaptez votre CV en incluant les mots-clés spécifiques mentionnés dans l'offre d'emploi."
+    },
+    "cv_achievements_quantify": {
+      "title": "Quantifiez vos réussites",
+      "description": "Ajoutez des chiffres et des résultats concrets : '20% d'augmentation des ventes' est plus impactant."
+    },
+    "cv_linkedin_sync": {
+      "title": "Synchronisez avec LinkedIn",
+      "description": "Assurez-vous que votre CV et votre profil LinkedIn sont cohérents et à jour."
+    },
+    "cv_pdf_quality": {
+      "title": "Exportez en PDF de qualité",
+      "description": "Utilisez toujours un format PDF pour garantir un rendu professionnel sur tous les appareils."
+    },
+    "job_research_company": {
+      "title": "Recherchez l'entreprise",
+      "description": "Informez-vous sur la culture, les valeurs et l'actualité de l'entreprise avant de postuler."
+    },
+    "job_network_contacts": {
+      "title": "Activez votre réseau",
+      "description": "Contactez vos relations professionnelles qui pourraient vous recommander dans l'entreprise visée."
+    },
+    "job_alerts_setup": {
+      "title": "Configurez des alertes emploi",
+      "description": "Paramétrez des alertes sur les sites d'emploi pour être informé des nouvelles opportunités."
+    },
+    "job_salary_research": {
+      "title": "Renseignez-vous sur les salaires",
+      "description": "Consultez les grilles salariales du secteur pour négocier en connaissance de cause."
+    },
+    "letter_personalization": {
+      "title": "Personnalisez chaque lettre",
+      "description": "Adaptez votre lettre de motivation spécifiquement à chaque poste et entreprise."
+    },
+    "letter_structure_clear": {
+      "title": "Structurez clairement",
+      "description": "Organisez votre lettre en paragraphes distincts : accroche, motivation, compétences, conclusion."
+    },
+    "letter_examples_concrete": {
+      "title": "Donnez des exemples concrets",
+      "description": "Illustrez vos compétences avec des situations professionnelles précises et leurs résultats."
+    },
+    "letter_enthusiasm_show": {
+      "title": "Montrez votre enthousiasme",
+      "description": "Exprimez votre motivation sincère pour le poste et l'entreprise de manière authentique."
+    },
+    "letter_call_action": {
+      "title": "Terminez par un appel à l'action",
+      "description": "Proposez un entretien et donnez vos disponibilités pour faciliter la prise de contact."
+    },
+    "letter_proofreading": {
+      "title": "Relisez attentivement",
+      "description": "Vérifiez l'orthographe, la grammaire et la cohérence avant d'envoyer votre candidature."
+    },
+    "application_timing": {
+      "title": "Postulez au bon moment",
+      "description": "Envoyez vos candidatures en début de semaine et en journée pour maximiser les chances de lecture."
+    },
+    "application_follow_up": {
+      "title": "Effectuez un suivi",
+      "description": "Relancez poliment votre candidature après une semaine si vous n'avez pas de réponse."
+    },
+    "application_documents_order": {
+      "title": "Organisez vos documents",
+      "description": "Nommez clairement vos fichiers : 'CV_PrenomNom_Poste.pdf' pour faciliter le tri du recruteur."
+    },
+    "interview_preparation": {
+      "title": "Préparez votre entretien",
+      "description": "Répétez vos réponses aux questions classiques et préparez des questions à poser au recruteur."
+    },
+    "interview_questions_prepare": {
+      "title": "Préparez vos questions",
+      "description": "Montrez votre intérêt en préparant des questions pertinentes sur le poste et l'entreprise."
+    }
   }
 }

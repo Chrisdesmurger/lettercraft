@@ -788,5 +788,96 @@
       "readingComplete": "Lesen abgeschlossen",
       "percentRead": "{percent}% gelesen"
     }
+  },
+  "tips": {
+    "title": "Bewerbungstipps",
+    "subtitle": "Tipps zur Optimierung Ihrer Bewerbungen",
+    "categories": {
+      "cv": "Lebenslauf",
+      "job_search": "Jobsuche",
+      "letter_writing": "Schreiben",
+      "interview": "Vorstellungsgespräch",
+      "application": "Bewerbung"
+    },
+    "cv_active_update": {
+      "title": "Halten Sie Ihren Lebenslauf aktuell",
+      "description": "Aktualisieren Sie regelmäßig Ihren Lebenslauf mit Ihren neuesten Erfahrungen und Fähigkeiten, um wettbewerbsfähig zu bleiben."
+    },
+    "cv_skills_keywords": {
+      "title": "Verwenden Sie Schlüsselwörter aus der Stellenausschreibung",
+      "description": "Passen Sie Ihren Lebenslauf an, indem Sie spezifische Schlüsselwörter aus der Stellenausschreibung einbeziehen."
+    },
+    "cv_achievements_quantify": {
+      "title": "Quantifizieren Sie Ihre Erfolge",
+      "description": "Fügen Sie Zahlen und konkrete Ergebnisse hinzu: '20% Umsatzsteigerung' ist wirkungsvoller."
+    },
+    "cv_linkedin_sync": {
+      "title": "Mit LinkedIn synchronisieren",
+      "description": "Stellen Sie sicher, dass Ihr Lebenslauf und Ihr LinkedIn-Profil konsistent und aktuell sind."
+    },
+    "cv_pdf_quality": {
+      "title": "Hochwertiges PDF exportieren",
+      "description": "Verwenden Sie immer das PDF-Format, um eine professionelle Darstellung auf allen Geräten zu gewährleisten."
+    },
+    "job_research_company": {
+      "title": "Recherchieren Sie das Unternehmen",
+      "description": "Informieren Sie sich über die Kultur, Werte und aktuellen Nachrichten des Unternehmens, bevor Sie sich bewerben."
+    },
+    "job_network_contacts": {
+      "title": "Aktivieren Sie Ihr Netzwerk",
+      "description": "Kontaktieren Sie Ihre beruflichen Verbindungen, die Sie beim Zielunternehmen empfehlen könnten."
+    },
+    "job_alerts_setup": {
+      "title": "Stellenbenachrichtigungen einrichten",
+      "description": "Konfigurieren Sie Benachrichtigungen auf Jobbörsen, um über neue Möglichkeiten informiert zu werden."
+    },
+    "job_salary_research": {
+      "title": "Gehälter recherchieren",
+      "description": "Überprüfen Sie die Gehaltsskalen der Branche, um mit vollem Wissen zu verhandeln."
+    },
+    "letter_personalization": {
+      "title": "Personalisieren Sie jeden Brief",
+      "description": "Passen Sie Ihr Anschreiben spezifisch an jede Position und jedes Unternehmen an."
+    },
+    "letter_structure_clear": {
+      "title": "Klar strukturieren",
+      "description": "Organisieren Sie Ihren Brief in deutliche Absätze: Einstieg, Motivation, Kompetenzen, Schluss."
+    },
+    "letter_examples_concrete": {
+      "title": "Konkrete Beispiele geben",
+      "description": "Illustrieren Sie Ihre Fähigkeiten mit spezifischen beruflichen Situationen und deren Ergebnissen."
+    },
+    "letter_enthusiasm_show": {
+      "title": "Zeigen Sie Ihre Begeisterung",
+      "description": "Drücken Sie Ihre aufrichtige Motivation für die Position und das Unternehmen authentisch aus."
+    },
+    "letter_call_action": {
+      "title": "Mit einem Handlungsaufruf enden",
+      "description": "Schlagen Sie ein Vorstellungsgespräch vor und geben Sie Ihre Verfügbarkeit an, um den Kontakt zu erleichtern."
+    },
+    "letter_proofreading": {
+      "title": "Sorgfältig korrekturlesen",
+      "description": "Überprüfen Sie Rechtschreibung, Grammatik und Konsistenz, bevor Sie Ihre Bewerbung senden."
+    },
+    "application_timing": {
+      "title": "Zur richtigen Zeit bewerben",
+      "description": "Senden Sie Bewerbungen zu Wochenbeginn und während der Geschäftszeiten, um die Lesechancen zu maximieren."
+    },
+    "application_follow_up": {
+      "title": "Nachfassen",
+      "description": "Fassen Sie höflich nach einer Woche nach, wenn Sie keine Antwort auf Ihre Bewerbung erhalten haben."
+    },
+    "application_documents_order": {
+      "title": "Organisieren Sie Ihre Dokumente",
+      "description": "Benennen Sie Ihre Dateien klar: 'CV_VornameNachname_Position.pdf', um dem Recruiter die Sortierung zu erleichtern."
+    },
+    "interview_preparation": {
+      "title": "Bereiten Sie Ihr Vorstellungsgespräch vor",
+      "description": "Üben Sie Antworten auf häufige Fragen und bereiten Sie Fragen vor, die Sie dem Recruiter stellen können."
+    },
+    "interview_questions_prepare": {
+      "title": "Bereiten Sie Ihre Fragen vor",
+      "description": "Zeigen Sie Ihr Interesse, indem Sie relevante Fragen über die Position und das Unternehmen vorbereiten."
+    }
   }
 }

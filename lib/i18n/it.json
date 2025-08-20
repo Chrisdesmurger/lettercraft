@@ -788,5 +788,96 @@
       "readingComplete": "Lettura completata",
       "percentRead": "{percent}% letto"
     }
+  },
+  "tips": {
+    "title": "Consigli per la Candidatura",
+    "subtitle": "Suggerimenti per ottimizzare le tue candidature lavorative",
+    "categories": {
+      "cv": "Curriculum",
+      "job_search": "Ricerca Lavoro",
+      "letter_writing": "Redazione",
+      "interview": "Colloquio",
+      "application": "Candidatura"
+    },
+    "cv_active_update": {
+      "title": "Mantieni il tuo CV aggiornato",
+      "description": "Aggiorna regolarmente il tuo CV con le tue ultime esperienze e competenze per rimanere competitivo."
+    },
+    "cv_skills_keywords": {
+      "title": "Usa le parole chiave dell'offerta",
+      "description": "Adatta il tuo CV includendo parole chiave specifiche menzionate nell'annuncio di lavoro."
+    },
+    "cv_achievements_quantify": {
+      "title": "Quantifica i tuoi risultati",
+      "description": "Aggiungi numeri e risultati concreti: 'aumento vendite del 20%' è più impattante."
+    },
+    "cv_linkedin_sync": {
+      "title": "Sincronizza con LinkedIn",
+      "description": "Assicurati che il tuo CV e il profilo LinkedIn siano coerenti e aggiornati."
+    },
+    "cv_pdf_quality": {
+      "title": "Esporta PDF di alta qualità",
+      "description": "Usa sempre il formato PDF per garantire una resa professionale su tutti i dispositivi."
+    },
+    "job_research_company": {
+      "title": "Ricerca l'azienda",
+      "description": "Informati sulla cultura, i valori e le notizie attuali dell'azienda prima di candidarti."
+    },
+    "job_network_contacts": {
+      "title": "Attiva la tua rete",
+      "description": "Contatta i tuoi contatti professionali che potrebbero raccomandarti presso l'azienda target."
+    },
+    "job_alerts_setup": {
+      "title": "Configura avvisi di lavoro",
+      "description": "Imposta alert sui siti di lavoro per essere notificato di nuove opportunità."
+    },
+    "job_salary_research": {
+      "title": "Ricerca gli stipendi",
+      "description": "Controlla le scale salariali del settore per negoziare con piena conoscenza."
+    },
+    "letter_personalization": {
+      "title": "Personalizza ogni lettera",
+      "description": "Adatta la tua lettera di presentazione specificamente a ogni posizione e azienda."
+    },
+    "letter_structure_clear": {
+      "title": "Struttura chiaramente",
+      "description": "Organizza la tua lettera in paragrafi distinti: aggancio, motivazione, competenze, conclusione."
+    },
+    "letter_examples_concrete": {
+      "title": "Fornisci esempi concreti",
+      "description": "Illustra le tue competenze con situazioni professionali specifiche e i loro risultati."
+    },
+    "letter_enthusiasm_show": {
+      "title": "Mostra il tuo entusiasmo",
+      "description": "Esprimi la tua sincera motivazione per la posizione e l'azienda in modo autentico."
+    },
+    "letter_call_action": {
+      "title": "Termina con una call to action",
+      "description": "Proponi un colloquio e fornisci le tue disponibilità per facilitare il contatto."
+    },
+    "letter_proofreading": {
+      "title": "Rileggi attentamente",
+      "description": "Controlla ortografia, grammatica e coerenza prima di inviare la tua candidatura."
+    },
+    "application_timing": {
+      "title": "Candidati al momento giusto",
+      "description": "Invia candidature a inizio settimana e durante l'orario lavorativo per massimizzare le possibilità di lettura."
+    },
+    "application_follow_up": {
+      "title": "Fai un follow-up",
+      "description": "Ricontatta educatamente sulla tua candidatura dopo una settimana se non hai ricevuto risposta."
+    },
+    "application_documents_order": {
+      "title": "Organizza i tuoi documenti",
+      "description": "Nomina i tuoi file chiaramente: 'CV_NomeCognome_Posizione.pdf' per aiutare il selezionatore."
+    },
+    "interview_preparation": {
+      "title": "Prepara il tuo colloquio",
+      "description": "Esercitati con le risposte alle domande comuni e prepara domande da fare al selezionatore."
+    },
+    "interview_questions_prepare": {
+      "title": "Prepara le tue domande",
+      "description": "Mostra il tuo interesse preparando domande pertinenti sulla posizione e l'azienda."
+    }
   }
 }

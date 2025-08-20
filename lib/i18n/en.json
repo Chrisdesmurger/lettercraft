@@ -748,5 +748,96 @@
       "readingComplete": "Reading complete",
       "percentRead": "{percent}% read"
     }
+  },
+  "tips": {
+    "title": "Application Tips",
+    "subtitle": "Tips to optimize your job applications",
+    "categories": {
+      "cv": "Resume",
+      "job_search": "Job Search",
+      "letter_writing": "Writing",
+      "interview": "Interview",
+      "application": "Application"
+    },
+    "cv_active_update": {
+      "title": "Keep your resume updated",
+      "description": "Regularly update your resume with your latest experiences and skills to stay competitive."
+    },
+    "cv_skills_keywords": {
+      "title": "Use job offer keywords",
+      "description": "Adapt your resume by including specific keywords mentioned in the job posting."
+    },
+    "cv_achievements_quantify": {
+      "title": "Quantify your achievements",
+      "description": "Add numbers and concrete results: '20% sales increase' is more impactful."
+    },
+    "cv_linkedin_sync": {
+      "title": "Sync with LinkedIn",
+      "description": "Ensure your resume and LinkedIn profile are consistent and up-to-date."
+    },
+    "cv_pdf_quality": {
+      "title": "Export high-quality PDF",
+      "description": "Always use PDF format to ensure professional rendering on all devices."
+    },
+    "job_research_company": {
+      "title": "Research the company",
+      "description": "Learn about the company's culture, values, and current news before applying."
+    },
+    "job_network_contacts": {
+      "title": "Activate your network",
+      "description": "Contact your professional connections who could recommend you to the target company."
+    },
+    "job_alerts_setup": {
+      "title": "Set up job alerts",
+      "description": "Configure alerts on job sites to be notified of new opportunities."
+    },
+    "job_salary_research": {
+      "title": "Research salaries",
+      "description": "Check industry salary scales to negotiate with full knowledge."
+    },
+    "letter_personalization": {
+      "title": "Personalize each letter",
+      "description": "Adapt your cover letter specifically to each position and company."
+    },
+    "letter_structure_clear": {
+      "title": "Structure clearly",
+      "description": "Organize your letter in distinct paragraphs: hook, motivation, skills, conclusion."
+    },
+    "letter_examples_concrete": {
+      "title": "Give concrete examples",
+      "description": "Illustrate your skills with specific professional situations and their results."
+    },
+    "letter_enthusiasm_show": {
+      "title": "Show your enthusiasm",
+      "description": "Express your sincere motivation for the position and company authentically."
+    },
+    "letter_call_action": {
+      "title": "End with a call to action",
+      "description": "Propose an interview and provide your availability to facilitate contact."
+    },
+    "letter_proofreading": {
+      "title": "Proofread carefully",
+      "description": "Check spelling, grammar, and consistency before sending your application."
+    },
+    "application_timing": {
+      "title": "Apply at the right time",
+      "description": "Send applications early in the week and during business hours to maximize reading chances."
+    },
+    "application_follow_up": {
+      "title": "Follow up",
+      "description": "Politely follow up on your application after a week if you haven't received a response."
+    },
+    "application_documents_order": {
+      "title": "Organize your documents",
+      "description": "Name your files clearly: 'CV_FirstnameName_Position.pdf' to help recruiter sorting."
+    },
+    "interview_preparation": {
+      "title": "Prepare your interview",
+      "description": "Practice answers to common questions and prepare questions to ask the recruiter."
+    },
+    "interview_questions_prepare": {
+      "title": "Prepare your questions",
+      "description": "Show your interest by preparing relevant questions about the position and company."
+    }
   }
 }
