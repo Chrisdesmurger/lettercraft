@@ -67,8 +67,9 @@ export function createQuestionnaireQuestions(
     }
   ]
 
-  // Ajouter la question de langue seulement pour les utilisateurs premium
+  // Ajouter les questions premium seulement pour les utilisateurs premium
   if (subscriptionTier === 'premium') {
+    // Question langue
     questions.push({
       id: 'language',
       title: t('questionnaire.question6.title'),
@@ -84,6 +85,71 @@ export function createQuestionnaireQuestions(
       validation: (value: string) => {
         if (!value) {
           return t('questionnaire.validation.required')
+        }
+        return null
+      }
+    })
+
+    // Question ton d'écriture
+    questions.push({
+      id: 'writing_tone',
+      title: t('questionnaire.question7.title'),
+      type: 'tone_selector',
+      placeholder: t('questionnaire.question7.placeholder'),
+      required: true,
+      options: [
+        { 
+          value: 'professionnel', 
+          label: t('questionnaire.question7.tones.professional.label'),
+          description: t('questionnaire.question7.tones.professional.description'),
+          example: t('questionnaire.question7.tones.professional.example')
+        },
+        { 
+          value: 'chaleureux', 
+          label: t('questionnaire.question7.tones.warm.label'),
+          description: t('questionnaire.question7.tones.warm.description'),
+          example: t('questionnaire.question7.tones.warm.example')
+        },
+        { 
+          value: 'direct', 
+          label: t('questionnaire.question7.tones.direct.label'),
+          description: t('questionnaire.question7.tones.direct.description'),
+          example: t('questionnaire.question7.tones.direct.example')
+        },
+        { 
+          value: 'persuasif', 
+          label: t('questionnaire.question7.tones.persuasive.label'),
+          description: t('questionnaire.question7.tones.persuasive.description'),
+          example: t('questionnaire.question7.tones.persuasive.example')
+        },
+        { 
+          value: 'créatif', 
+          label: t('questionnaire.question7.tones.creative.label'),
+          description: t('questionnaire.question7.tones.creative.description'),
+          example: t('questionnaire.question7.tones.creative.example')
+        },
+        { 
+          value: 'concis', 
+          label: t('questionnaire.question7.tones.concise.label'),
+          description: t('questionnaire.question7.tones.concise.description'),
+          example: t('questionnaire.question7.tones.concise.example')
+        },
+        { 
+          value: 'personnalisé', 
+          label: t('questionnaire.question7.tones.custom.label'),
+          description: t('questionnaire.question7.tones.custom.description')
+        }
+      ],
+      defaultValue: 'professionnel',
+      validation: (value: any) => {
+        if (!value || !value.toneKey) {
+          return t('questionnaire.validation.selectTone')
+        }
+        if (value.toneKey === 'personnalisé' && (!value.customText || value.customText.trim().length === 0)) {
+          return t('questionnaire.validation.customToneRequired')
+        }
+        if (value.customText && value.customText.length > 120) {
+          return t('questionnaire.validation.customToneTooLong')
         }
         return null
       }

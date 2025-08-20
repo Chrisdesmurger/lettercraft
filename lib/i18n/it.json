@@ -518,12 +518,60 @@
       "english": "Inglese",
       "spanish": "Spagnolo"
     },
+    "question7": {
+      "title": "Scegli il tono della tua lettera di presentazione",
+      "placeholder": "Seleziona lo stile di scrittura che ti rappresenta",
+      "premiumFeature": "Funzione Premium",
+      "example": "Esempio:",
+      "customToneLabel": "Descrivi il tuo tono personalizzato (max 120 caratteri)",
+      "customTonePlaceholder": "Es: Informale ma rispettoso, con un tocco di umorismo...",
+      "customToneHelp": "Sii specifico riguardo allo stile di scrittura desiderato",
+      "tones": {
+        "professional": {
+          "label": "Professionale",
+          "description": "Stile formale e strutturato, ideale per candidature tradizionali",
+          "example": "Ho l'onore di presentare la mia candidatura..."
+        },
+        "warm": {
+          "label": "Caloroso",
+          "description": "Tono cordiale e umano che crea una connessione personale",
+          "example": "È con vero entusiasmo che vi scrivo..."
+        },
+        "direct": {
+          "label": "Diretto",
+          "description": "Approccio franco ed efficiente, va dritto al punto",
+          "example": "I miei 5 anni di esperienza corrispondono esattamente alle vostre esigenze..."
+        },
+        "persuasive": {
+          "label": "Persuasivo",
+          "description": "Enfatizza il valore aggiunto e i benefici",
+          "example": "La mia esperienza vi permetterà di aumentare le vostre prestazioni..."
+        },
+        "creative": {
+          "label": "Creativo",
+          "description": "Stile originale con espressioni varie e un tocco di originalità",
+          "example": "Come un puzzle dove ogni pezzo trova il suo posto..."
+        },
+        "concise": {
+          "label": "Conciso",
+          "description": "Massimo impatto con il minimo di parole",
+          "example": "Sviluppatore esperto. Risultati comprovati. Disponibile immediatamente."
+        },
+        "custom": {
+          "label": "Personalizzato",
+          "description": "Descrivi il tono desiderato in poche parole"
+        }
+      }
+    },
     "validation": {
       "required": "Questo campo è obbligatorio",
       "min50chars": "Per favore inserisci almeno 50 caratteri",
       "min30chars": "Per favore inserisci almeno 30 caratteri",
       "selectExperience": "Per favore seleziona un'esperienza",
-      "selectSkills": "Per favore seleziona almeno una competenza"
+      "selectSkills": "Per favore seleziona almeno una competenza",
+      "selectTone": "Per favore seleziona un tono di scrittura",
+      "customToneRequired": "Il testo personalizzato è richiesto per il tono personalizzato",
+      "customToneTooLong": "Il testo personalizzato non può superare 120 caratteri"
     }
   },
   "flow": {

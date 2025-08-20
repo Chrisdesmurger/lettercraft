@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { ChevronRight, ChevronLeft, AlertCircle, CheckCircle } from 'lucide-react'
+import { ChevronRight, ChevronLeft, AlertCircle, CheckCircle, Palette } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { QuestionnaireQuestion } from '@/hooks/useQuestionnaireFlow'
 import { useI18n } from '@/lib/i18n-context'
@@ -267,6 +267,97 @@ export default function QuestionCard({
             <div className="text-xs text-gray-500 space-y-1">
               <p>{t('questionnaire.skillsFromOffer')}</p>
               <p>{t('questionnaire.skillsFromCV')}</p>
+            </div>
+          </div>
+        )
+
+      case 'tone_selector':
+        const toneValue = localValue || { toneKey: 'professionnel', customText: '' }
+        
+        return (
+          <div className="space-y-6">
+            {/* Premium Feature Badge */}
+            <div className="flex items-center gap-2 mb-4">
+              <Palette className="w-4 h-4 text-orange-600" />
+              <Badge variant="secondary" className="bg-orange-100 text-orange-800">
+                {t('questionnaire.question7.premiumFeature')}
+              </Badge>
+            </div>
+
+            {/* Tone Selection */}
+            <div className="space-y-4">
+              <RadioGroup 
+                value={toneValue.toneKey} 
+                onValueChange={(selectedTone) => {
+                  handleValueChange({
+                    toneKey: selectedTone,
+                    customText: selectedTone === 'personnalisé' ? toneValue.customText : ''
+                  })
+                }}
+              >
+                {question.options?.map((option: any) => (
+                  <div key={option.value} className="space-y-2">
+                    <div className="flex items-start space-x-3 p-3 border rounded-lg hover:bg-gray-50 transition-colors">
+                      <RadioGroupItem 
+                        value={option.value} 
+                        id={option.value} 
+                        className="mt-0.5"
+                      />
+                      <div className="flex-1 cursor-pointer" onClick={() => {
+                        handleValueChange({
+                          toneKey: option.value,
+                          customText: option.value === 'personnalisé' ? toneValue.customText : ''
+                        })
+                      }}>
+                        <Label htmlFor={option.value} className="cursor-pointer font-medium">
+                          {option.label}
+                        </Label>
+                        {option.description && (
+                          <p className="text-sm text-gray-600 mt-1">
+                            {option.description}
+                          </p>
+                        )}
+                        {option.example && (
+                          <p className="text-xs text-gray-400 mt-1 italic">
+                            {t('questionnaire.question7.example')} "{option.example}"
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </RadioGroup>
+
+              {/* Custom tone text input */}
+              {toneValue.toneKey === 'personnalisé' && (
+                <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <Label htmlFor="customToneText" className="text-sm font-medium mb-2 block">
+                    {t('questionnaire.question7.customToneLabel')}
+                  </Label>
+                  <Textarea
+                    id="customToneText"
+                    value={toneValue.customText || ''}
+                    onChange={(e) => {
+                      handleValueChange({
+                        toneKey: 'personnalisé',
+                        customText: e.target.value
+                      })
+                    }}
+                    placeholder={t('questionnaire.question7.customTonePlaceholder')}
+                    maxLength={120}
+                    rows={3}
+                    className="resize-none"
+                  />
+                  <div className="flex justify-between items-center mt-2">
+                    <p className="text-xs text-gray-500">
+                      {t('questionnaire.question7.customToneHelp')}
+                    </p>
+                    <span className="text-xs text-gray-400">
+                      {(toneValue.customText || '').length}/120
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )

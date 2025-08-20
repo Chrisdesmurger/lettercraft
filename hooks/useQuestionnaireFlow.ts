@@ -4,13 +4,18 @@ import { motion } from 'framer-motion'
 export interface QuestionnaireQuestion {
   id: string
   title: string
-  type: 'text' | 'textarea' | 'select' | 'multi_select' | 'select_experience' | 'multi_select_skills' | 'select_language'
+  type: 'text' | 'textarea' | 'select' | 'multi_select' | 'select_experience' | 'multi_select_skills' | 'select_language' | 'tone_selector'
   placeholder?: string
-  options?: Array<{ value: string; label: string }>
+  options?: Array<{ 
+    value: string; 
+    label: string; 
+    description?: string; 
+    example?: string;
+  }>
   required?: boolean
   validation?: (value: any) => string | null
   dynamic?: boolean
-  defaultValue?: string
+  defaultValue?: string | any
 }
 
 export interface QuestionnaireState {

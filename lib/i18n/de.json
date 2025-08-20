@@ -518,12 +518,60 @@
       "english": "Englisch",
       "spanish": "Spanisch"
     },
+    "question7": {
+      "title": "Wählen Sie den Ton Ihres Bewerbungsschreibens",
+      "placeholder": "Wählen Sie den Schreibstil, der Sie repräsentiert",
+      "premiumFeature": "Premium-Funktion",
+      "example": "Beispiel:",
+      "customToneLabel": "Beschreiben Sie Ihren benutzerdefinierten Ton (max 120 Zeichen)",
+      "customTonePlaceholder": "Z.B.: Locker aber respektvoll, mit einem Hauch von Humor...",
+      "customToneHelp": "Seien Sie spezifisch über den gewünschten Schreibstil",
+      "tones": {
+        "professional": {
+          "label": "Professionell",
+          "description": "Formeller und strukturierter Stil, ideal für traditionelle Bewerbungen",
+          "example": "Ich habe die Ehre, Ihnen meine Bewerbung zu unterbreiten..."
+        },
+        "warm": {
+          "label": "Warmherzig",
+          "description": "Herzlicher und menschlicher Ton, der eine persönliche Verbindung schafft",
+          "example": "Mit echter Begeisterung schreibe ich Ihnen..."
+        },
+        "direct": {
+          "label": "Direkt",
+          "description": "Offener und effizienter Ansatz, kommt direkt zur Sache",
+          "example": "Meine 5-jährige Erfahrung entspricht genau Ihren Anforderungen..."
+        },
+        "persuasive": {
+          "label": "Überzeugend",
+          "description": "Betont Mehrwert und Nutzen",
+          "example": "Meine Expertise wird es Ihnen ermöglichen, Ihre Leistung zu steigern..."
+        },
+        "creative": {
+          "label": "Kreativ",
+          "description": "Origineller Stil mit vielfältigen Ausdrücken und einem Hauch von Originalität",
+          "example": "Wie bei einem Puzzle, bei dem jedes Teil seinen Platz findet..."
+        },
+        "concise": {
+          "label": "Prägnant",
+          "description": "Maximale Wirkung mit minimalen Worten",
+          "example": "Erfahrener Entwickler. Bewiesene Ergebnisse. Sofort verfügbar."
+        },
+        "custom": {
+          "label": "Benutzerdefiniert",
+          "description": "Beschreiben Sie den gewünschten Ton in wenigen Worten"
+        }
+      }
+    },
     "validation": {
       "required": "Dieses Feld ist erforderlich",
       "min50chars": "Bitte geben Sie mindestens 50 Zeichen ein",
       "min30chars": "Bitte geben Sie mindestens 30 Zeichen ein",
       "selectExperience": "Bitte wählen Sie eine Erfahrung aus",
-      "selectSkills": "Bitte wählen Sie mindestens eine Fähigkeit aus"
+      "selectSkills": "Bitte wählen Sie mindestens eine Fähigkeit aus",
+      "selectTone": "Bitte wählen Sie einen Schreibton aus",
+      "customToneRequired": "Benutzerdefinierter Text ist für benutzerdefinierten Ton erforderlich",
+      "customToneTooLong": "Benutzerdefinierter Text darf 120 Zeichen nicht überschreiten"
     }
   },
   "flow": {
