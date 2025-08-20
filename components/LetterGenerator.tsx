@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
+import { Textarea } from '@/components/ui/textarea'
 import {
     Sparkles,
     Globe,
@@ -18,12 +19,14 @@ import {
     ChevronRight,
     Loader2,
     RefreshCw,
-    Settings
+    Settings,
+    AlertCircle
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useI18n } from '@/lib/i18n-context'
 import { QuotaGuard, usePreGenerationQuotaCheck } from '@/components/quota'
 import { generateLetter } from '@/lib/api/letter-generation'
+import { getToneOptions, validateToneParams, type ToneKey } from '@/lib/tone-guidelines'
 
 interface LetterGeneratorProps {
     data?: any
@@ -42,21 +45,29 @@ export default function LetterGenerator({ data, onUpdate, onNext }: LetterGenera
     const { t } = useI18n()
     const { executeWithQuotaCheck } = usePreGenerationQuotaCheck()
     
-    const tones = [
-        { value: 'professional', label: t('letter.tones.professional'), description: t('letter.tones.professionalDesc') },
-        { value: 'enthusiastic', label: t('letter.tones.enthusiastic'), description: t('letter.tones.enthusiasticDesc') },
-        { value: 'creative', label: t('letter.tones.creative'), description: t('letter.tones.creativeDesc') },
-    ]
+    // Récupérer les options de tons prédéfinies
+    const toneOptions = getToneOptions()
+    
     const [generating, setGenerating] = useState(false)
     const [regenerating, setRegenerating] = useState(false)
     const [generatedLetter, setGeneratedLetter] = useState(data?.generatedLetter || '')
 
     // Generation parameters
     const [language, setLanguage] = useState(data?.letterLanguage || 'fr')
-    const [tone, setTone] = useState('professional')
+    const [toneKey, setToneKey] = useState<ToneKey>(data?.letterToneKey || 'professionnel')
+    const [customToneText, setCustomToneText] = useState(data?.letterToneCustom || '')
     const [length, setLength] = useState([250]) // Nombre de mots
     const [includeHobbies, setIncludeHobbies] = useState(false)
     const [emphasizeExperience, setEmphasizeExperience] = useState(true)
+    
+    // Validation du ton
+    const [toneValidation, setToneValidation] = useState({ valid: true, errors: [] as string[] })
+    
+    // Valider les paramètres de ton quand ils changent
+    useEffect(() => {
+        const validation = validateToneParams(toneKey, customToneText)
+        setToneValidation(validation)
+    }, [toneKey, customToneText])
 
     const generateLetterFromAPI = async () => {
         setGenerating(true)
@@ -73,7 +84,8 @@ export default function LetterGenerator({ data, onUpdate, onNext }: LetterGenera
                     jobOffer: data?.jobOffer || { title: '', company: '', description: '' },
                     settings: {
                         language,
-                        tone,
+                        toneKey,
+                        toneCustom: customToneText,
                         length: length[0],
                         includeHobbies,
                         emphasizeExperience
@@ -89,7 +101,8 @@ export default function LetterGenerator({ data, onUpdate, onNext }: LetterGenera
                         sections: response.sections, // Inclure les sections
                         letterId: response.letterId, // Inclure l'ID pour les reviews
                         letterLanguage: language,
-                        letterTone: tone,
+                        letterToneKey: toneKey,
+                        letterToneCustom: customToneText,
                         letterLength: length[0]
                     })
                 }
@@ -141,7 +154,8 @@ ${data?.userName || 'Votre nom'}`
                 onUpdate({
                     generatedLetter: letter,
                     letterLanguage: language,
-                    letterTone: tone,
+                    letterToneKey: toneKey,
+                    letterToneCustom: customToneText,
                     letterLength: length[0]
                 })
             }
@@ -222,27 +236,84 @@ ${data?.userName || 'Votre nom'}`
                             </RadioGroup>
                         </div>
 
-                        {/* Ton */}
+                        {/* Choix du ton */}
                         <div>
                             <Label className="text-base mb-3 block">
                                 <Zap className="inline h-4 w-4 mr-2" />
-                                {t('letter.tone')}
+                                Choisissez le ton de votre lettre
                             </Label>
-                            <RadioGroup value={tone} onValueChange={setTone}>
+                            <RadioGroup value={toneKey} onValueChange={(value) => setToneKey(value as ToneKey)}>
                                 <div className="space-y-3">
-                                    {tones.map((t) => (
-                                        <div key={t.value} className="flex items-start">
-                                            <RadioGroupItem value={t.value} id={t.value} />
-                                            <div className="ml-3">
-                                                <Label htmlFor={t.value} className="cursor-pointer">
-                                                    {t.label}
+                                    {toneOptions.map((option) => (
+                                        <div key={option.key} className="flex items-start">
+                                            <RadioGroupItem value={option.key} id={option.key} />
+                                            <div className="ml-3 flex-1">
+                                                <Label htmlFor={option.key} className="cursor-pointer font-medium">
+                                                    {option.label}
                                                 </Label>
-                                                <p className="text-sm text-gray-500">{t.description}</p>
+                                                <p className="text-sm text-gray-500 mt-1">{option.description}</p>
+                                                {option.example && (
+                                                    <p className="text-xs text-gray-400 mt-1 italic">
+                                                        Exemple : "{option.example}"
+                                                    </p>
+                                                )}
                                             </div>
                                         </div>
                                     ))}
+                                    
+                                    {/* Option personnalisée */}
+                                    <div className="flex items-start">
+                                        <RadioGroupItem value="personnalisé" id="personnalisé" />
+                                        <div className="ml-3 flex-1">
+                                            <Label htmlFor="personnalisé" className="cursor-pointer font-medium">
+                                                Personnalisé
+                                            </Label>
+                                            <p className="text-sm text-gray-500 mt-1">
+                                                Décrivez le ton souhaité en quelques mots
+                                            </p>
+                                        </div>
+                                    </div>
                                 </div>
                             </RadioGroup>
+                            
+                            {/* Champ texte pour ton personnalisé */}
+                            {toneKey === 'personnalisé' && (
+                                <div className="mt-4">
+                                    <Label htmlFor="customTone" className="text-sm font-medium">
+                                        Décrivez votre ton souhaité (max 120 caractères)
+                                    </Label>
+                                    <Textarea
+                                        id="customTone"
+                                        value={customToneText}
+                                        onChange={(e) => setCustomToneText(e.target.value)}
+                                        maxLength={120}
+                                        placeholder="Ex: Décontracté mais respectueux, avec une pointe d'humour..."
+                                        className="mt-1 resize-none"
+                                        rows={3}
+                                        aria-describedby="customTone-help"
+                                    />
+                                    <div className="flex justify-between items-center mt-1">
+                                        <p id="customTone-help" className="text-xs text-gray-500">
+                                            Soyez spécifique sur le style d'écriture souhaité
+                                        </p>
+                                        <span className="text-xs text-gray-400">
+                                            {customToneText.length}/120
+                                        </span>
+                                    </div>
+                                </div>
+                            )}
+                            
+                            {/* Affichage des erreurs de validation */}
+                            {!toneValidation.valid && (
+                                <div className="mt-2 flex items-start space-x-2 text-red-600">
+                                    <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                                    <div className="text-sm">
+                                        {toneValidation.errors.map((error, index) => (
+                                            <p key={index}>{error}</p>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         {/* Longueur */}
@@ -293,7 +364,7 @@ ${data?.userName || 'Votre nom'}`
                                 onClick={generateLetterFromAPI}
                                 className="w-full"
                                 size="lg"
-                                disabled={generating}
+                                disabled={generating || !toneValidation.valid}
                             >
                                 <Sparkles className="mr-2 h-4 w-4" />
                                 {t('letter.generate')}

@@ -23,6 +23,7 @@ import { supabase } from '@/lib/supabase-client'
 import { generateLetterPdfWithTemplate, generateTextFile } from '@/lib/pdf'
 import { type LetterData } from '@/lib/pdf-templates'
 import TemplateSelector from '@/components/pdf/TemplateSelector'
+import { TONE_GUIDELINES, isValidToneKey } from '@/lib/tone-guidelines'
 
 type GeneratedLetter = Tables<'generated_letters'> & {
   job_offers: Tables<'job_offers'> | null
@@ -39,6 +40,30 @@ export default function LetterCard({ letter, onView }: LetterCardProps) {
   const [isDownloading, setIsDownloading] = useState(false)
   const [selectedTemplateId, setSelectedTemplateId] = useState('classic')
   const [showTemplateSelector, setShowTemplateSelector] = useState(false)
+
+  // Récupérer les informations sur le ton
+  const getToneDisplay = () => {
+    const toneKey = letter.tone_key || 'professionnel'
+    if (toneKey === 'personnalisé' && letter.tone_custom) {
+      return {
+        label: 'Personnalisé',
+        description: letter.tone_custom
+      }
+    } else if (isValidToneKey(toneKey) && TONE_GUIDELINES[toneKey as keyof typeof TONE_GUIDELINES]) {
+      const guideline = TONE_GUIDELINES[toneKey as keyof typeof TONE_GUIDELINES]
+      return {
+        label: guideline.label,
+        description: guideline.description
+      }
+    } else {
+      return {
+        label: 'Professionnel',
+        description: 'Style formel et structuré'
+      }
+    }
+  }
+
+  const toneInfo = getToneDisplay()
 
   // Convertir les données de la lettre vers le format LetterData
   const letterData: LetterData = {
@@ -130,6 +155,18 @@ export default function LetterCard({ letter, onView }: LetterCardProps) {
               {format(createdDate, 'dd MMM yyyy', { locale: fr })}
             </span>
           </div>
+        </div>
+
+        {/* Badge ton d'écriture */}
+        <div className="mb-4">
+          <Badge 
+            variant="secondary" 
+            className="bg-blue-50 text-blue-700 border-blue-200 text-xs"
+            title={toneInfo.description}
+          >
+            <Palette className="w-3 h-3 mr-1" />
+            Ton : {toneInfo.label}
+          </Badge>
         </div>
 
         {/* Actions principales */}

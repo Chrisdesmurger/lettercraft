@@ -17,7 +17,8 @@ interface GenerateLetterParams {
     }
     settings: {
         language: string
-        tone: string
+        toneKey: string
+        toneCustom?: string
         length: number
         includeHobbies?: boolean
         emphasizeExperience?: boolean

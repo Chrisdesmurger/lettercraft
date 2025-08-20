@@ -388,6 +388,8 @@ export type Database = {
           pdf_url: string | null;
           generation_settings: any;
           openai_model: string;
+          tone_key: string;
+          tone_custom: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -405,6 +407,8 @@ export type Database = {
           pdf_url?: string | null;
           generation_settings?: any;
           openai_model?: string;
+          tone_key?: string;
+          tone_custom?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -422,6 +426,8 @@ export type Database = {
           pdf_url?: string | null;
           generation_settings?: any;
           openai_model?: string;
+          tone_key?: string;
+          tone_custom?: string | null;
           created_at?: string;
           updated_at?: string;
         };

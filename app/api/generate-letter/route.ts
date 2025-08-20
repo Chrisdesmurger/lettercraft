@@ -6,6 +6,7 @@ import { cookies } from 'next/headers'
 import { withQuotaCheck } from '@/lib/middleware/quota-middleware'
 import { generateStructuredPrompt, parseLetterResponse, cleanLetterSections, validateContentCleanliness } from '@/lib/letter-sections'
 import { getOpenAIConfig } from '@/lib/openai-config'
+import { getToneDirectives, validateToneParams, sanitizeToneText, isValidToneKey } from '@/lib/tone-guidelines'
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY
@@ -18,8 +19,36 @@ async function generateLetterHandler(request: NextRequest, userId: string) {
         const body = await request.json()
         const { profile, cv, jobOffer, settings } = body
 
-        // Générer le prompt structuré pour obtenir les sections séparées
-        const prompt = generateStructuredPrompt(profile, cv, jobOffer, settings)
+        // Validation et sécurisation des paramètres de ton
+        const { toneKey = 'professionnel', toneCustom } = settings
+        
+        // Validation côté serveur
+        if (!isValidToneKey(toneKey)) {
+            return NextResponse.json(
+                { error: 'Ton non valide' },
+                { status: 400 }
+            )
+        }
+
+        const toneValidation = validateToneParams(toneKey, toneCustom)
+        if (!toneValidation.valid) {
+            return NextResponse.json(
+                { error: 'Paramètres de ton invalides', details: toneValidation.errors },
+                { status: 400 }
+            )
+        }
+
+        // Sanitiser le texte personnalisé si nécessaire
+        const sanitizedToneCustom = toneCustom ? sanitizeToneText(toneCustom) : undefined
+
+        // Obtenir les directives de style pour le ton sélectionné
+        const toneDirectives = getToneDirectives(toneKey, sanitizedToneCustom)
+
+        // Générer le prompt structuré avec les directives de ton
+        const prompt = generateStructuredPrompt(profile, cv, jobOffer, {
+            ...settings,
+            toneDirectives
+        })
 
         const letterConfig = getOpenAIConfig('LETTER_GENERATION')
         const completion = await openai.chat.completions.create({
@@ -57,7 +86,7 @@ async function generateLetterHandler(request: NextRequest, userId: string) {
             // On peut continuer mais on log les problèmes pour surveillance
         }
 
-        // Sauvegarder la lettre générée avec les sections séparées
+        // Sauvegarder la lettre générée avec les sections séparées et les paramètres de ton
         const { data: savedLetter, error: saveError } = await supabase
             .from('generated_letters')
             .insert({
@@ -70,6 +99,8 @@ async function generateLetterHandler(request: NextRequest, userId: string) {
                 pdf_url: null,
                 generation_settings: settings,
                 openai_model: letterConfig.model,
+                tone_key: toneKey,
+                tone_custom: sanitizedToneCustom,
                 // Ces champs sont requis selon le schéma mais on peut les laisser vides pour l'instant
                 questionnaire_response_id: 'temp-' + Date.now(),
                 job_offer_id: 'temp-' + Date.now(),

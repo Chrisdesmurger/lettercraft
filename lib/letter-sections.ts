@@ -290,7 +290,7 @@ SUBJECT: [Objet concis pour ${jobOffer.title} chez ${jobOffer.company}]
 
 GREETING: [Formule de politesse simple comme "Madame, Monsieur," ou "Chère équipe de recrutement,"]
 
-BODY: [Corps de la lettre d'environ ${settings.length} mots, ton ${settings.tone}, mettant en avant les compétences et expériences pertinentes pour le poste, SANS aucune information personnelle]
+BODY: [Corps de la lettre d'environ ${settings.length} mots, respecte ces directives de style : "${settings.toneDirectives || 'Style professionnel et clair'}", mettant en avant les compétences et expériences pertinentes pour le poste, SANS aucune information personnelle]
 
 ATTENTION: Ne respecte que ce format. Pas d'adresse, pas de nom, pas de signature, pas de date.
 `
