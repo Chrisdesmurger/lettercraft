@@ -10,7 +10,6 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { useUser } from '@/hooks/useUser'
 import { useI18n } from '@/lib/i18n-context'
-import OnboardingQuestionnaire from '@/components/OnboardingQuestionnaire'
 import CVUpload from '@/components/CVUpload'
 import JobOfferExtractor from '@/components/JobOfferExtractor'
 import LetterGenerator from '@/components/LetterGenerator'
@@ -33,17 +32,6 @@ import { cn } from '@/lib/utils'
 
 // Configuration des étapes
 const getSteps = (t: any) => [
-    {
-        id: 'profile',
-        title: t('steps.profile.title'),
-        description: t('steps.profile.description'),
-        icon: User,
-        component: OnboardingQuestionnaire,
-        validation: async (data: any) => {
-            // Vérifier que le questionnaire est rempli
-            return data.category && Object.keys(data.responses || {}).length > 0
-        }
-    },
     {
         id: 'cv',
         title: t('steps.cv.title'),

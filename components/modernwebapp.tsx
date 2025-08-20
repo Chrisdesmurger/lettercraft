@@ -2,9 +2,10 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { ChevronRight, FileText, Upload, MessageSquare } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import Header from '@/components/Header'
 import { useI18n } from '@/lib/i18n-context'
+import HomeTipsCarousel from '@/components/tips/HomeTipsCarousel'
 
 const ModernWebApp = () => {
   const { t } = useI18n()
@@ -19,10 +20,7 @@ const ModernWebApp = () => {
         {/* Dashboard Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border border-orange-100/50 hover:shadow-lg transition-all duration-300 hover:scale-105">
-            <div className="flex items-center space-x-3 mb-4">
-              <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
-                <FileText className="w-5 h-5 text-blue-600" />
-              </div>
+            <div className="mb-4">
               <h3 className="text-lg font-semibold text-gray-900">{t('webapp.cvUploaded')}</h3>
             </div>
             <p className="text-gray-600 text-sm">{t('webapp.cvDesc')}</p>
@@ -35,10 +33,7 @@ const ModernWebApp = () => {
           </div>
 
           <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border border-orange-100/50 hover:shadow-lg transition-all duration-300 hover:scale-105">
-            <div className="flex items-center space-x-3 mb-4">
-              <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
-                <Upload className="w-5 h-5 text-green-600" />
-              </div>
+            <div className="mb-4">
               <h3 className="text-lg font-semibold text-gray-900">{t('webapp.generator')}</h3>
             </div>
             <p className="text-gray-600 text-sm">{t('webapp.generatorDesc')}</p>
@@ -51,10 +46,7 @@ const ModernWebApp = () => {
           </div>
 
           <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border border-orange-100/50 hover:shadow-lg transition-all duration-300 hover:scale-105">
-            <div className="flex items-center space-x-3 mb-4">
-              <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
-                <MessageSquare className="w-5 h-5 text-purple-600" />
-              </div>
+            <div className="mb-4">
               <h3 className="text-lg font-semibold text-gray-900">{t('webapp.lettersGenerated')}</h3>
             </div>
             <p className="text-gray-600 text-sm">{t('webapp.lettersDesc')}</p>
@@ -66,6 +58,9 @@ const ModernWebApp = () => {
             </Link>
           </div>
         </div>
+
+        {/* Carrousel de conseils */}
+        <HomeTipsCarousel className="mb-12" />
 
         {/* Section d'actions */}
         <div className="mt-12 text-center">
