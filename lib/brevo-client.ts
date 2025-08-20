@@ -4,36 +4,37 @@
  */
 
 export interface EmailRecipient {
-  email: string
-  name?: string
+  email: string;
+  name?: string;
 }
 
 export interface SendEmailOptions {
-  to: EmailRecipient[]
-  subject: string
-  htmlContent: string
-  textContent?: string
-  tags?: string[]
-  sender?: EmailRecipient
+  to: EmailRecipient[];
+  subject: string;
+  htmlContent: string;
+  textContent?: string;
+  tags?: string[];
+  sender?: EmailRecipient;
 }
 
 /**
  * Service Brevo utilisant l'API REST directe
  */
 class BrevoEmailService {
-  private apiKey: string
-  private baseUrl = 'https://api.brevo.com/v3'
+  private apiKey: string;
+  private baseUrl = "https://api.brevo.com/v3";
   private defaultSender: EmailRecipient = {
-    email: process.env.BREVO_SENDER_EMAIL || 'noreply@lettercraft.fr',
-    name: process.env.BREVO_SENDER_NAME || 'LetterCraft'
-  }
-  private supportEmail: string = process.env.BREVO_SUPPORT_EMAIL || 'support@lettercraft.fr'
+    email: process.env.BREVO_SENDER_EMAIL || "noreply@lettercraft.fr",
+    name: process.env.BREVO_SENDER_NAME || "LetterCraft",
+  };
+  private supportEmail: string =
+    process.env.BREVO_SUPPORT_EMAIL || "support@lettercraft.fr";
 
   constructor() {
     if (!process.env.BREVO_API_KEY) {
-      throw new Error('BREVO_API_KEY environment variable is not set')
+      throw new Error("BREVO_API_KEY environment variable is not set");
     }
-    this.apiKey = process.env.BREVO_API_KEY
+    this.apiKey = process.env.BREVO_API_KEY;
   }
 
   /**
@@ -46,38 +47,38 @@ class BrevoEmailService {
         sender: options.sender || this.defaultSender,
         subject: options.subject,
         htmlContent: options.htmlContent,
-        textContent: options.textContent || this.htmlToText(options.htmlContent),
-        tags: options.tags || []
-      }
+        textContent:
+          options.textContent || this.htmlToText(options.htmlContent),
+        tags: options.tags || [],
+      };
 
-      console.log('📧 Envoi email Brevo:', {
-        to: options.to.map(r => r.email),
+      console.log("📧 Envoi email Brevo:", {
+        to: options.to.map((r) => r.email),
         subject: options.subject,
-        tags: options.tags
-      })
+        tags: options.tags,
+      });
 
       const response = await fetch(`${this.baseUrl}/smtp/email`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'api-key': this.apiKey,
-          'Content-Type': 'application/json'
+          "api-key": this.apiKey,
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(emailData)
-      })
+        body: JSON.stringify(emailData),
+      });
 
       if (!response.ok) {
-        const errorText = await response.text()
-        console.error('❌ Erreur API Brevo:', response.status, errorText)
-        return false
+        const errorText = await response.text();
+        console.error("❌ Erreur API Brevo:", response.status, errorText);
+        return false;
       }
 
-      const result = await response.json()
-      console.log('✅ Email envoyé avec succès:', result.messageId)
-      return true
-
+      const result = await response.json();
+      console.log("✅ Email envoyé avec succès:", result.messageId);
+      return true;
     } catch (error) {
-      console.error('❌ Erreur envoi email Brevo:', error)
-      return false
+      console.error("❌ Erreur envoi email Brevo:", error);
+      return false;
     }
   }
 
@@ -86,24 +87,28 @@ class BrevoEmailService {
    */
   private htmlToText(html: string): string {
     return html
-      .replace(/<[^>]*>/g, '') // Retire les tags HTML
-      .replace(/&nbsp;/g, ' ')
-      .replace(/&amp;/g, '&')
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
+      .replace(/<[^>]*>/g, "") // Retire les tags HTML
+      .replace(/&nbsp;/g, " ")
+      .replace(/&amp;/g, "&")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
       .replace(/&quot;/g, '"')
       .replace(/&#39;/g, "'")
-      .replace(/\s+/g, ' ')
-      .trim()
+      .replace(/\s+/g, " ")
+      .trim();
   }
 
   /**
    * Email de confirmation d'inscription
    */
-  async sendWelcomeEmail(userEmail: string, userName: string, userLanguage: string = 'fr'): Promise<boolean> {
+  async sendWelcomeEmail(
+    userEmail: string,
+    userName: string,
+    userLanguage: string = "fr",
+  ): Promise<boolean> {
     const templates = {
       fr: {
-        subject: 'Bienvenue sur LetterCraft ! 🎉',
+        subject: "Bienvenue sur LetterCraft ! 🎉",
         htmlContent: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h1 style="color: #f97316;">Bienvenue ${userName} !</h1>
@@ -122,10 +127,10 @@ class BrevoEmailService {
             </div>
             <p>Bonne recherche d'emploi !<br><strong>L'équipe LetterCraft</strong></p>
           </div>
-        `
+        `,
       },
       en: {
-        subject: 'Welcome to LetterCraft! 🎉',
+        subject: "Welcome to LetterCraft! 🎉",
         htmlContent: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h1 style="color: #f97316;">Welcome ${userName}!</h1>
@@ -144,27 +149,33 @@ class BrevoEmailService {
             </div>
             <p>Good luck with your job search!<br><strong>The LetterCraft Team</strong></p>
           </div>
-        `
-      }
-    }
+        `,
+      },
+    };
 
-    const template = templates[userLanguage as keyof typeof templates] || templates.fr
+    const template =
+      templates[userLanguage as keyof typeof templates] || templates.fr;
 
     return this.sendEmail({
       to: [{ email: userEmail, name: userName }],
       subject: template.subject,
       htmlContent: template.htmlContent,
-      tags: ['welcome', 'registration']
-    })
+      tags: ["welcome", "registration"],
+    });
   }
 
   /**
    * Email de confirmation d'abonnement premium
    */
-  async sendSubscriptionConfirmationEmail(userEmail: string, userName: string, invoiceUrl?: string, userLanguage: string = 'fr'): Promise<boolean> {
+  async sendSubscriptionConfirmationEmail(
+    userEmail: string,
+    userName: string,
+    invoiceUrl?: string,
+    userLanguage: string = "fr",
+  ): Promise<boolean> {
     const templates = {
       fr: {
-        subject: 'Abonnement Premium activé ! 👑',
+        subject: "Abonnement Premium activé ! 👑",
         htmlContent: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h1 style="color: #f97316;">Félicitations ${userName} !</h1>
@@ -179,7 +190,7 @@ class BrevoEmailService {
                 <li>💬 Support prioritaire</li>
               </ul>
             </div>
-            ${invoiceUrl ? `<p><a href="${invoiceUrl}" style="color: #2563eb;">📄 Télécharger votre facture</a></p>` : ''}
+            ${invoiceUrl ? `<p><a href="${invoiceUrl}" style="color: #2563eb;">📄 Télécharger votre facture</a></p>` : ""}
             <div style="text-align: center; margin: 30px 0;">
               <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard" 
                  style="background: #f97316; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
@@ -188,10 +199,10 @@ class BrevoEmailService {
             </div>
             <p>Merci de votre confiance !<br><strong>L'équipe LetterCraft</strong></p>
           </div>
-        `
+        `,
       },
       en: {
-        subject: 'Premium Subscription Activated! 👑',
+        subject: "Premium Subscription Activated! 👑",
         htmlContent: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h1 style="color: #f97316;">Congratulations ${userName}!</h1>
@@ -206,7 +217,7 @@ class BrevoEmailService {
                 <li>💬 Priority support</li>
               </ul>
             </div>
-            ${invoiceUrl ? `<p><a href="${invoiceUrl}" style="color: #2563eb;">📄 Download your invoice</a></p>` : ''}
+            ${invoiceUrl ? `<p><a href="${invoiceUrl}" style="color: #2563eb;">📄 Download your invoice</a></p>` : ""}
             <div style="text-align: center; margin: 30px 0;">
               <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard" 
                  style="background: #f97316; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
@@ -215,27 +226,33 @@ class BrevoEmailService {
             </div>
             <p>Thank you for your trust!<br><strong>The LetterCraft Team</strong></p>
           </div>
-        `
-      }
-    }
+        `,
+      },
+    };
 
-    const template = templates[userLanguage as keyof typeof templates] || templates.fr
+    const template =
+      templates[userLanguage as keyof typeof templates] || templates.fr;
 
     return this.sendEmail({
       to: [{ email: userEmail, name: userName }],
       subject: template.subject,
       htmlContent: template.htmlContent,
-      tags: ['subscription', 'premium', 'confirmation']
-    })
+      tags: ["subscription", "premium", "confirmation"],
+    });
   }
 
   /**
    * Email d'échec de paiement
    */
-  async sendPaymentFailedEmail(userEmail: string, userName: string, invoiceUrl?: string, userLanguage: string = 'fr'): Promise<boolean> {
+  async sendPaymentFailedEmail(
+    userEmail: string,
+    userName: string,
+    invoiceUrl?: string,
+    userLanguage: string = "fr",
+  ): Promise<boolean> {
     const templates = {
       fr: {
-        subject: 'Problème de paiement - Action requise ⚠️',
+        subject: "Problème de paiement - Action requise ⚠️",
         htmlContent: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h1 style="color: #dc2626;">Bonjour ${userName},</h1>
@@ -248,21 +265,25 @@ class BrevoEmailService {
                 <li>Contactez votre banque si nécessaire</li>
               </ul>
             </div>
-            ${invoiceUrl ? `
+            ${
+              invoiceUrl
+                ? `
               <div style="text-align: center; margin: 30px 0;">
                 <a href="${invoiceUrl}" 
                    style="background: #dc2626; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
                   Réessayer le paiement
                 </a>
               </div>
-            ` : ''}
+            `
+                : ""
+            }
             <p><strong>Important :</strong> Votre accès Premium sera suspendu si le paiement n'est pas régularisé dans les 7 jours.</p>
             <p>Besoin d'aide ? Contactez-nous à ${this.supportEmail}<br><strong>L'équipe LetterCraft</strong></p>
           </div>
-        `
+        `,
       },
       en: {
-        subject: 'Payment Issue - Action Required ⚠️',
+        subject: "Payment Issue - Action Required ⚠️",
         htmlContent: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h1 style="color: #dc2626;">Hello ${userName},</h1>
@@ -275,40 +296,54 @@ class BrevoEmailService {
                 <li>Contact your bank if necessary</li>
               </ul>
             </div>
-            ${invoiceUrl ? `
+            ${
+              invoiceUrl
+                ? `
               <div style="text-align: center; margin: 30px 0;">
                 <a href="${invoiceUrl}" 
                    style="background: #dc2626; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
                   Retry Payment
                 </a>
               </div>
-            ` : ''}
+            `
+                : ""
+            }
             <p><strong>Important:</strong> Your Premium access will be suspended if payment is not resolved within 7 days.</p>
             <p>Need help? Contact us at ${this.supportEmail}<br><strong>The LetterCraft Team</strong></p>
           </div>
-        `
-      }
-    }
+        `,
+      },
+    };
 
-    const template = templates[userLanguage as keyof typeof templates] || templates.fr
+    const template =
+      templates[userLanguage as keyof typeof templates] || templates.fr;
 
     return this.sendEmail({
       to: [{ email: userEmail, name: userName }],
       subject: template.subject,
       htmlContent: template.htmlContent,
-      tags: ['payment', 'failed', 'billing']
-    })
+      tags: ["payment", "failed", "billing"],
+    });
   }
 
   /**
    * Email de limite de quota atteinte
    */
-  async sendQuotaLimitReachedEmail(userEmail: string, userName: string, currentQuota: number, maxQuota: number, resetDate: string, userLanguage: string = 'fr'): Promise<boolean> {
-    const resetDateFormatted = new Date(resetDate).toLocaleDateString(userLanguage === 'en' ? 'en-US' : 'fr-FR')
-    
+  async sendQuotaLimitReachedEmail(
+    userEmail: string,
+    userName: string,
+    currentQuota: number,
+    maxQuota: number,
+    resetDate: string,
+    userLanguage: string = "fr",
+  ): Promise<boolean> {
+    const resetDateFormatted = new Date(resetDate).toLocaleDateString(
+      userLanguage === "en" ? "en-US" : "fr-FR",
+    );
+
     const templates = {
       fr: {
-        subject: 'Limite mensuelle atteinte - Passez à Premium ! 🚀',
+        subject: "Limite mensuelle atteinte - Passez à Premium ! 🚀",
         htmlContent: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h1 style="color: #f97316;">Bonjour ${userName},</h1>
@@ -329,10 +364,10 @@ class BrevoEmailService {
             <p>Avec Premium, plus de limites ! Générez autant de lettres que vous voulez.</p>
             <p><strong>L'équipe LetterCraft</strong></p>
           </div>
-        `
+        `,
       },
       en: {
-        subject: 'Monthly Limit Reached - Upgrade to Premium! 🚀',
+        subject: "Monthly Limit Reached - Upgrade to Premium! 🚀",
         htmlContent: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h1 style="color: #f97316;">Hello ${userName},</h1>
@@ -353,33 +388,43 @@ class BrevoEmailService {
             <p>With Premium, no more limits! Generate as many letters as you want.</p>
             <p><strong>The LetterCraft Team</strong></p>
           </div>
-        `
-      }
-    }
+        `,
+      },
+    };
 
-    const template = templates[userLanguage as keyof typeof templates] || templates.fr
+    const template =
+      templates[userLanguage as keyof typeof templates] || templates.fr;
 
     return this.sendEmail({
       to: [{ email: userEmail, name: userName }],
       subject: template.subject,
       htmlContent: template.htmlContent,
-      tags: ['quota', 'limit', 'upgrade']
-    })
+      tags: ["quota", "limit", "upgrade"],
+    });
   }
 
   /**
    * Email de confirmation d'annulation d'abonnement
    */
-  async sendSubscriptionCancelledEmail(userEmail: string, userName: string, endDate: string, userLanguage: string = 'fr'): Promise<boolean> {
-    const endDateFormatted = new Date(endDate).toLocaleDateString(userLanguage === 'en' ? 'en-US' : 'fr-FR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    })
-    
+  async sendSubscriptionCancelledEmail(
+    userEmail: string,
+    userName: string,
+    endDate: string,
+    userLanguage: string = "fr",
+  ): Promise<boolean> {
+    const endDateFormatted = new Date(endDate).toLocaleDateString(
+      userLanguage === "en" ? "en-US" : "fr-FR",
+      {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      },
+    );
+
     const templates = {
       fr: {
-        subject: 'Abonnement annulé - Accès maintenu jusqu\'à la fin de période 📅',
+        subject:
+          "Abonnement annulé - Accès maintenu jusqu'à la fin de période 📅",
         htmlContent: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h1 style="color: #f97316;">Bonjour ${userName},</h1>
@@ -411,10 +456,11 @@ class BrevoEmailService {
             <p>Nous espérons vous revoir bientôt ! N'hésitez pas à nous faire part de vos commentaires.</p>
             <p>Merci de votre confiance,<br><strong>L'équipe LetterCraft</strong></p>
           </div>
-        `
+        `,
       },
       en: {
-        subject: 'Subscription Cancelled - Access Maintained Until End of Period 📅',
+        subject:
+          "Subscription Cancelled - Access Maintained Until End of Period 📅",
         htmlContent: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h1 style="color: #f97316;">Hello ${userName},</h1>
@@ -446,31 +492,37 @@ class BrevoEmailService {
             <p>We hope to see you back soon! Feel free to share your feedback with us.</p>
             <p>Thank you for your trust,<br><strong>The LetterCraft Team</strong></p>
           </div>
-        `
-      }
-    }
+        `,
+      },
+    };
 
-    const template = templates[userLanguage as keyof typeof templates] || templates.fr
+    const template =
+      templates[userLanguage as keyof typeof templates] || templates.fr;
 
     return this.sendEmail({
       to: [{ email: userEmail, name: userName }],
       subject: template.subject,
       htmlContent: template.htmlContent,
-      tags: ['subscription', 'cancelled', 'notification']
-    })
+      tags: ["subscription", "cancelled", "notification"],
+    });
   }
 
   /**
    * Email d'approche de la limite de quota
    */
-  async sendQuotaWarningEmail(userEmail: string, userName: string, remainingQuota: number, userLanguage: string = 'fr'): Promise<boolean> {
+  async sendQuotaWarningEmail(
+    userEmail: string,
+    userName: string,
+    remainingQuota: number,
+    userLanguage: string = "fr",
+  ): Promise<boolean> {
     const templates = {
       fr: {
-        subject: `Plus que ${remainingQuota} génération${remainingQuota > 1 ? 's' : ''} restante${remainingQuota > 1 ? 's' : ''} ! ⚠️`,
+        subject: `Plus que ${remainingQuota} génération${remainingQuota > 1 ? "s" : ""} restante${remainingQuota > 1 ? "s" : ""} ! ⚠️`,
         htmlContent: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h1 style="color: #f59e0b;">Attention ${userName},</h1>
-            <p>Il ne vous reste plus que <strong>${remainingQuota} génération${remainingQuota > 1 ? 's' : ''}</strong> ce mois-ci.</p>
+            <p>Il ne vous reste plus que <strong>${remainingQuota} génération${remainingQuota > 1 ? "s" : ""}</strong> ce mois-ci.</p>
             <div style="background: #fffbeb; padding: 20px; border-radius: 8px; margin: 20px 0;">
               <p style="margin: 0;"><strong>Pour éviter toute interruption :</strong></p>
               <ul style="margin: 10px 0 0 0;">
@@ -486,14 +538,14 @@ class BrevoEmailService {
             </div>
             <p><strong>L'équipe LetterCraft</strong></p>
           </div>
-        `
+        `,
       },
       en: {
-        subject: `Only ${remainingQuota} generation${remainingQuota > 1 ? 's' : ''} left! ⚠️`,
+        subject: `Only ${remainingQuota} generation${remainingQuota > 1 ? "s" : ""} left! ⚠️`,
         htmlContent: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h1 style="color: #f59e0b;">Attention ${userName},</h1>
-            <p>You only have <strong>${remainingQuota} generation${remainingQuota > 1 ? 's' : ''}</strong> left this month.</p>
+            <p>You only have <strong>${remainingQuota} generation${remainingQuota > 1 ? "s" : ""}</strong> left this month.</p>
             <div style="background: #fffbeb; padding: 20px; border-radius: 8px; margin: 20px 0;">
               <p style="margin: 0;"><strong>To avoid any interruption:</strong></p>
               <ul style="margin: 10px 0 0 0;">
@@ -509,44 +561,46 @@ class BrevoEmailService {
             </div>
             <p><strong>The LetterCraft Team</strong></p>
           </div>
-        `
-      }
-    }
+        `,
+      },
+    };
 
-    const template = templates[userLanguage as keyof typeof templates] || templates.fr
+    const template =
+      templates[userLanguage as keyof typeof templates] || templates.fr;
 
     return this.sendEmail({
       to: [{ email: userEmail, name: userName }],
       subject: template.subject,
       htmlContent: template.htmlContent,
-      tags: ['quota', 'warning']
-    })
+      tags: ["quota", "warning"],
+    });
   }
 
   /**
    * Email de confirmation de demande de suppression de compte
    */
   async sendAccountDeletionConfirmationEmail(
-    userEmail: string, 
-    userName: string, 
-    confirmationUrl: string, 
-    scheduledDeletionAt: string, 
-    userLanguage: string = 'fr'
+    userEmail: string,
+    userName: string,
+    confirmationUrl: string,
+    scheduledDeletionAt: string,
+    userLanguage: string = "fr",
   ): Promise<boolean> {
     const deletionDate = new Date(scheduledDeletionAt).toLocaleDateString(
-      userLanguage === 'en' ? 'en-US' : 'fr-FR',
-      { 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      }
-    )
-    
+      userLanguage === "en" ? "en-US" : "fr-FR",
+      {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      },
+    );
+
     const templates = {
       fr: {
-        subject: '⚠️ Confirmation requise - Suppression de votre compte LetterCraft',
+        subject:
+          "⚠️ Confirmation requise - Suppression de votre compte LetterCraft",
         htmlContent: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h1 style="color: #dc2626;">Bonjour ${userName},</h1>
@@ -599,10 +653,10 @@ class BrevoEmailService {
             
             <p>Cordialement,<br><strong>L'équipe LetterCraft</strong></p>
           </div>
-        `
+        `,
       },
       en: {
-        subject: '⚠️ Confirmation Required - LetterCraft Account Deletion',
+        subject: "⚠️ Confirmation Required - LetterCraft Account Deletion",
         htmlContent: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h1 style="color: #dc2626;">Hello ${userName},</h1>
@@ -655,34 +709,35 @@ class BrevoEmailService {
             
             <p>Best regards,<br><strong>The LetterCraft Team</strong></p>
           </div>
-        `
-      }
-    }
+        `,
+      },
+    };
 
-    const template = templates[userLanguage as keyof typeof templates] || templates.fr
+    const template =
+      templates[userLanguage as keyof typeof templates] || templates.fr;
 
     return this.sendEmail({
       to: [{ email: userEmail, name: userName }],
       subject: template.subject,
       htmlContent: template.htmlContent,
-      tags: ['account_deletion', 'confirmation', 'security']
-    })
+      tags: ["account_deletion", "confirmation", "security"],
+    });
   }
 
   /**
    * Email de confirmation finale de suppression de compte
    */
   async sendAccountDeletedEmail(
-    userEmail: string, 
-    userName: string, 
-    deletionType: string, 
-    wasRefunded: boolean, 
-    refundAmount: number, 
-    userLanguage: string = 'fr'
+    userEmail: string,
+    userName: string,
+    deletionType: string,
+    wasRefunded: boolean,
+    refundAmount: number,
+    userLanguage: string = "fr",
   ): Promise<boolean> {
     const templates = {
       fr: {
-        subject: '✅ Votre compte LetterCraft a été supprimé',
+        subject: "✅ Votre compte LetterCraft a été supprimé",
         htmlContent: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h1 style="color: #059669;">Au revoir ${userName},</h1>
@@ -691,18 +746,22 @@ class BrevoEmailService {
             <div style="background: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
               <h3 style="color: #0369a1; margin-top: 0;">✅ Suppression confirmée</h3>
               <ul style="margin: 0;">
-                <li>Type de suppression : <strong>${deletionType === 'hard' ? 'Complète' : 'Anonymisation'}</strong></li>
-                <li>Date : <strong>${new Date().toLocaleDateString('fr-FR')}</strong></li>
+                <li>Type de suppression : <strong>${deletionType === "hard" ? "Complète" : "Anonymisation"}</strong></li>
+                <li>Date : <strong>${new Date().toLocaleDateString("fr-FR")}</strong></li>
                 <li>Toutes vos données personnelles ont été supprimées</li>
               </ul>
             </div>
 
-            ${wasRefunded ? `
+            ${
+              wasRefunded
+                ? `
               <div style="background: #f0fdf4; padding: 20px; border-radius: 8px; margin: 20px 0;">
                 <h3 style="color: #059669; margin-top: 0;">💰 Remboursement traité</h3>
                 <p style="margin: 0;">Un remboursement de <strong>${refundAmount.toFixed(2)} €</strong> a été traité pour la partie inutilisée de votre abonnement. Vous le recevrez dans 5-10 jours ouvrés.</p>
               </div>
-            ` : ''}
+            `
+                : ""
+            }
 
             <div style="background: #fffbeb; padding: 20px; border-radius: 8px; margin: 20px 0;">
               <h3 style="color: #92400e; margin-top: 0;">📄 Données conservées (conformité légale)</h3>
@@ -718,10 +777,10 @@ class BrevoEmailService {
             
             <p>Bonne continuation dans vos projets professionnels !<br><strong>L'équipe LetterCraft</strong></p>
           </div>
-        `
+        `,
       },
       en: {
-        subject: '✅ Your LetterCraft account has been deleted',
+        subject: "✅ Your LetterCraft account has been deleted",
         htmlContent: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h1 style="color: #059669;">Goodbye ${userName},</h1>
@@ -730,18 +789,22 @@ class BrevoEmailService {
             <div style="background: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
               <h3 style="color: #0369a1; margin-top: 0;">✅ Deletion Confirmed</h3>
               <ul style="margin: 0;">
-                <li>Deletion type: <strong>${deletionType === 'hard' ? 'Complete' : 'Anonymization'}</strong></li>
-                <li>Date: <strong>${new Date().toLocaleDateString('en-US')}</strong></li>
+                <li>Deletion type: <strong>${deletionType === "hard" ? "Complete" : "Anonymization"}</strong></li>
+                <li>Date: <strong>${new Date().toLocaleDateString("en-US")}</strong></li>
                 <li>All your personal data has been deleted</li>
               </ul>
             </div>
 
-            ${wasRefunded ? `
+            ${
+              wasRefunded
+                ? `
               <div style="background: #f0fdf4; padding: 20px; border-radius: 8px; margin: 20px 0;">
                 <h3 style="color: #059669; margin-top: 0;">💰 Refund Processed</h3>
                 <p style="margin: 0;">A refund of <strong>€${refundAmount.toFixed(2)}</strong> has been processed for the unused portion of your subscription. You will receive it within 5-10 business days.</p>
               </div>
-            ` : ''}
+            `
+                : ""
+            }
 
             <div style="background: #fffbeb; padding: 20px; border-radius: 8px; margin: 20px 0;">
               <h3 style="color: #92400e; margin-top: 0;">📄 Data Retained (Legal Compliance)</h3>
@@ -757,20 +820,21 @@ class BrevoEmailService {
             
             <p>Good luck with your professional endeavors!<br><strong>The LetterCraft Team</strong></p>
           </div>
-        `
-      }
-    }
+        `,
+      },
+    };
 
-    const template = templates[userLanguage as keyof typeof templates] || templates.fr
+    const template =
+      templates[userLanguage as keyof typeof templates] || templates.fr;
 
     return this.sendEmail({
       to: [{ email: userEmail, name: userName }],
       subject: template.subject,
       htmlContent: template.htmlContent,
-      tags: ['account_deleted', 'confirmation', 'farewell']
-    })
+      tags: ["account_deleted", "confirmation", "farewell"],
+    });
   }
 }
 
 // Instance singleton du service
-export const brevoEmailService = new BrevoEmailService()
+export const brevoEmailService = new BrevoEmailService();

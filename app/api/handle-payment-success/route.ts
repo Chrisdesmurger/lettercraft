@@ -1,69 +1,69 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase-client'
-import { supabaseAdmin } from '@/lib/supabase-admin'
+import { NextRequest, NextResponse } from "next/server";
+import { supabase } from "@/lib/supabase-client";
+import { supabaseAdmin } from "@/lib/supabase-admin";
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId } = await request.json()
+    const { userId } = await request.json();
 
-    console.log('Handling payment success for user:', userId)
+    console.log("Handling payment success for user:", userId);
 
     if (!userId) {
-      return NextResponse.json(
-        { error: 'Missing userId' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: "Missing userId" }, { status: 400 });
     }
 
     // Check if user exists (bypass RLS)
-    const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(userId)
+    const { data: authUser } =
+      await supabaseAdmin.auth.admin.getUserById(userId);
     const { data: userProfile, error: getUserError } = await supabaseAdmin
-      .from('user_profiles')
-      .select('user_id, subscription_tier')
-      .eq('user_id', userId)
-      .single()
-    
-    console.log('User profile lookup result:', { authUser: !!authUser?.user, userProfile, getUserError })
+      .from("user_profiles")
+      .select("user_id, subscription_tier")
+      .eq("user_id", userId)
+      .single();
+
+    console.log("User profile lookup result:", {
+      authUser: !!authUser?.user,
+      userProfile,
+      getUserError,
+    });
 
     if (!authUser?.user || getUserError || !userProfile) {
-      console.error('User not found:', getUserError)
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      )
+      console.error("User not found:", getUserError);
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Set premium flag with bypass to avoid trigger conflicts
-    console.log('Setting immediate premium tier for user experience...')
+    console.log("Setting immediate premium tier for user experience...");
     const { error: updateError } = await supabaseAdmin
-      .from('user_profiles')
+      .from("user_profiles")
       .update({
-        subscription_tier: 'premium',
-        subscription_end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-        updated_at: new Date().toISOString()
+        subscription_tier: "premium",
+        subscription_end_date: new Date(
+          Date.now() + 30 * 24 * 60 * 60 * 1000,
+        ).toISOString(),
+        updated_at: new Date().toISOString(),
       })
-      .eq('user_id', userId)
+      .eq("user_id", userId);
 
-    console.log('Subscription update result:', { updateError })
+    console.log("Subscription update result:", { updateError });
 
     if (updateError) {
-      console.error('Error updating subscription:', updateError)
+      console.error("Error updating subscription:", updateError);
       return NextResponse.json(
-        { error: 'Failed to update subscription' },
-        { status: 500 }
-      )
+        { error: "Failed to update subscription" },
+        { status: 500 },
+      );
     }
 
-    return NextResponse.json({ 
-      success: true, 
-      message: 'Subscription updated to premium' 
-    })
-
+    return NextResponse.json({
+      success: true,
+      message: "Subscription updated to premium",
+    });
   } catch (error) {
-    console.error('Error in payment success handler:', error)
+    console.error("Error in payment success handler:", error);
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }

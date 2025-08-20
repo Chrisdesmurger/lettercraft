@@ -1,16 +1,16 @@
-'use client'
+"use client";
 
-import React from 'react'
-import { Lightbulb } from 'lucide-react'
-import TipsCarousel from './TipsCarousel'
-import { useI18n } from '@/lib/i18n-context'
+import React from "react";
+import { Lightbulb } from "lucide-react";
+import TipsCarousel from "./TipsCarousel";
+import { useI18n } from "@/lib/i18n-context";
 
 interface HomeTipsCarouselProps {
-  className?: string
+  className?: string;
 }
 
 export default function HomeTipsCarousel({ className }: HomeTipsCarouselProps) {
-  const { t } = useI18n()
+  const { t } = useI18n();
 
   return (
     <div className={className}>
@@ -21,14 +21,12 @@ export default function HomeTipsCarousel({ className }: HomeTipsCarouselProps) {
           </div>
           <div>
             <h2 className="text-lg font-bold text-gray-900">
-              {t('tips.title')}
+              {t("tips.title")}
             </h2>
-            <p className="text-sm text-gray-600">
-              {t('tips.subtitle')}
-            </p>
+            <p className="text-sm text-gray-600">{t("tips.subtitle")}</p>
           </div>
         </div>
-        
+
         <TipsCarousel
           mode="random"
           count={3}
@@ -40,5 +38,5 @@ export default function HomeTipsCarousel({ className }: HomeTipsCarouselProps) {
         />
       </div>
     </div>
-  )
+  );
 }

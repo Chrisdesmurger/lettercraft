@@ -6,7 +6,7 @@
   },
   "navigation": {
     "dashboard": "Panel",
-    "generator": "Generador", 
+    "generator": "Generador",
     "letters": "Mis Cartas",
     "profile": "Perfil"
   },
@@ -28,7 +28,7 @@
       "description": "Personaliza y genera tu carta"
     },
     "preview": {
-      "title": "Vista previa", 
+      "title": "Vista previa",
       "description": "Revisa y descarga tu carta"
     }
   },
@@ -349,7 +349,7 @@
       "retry": "Reintentar",
       "refresh": "Actualizar facturas",
       "refreshing": "Actualizando...",
-    "optional": "opcional",
+      "optional": "opcional",
       "download": "Descargar factura",
       "downloadTitle": "Descargar factura",
       "viewOnStripe": "Ver en Stripe",
@@ -513,6 +513,7 @@
     "question6": {
       "title": "¿En qué idioma te gustaría generar tu carta de presentación?",
       "placeholder": "Selecciona el idioma para tu carta",
+      "premiumFeature": "Función Premium",
       "detectedLanguage": "Idioma detectado automáticamente: {language}",
       "french": "Francés",
       "english": "Inglés",
@@ -606,6 +607,7 @@
     "position": "Puesto",
     "company": "Empresa",
     "cvUsed": "CV utilizado",
+    "toneUsed": "Tono utilizado",
     "generatedOn": "Generado el"
   },
   "auth": {
@@ -723,7 +725,7 @@
         "description": "Estilo tradicional francés con Times New Roman"
       },
       "modern": {
-        "name": "Moderno", 
+        "name": "Moderno",
         "description": "Diseño limpio y contemporáneo"
       },
       "elegant": {
@@ -751,7 +753,7 @@
       "label": "Valoración",
       "labels": {
         "1": "Muy insatisfecho",
-        "2": "Insatisfecho", 
+        "2": "Insatisfecho",
         "3": "Neutral",
         "4": "Satisfecho",
         "5": "Muy satisfecho"
@@ -766,7 +768,7 @@
     "categories": {
       "label": "Aspectos a mejorar (opcional)",
       "content": "Contenido",
-      "style": "Estilo", 
+      "style": "Estilo",
       "relevance": "Relevancia",
       "length": "Longitud",
       "categoryLabel": "Categoría {category}",

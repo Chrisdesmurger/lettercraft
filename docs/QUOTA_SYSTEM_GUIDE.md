@@ -3,6 +3,7 @@
 ## Vue d'ensemble
 
 Le système de quotas LetterCraft limite les générations de lettres de motivation en fonction du plan d'abonnement de l'utilisateur :
+
 - **Plan Gratuit** : 10 générations par mois
 - **Plan Premium** : Générations illimitées (1000/mois techniquement)
 
@@ -11,6 +12,7 @@ Le système de quotas LetterCraft limite les générations de lettres de motivat
 ### 1. Base de données (Supabase)
 
 #### Table `user_quotas`
+
 ```sql
 CREATE TABLE public.user_quotas (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -25,12 +27,14 @@ CREATE TABLE public.user_quotas (
 ```
 
 #### Fonctions principales
+
 - `get_or_create_user_quota(UUID)` - Récupère ou crée le quota utilisateur
 - `can_generate_letter(UUID)` - Vérifie si l'utilisateur peut générer
 - `increment_letter_count(UUID)` - Incrémente le compteur après génération
 - `get_quota_status(UUID)` - Retourne le statut complet des quotas
 
 #### Triggers automatiques
+
 - Reset mensuel automatique (1er de chaque mois)
 - Synchronisation avec les changements d'abonnement
 - Mise à jour des limites selon le tier
@@ -40,6 +44,7 @@ CREATE TABLE public.user_quotas (
 **Fichier** : `lib/middleware/quota-middleware.ts`
 
 La fonction `withQuotaCheck()` protège les routes API :
+
 1. Extrait l'utilisateur de la requête
 2. Vérifie le quota disponible
 3. Exécute la fonction si autorisé
@@ -54,13 +59,15 @@ La fonction `withQuotaCheck()` protège les routes API :
 ### 4. Hooks React
 
 **Hook principal** : `useQuota()`
+
 ```typescript
-const { quota, loading, error, refreshQuota, checkCanGenerate } = useQuota()
+const { quota, loading, error, refreshQuota, checkCanGenerate } = useQuota();
 ```
 
 **Hook de vérification** : `usePreGenerationQuotaCheck()`
+
 ```typescript
-const { checkAndShowQuotaStatus } = usePreGenerationQuotaCheck()
+const { checkAndShowQuotaStatus } = usePreGenerationQuotaCheck();
 ```
 
 ### 5. Composants UI
@@ -84,6 +91,7 @@ npm run db:migrate
 ### 2. Variables d'environnement
 
 Assurez-vous d'avoir dans `.env.local` :
+
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
@@ -133,16 +141,16 @@ export function ProfilePage() {
 ### Vérification manuelle
 
 ```typescript
-import { usePreGenerationQuotaCheck } from '@/hooks/useQuota'
+import { usePreGenerationQuotaCheck } from "@/hooks/useQuota";
 
-const { checkAndShowQuotaStatus } = usePreGenerationQuotaCheck()
+const { checkAndShowQuotaStatus } = usePreGenerationQuotaCheck();
 
 const handleGenerate = async () => {
-  const canProceed = await checkAndShowQuotaStatus()
+  const canProceed = await checkAndShowQuotaStatus();
   if (canProceed) {
     // Procéder à la génération
   }
-}
+};
 ```
 
 ## Tests et Scénarios
@@ -177,12 +185,12 @@ const handleGenerate = async () => {
 SELECT * FROM get_quota_status('user-uuid-here');
 
 -- Simuler l'épuisement des quotas
-UPDATE user_quotas 
-SET letters_generated = max_letters 
+UPDATE user_quotas
+SET letters_generated = max_letters
 WHERE user_id = 'user-uuid-here';
 
 -- Simuler un reset
-UPDATE user_quotas 
+UPDATE user_quotas
 SET letters_generated = 0, reset_date = NOW() + INTERVAL '1 month'
 WHERE user_id = 'user-uuid-here';
 ```
@@ -214,6 +222,7 @@ curl -X POST \
 ### Messages utilisateur
 
 Tous les messages sont internationalisés et adaptés au contexte :
+
 - Quotas restants
 - Limite atteinte
 - Suggestions d'upgrade
@@ -269,8 +278,8 @@ Tous les messages sont internationalisés et adaptés au contexte :
 
 ```typescript
 // Activer les logs détaillés
-localStorage.setItem('quota-debug', 'true')
+localStorage.setItem("quota-debug", "true");
 
 // Vérifier l'état du hook
-console.log(useQuota())
+console.log(useQuota());
 ```

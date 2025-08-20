@@ -1,13 +1,13 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export interface ProfileTableProps {
   data: {
-    first_name?: string
-    last_name?: string
-    experiences?: string[]
-    skills?: string[]
-    education?: string[]
-  }
+    first_name?: string;
+    last_name?: string;
+    experiences?: string[];
+    skills?: string[];
+    education?: string[];
+  };
 }
 
 export default function ProfileTable({ data }: ProfileTableProps) {
@@ -71,5 +71,5 @@ export default function ProfileTable({ data }: ProfileTableProps) {
         </table>
       </CardContent>
     </Card>
-  )
+  );
 }

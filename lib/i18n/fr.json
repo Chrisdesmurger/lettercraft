@@ -6,7 +6,7 @@
   },
   "navigation": {
     "dashboard": "Dashboard",
-    "generator": "Générateur", 
+    "generator": "Générateur",
     "letters": "Mes Lettres",
     "profile": "Profil"
   },
@@ -28,7 +28,7 @@
       "description": "Personnalisez et générez votre lettre"
     },
     "preview": {
-      "title": "Aperçu", 
+      "title": "Aperçu",
       "description": "Relisez et téléchargez votre lettre"
     }
   },
@@ -548,6 +548,7 @@
     "question6": {
       "title": "Dans quelle langue souhaitez-vous générer votre lettre de motivation ?",
       "placeholder": "Sélectionnez la langue de votre lettre",
+      "premiumFeature": "Fonctionnalité Premium",
       "detectedLanguage": "Langue détectée automatiquement : {language}",
       "french": "Français",
       "english": "Anglais",
@@ -641,6 +642,7 @@
     "position": "Poste",
     "company": "Entreprise",
     "cvUsed": "CV utilisé",
+    "toneUsed": "Ton utilisé",
     "generatedOn": "Généré le"
   },
   "account": {
@@ -724,7 +726,7 @@
         "whatWillBeDeleted": "Ce qui sera supprimé :",
         "deletionList": {
           "profile": "• Votre profil et informations personnelles",
-          "cvs": "• Tous vos CV téléchargés", 
+          "cvs": "• Tous vos CV téléchargés",
           "letters": "• Toutes vos lettres générées et sauvegardées",
           "history": "• Votre historique d'utilisation",
           "subscription": "• Votre abonnement (avec annulation immédiate)"
@@ -762,7 +764,7 @@
         "description": "Style traditionnel français avec Times New Roman"
       },
       "modern": {
-        "name": "Moderne", 
+        "name": "Moderne",
         "description": "Design épuré et contemporain"
       },
       "elegant": {
@@ -790,7 +792,7 @@
       "label": "Note",
       "labels": {
         "1": "Très insatisfait",
-        "2": "Insatisfait", 
+        "2": "Insatisfait",
         "3": "Neutre",
         "4": "Satisfait",
         "5": "Très satisfait"
@@ -805,7 +807,7 @@
     "categories": {
       "label": "Aspects à améliorer (optionnel)",
       "content": "Contenu",
-      "style": "Style", 
+      "style": "Style",
       "relevance": "Pertinence",
       "length": "Longueur",
       "categoryLabel": "Catégorie {category}",

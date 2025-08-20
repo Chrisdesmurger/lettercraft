@@ -1,11 +1,13 @@
 # Test de la nouvelle logique de reset des quotas
 
 ## 🎯 Objectif
+
 Valider que le reset des quotas se base maintenant sur **30 jours après la première génération** puis **tous les mois** selon cette date de référence.
 
 ## 📋 Scénarios de Test
 
 ### Scénario 1: Nouvel Utilisateur (Première Fois)
+
 ```typescript
 // État initial
 {
@@ -20,6 +22,7 @@ Valider que le reset des quotas se base maintenant sur **30 jours après la prem
 ```
 
 ### Scénario 2: Première Génération
+
 ```typescript
 // Avant génération (15 janvier 2025 à 10:00)
 {
@@ -40,6 +43,7 @@ Valider que le reset des quotas se base maintenant sur **30 jours après la prem
 ```
 
 ### Scénario 3: Dans la période initiale (avant 30 jours)
+
 ```typescript
 // 15 jours après la première génération (30 janvier 2025)
 {
@@ -53,6 +57,7 @@ Valider que le reset des quotas se base maintenant sur **30 jours après la prem
 ```
 
 ### Scénario 4: Premier Reset (30 jours après première génération)
+
 ```typescript
 // Le 14 février 2025 (30 jours après première génération)
 // Automatique via refreshQuota()
@@ -73,6 +78,7 @@ Valider que le reset des quotas se base maintenant sur **30 jours après la prem
 ```
 
 ### Scénario 5: Cycles Mensuels Suivants
+
 ```typescript
 // Le 14 mars 2025 (2ème reset)
 // Le 14 avril 2025 (3ème reset)
@@ -86,18 +92,21 @@ Valider que le reset des quotas se base maintenant sur **30 jours après la prem
 ## 🔍 Points de Validation
 
 ### Interface Utilisateur
+
 - [ ] Nouveau message "Après la première génération" pour les nouveaux utilisateurs
 - [ ] Date de reset correctement calculée après première génération
 - [ ] Cycles mensuels respectent la date de première génération
 - [ ] Compteur se remet à zéro automatiquement lors des resets
 
 ### Base de Données
+
 - [ ] Colonne `first_generation_date` ajoutée
 - [ ] `first_generation_date` définie lors de la première génération
 - [ ] `reset_date` calculée comme `first_generation_date + 30 jours`
 - [ ] Resets suivants basés sur cycles mensuels de la première génération
 
 ### Code Logic
+
 - [ ] `incrementLetterCount()` définit `first_generation_date` si `letters_generated === 0`
 - [ ] `refreshQuota()` calcule correctement les dates de reset
 - [ ] Reset automatique quand `now >= reset_date`
@@ -106,6 +115,7 @@ Valider que le reset des quotas se base maintenant sur **30 jours après la prem
 ## 🧪 Tests Manuels
 
 ### Test 1: Simulation Complète
+
 ```sql
 -- Dans Supabase SQL Editor
 -- Créer un utilisateur test
@@ -118,15 +128,17 @@ SELECT * FROM user_quotas WHERE user_id = 'test-user-id';
 ```
 
 ### Test 2: Première Génération
+
 ```typescript
 // Dans l'interface, générer une première lettre
 // Vérifier que first_generation_date et reset_date sont définis
 ```
 
 ### Test 3: Simulation de Reset
+
 ```sql
 -- Simuler qu'on est 30 jours plus tard
-UPDATE user_quotas 
+UPDATE user_quotas
 SET reset_date = NOW() - INTERVAL '1 day'
 WHERE user_id = 'test-user-id';
 

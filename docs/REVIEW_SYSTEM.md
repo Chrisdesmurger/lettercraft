@@ -43,7 +43,7 @@ letter_reviews (
 ### Components
 
 - `StarRating` - Accessible star rating component
-- `CategorySelector` - Multi-select category component  
+- `CategorySelector` - Multi-select category component
 - `ReviewModal` - Complete review submission modal
 - `ContributorBadge` - Gamification badge display
 - `ReviewSystem` - Main integration component
@@ -54,32 +54,32 @@ letter_reviews (
 ### 1. Basic Usage
 
 ```tsx
-import { ReviewSystem } from '@/components/reviews'
+import { ReviewSystem } from "@/components/reviews";
 
 function LetterDisplay({ letter }) {
   return (
     <div>
       {/* Your letter content */}
       <div>{letter.content}</div>
-      
+
       {/* Review system - will auto-show modal after 2.5s */}
-      <ReviewSystem 
+      <ReviewSystem
         letterId={letter.id}
         autoShow={true}
         showBadge={true}
         onReviewSubmitted={(review) => {
-          console.log('Review submitted:', review)
+          console.log("Review submitted:", review);
         }}
       />
     </div>
-  )
+  );
 }
 ```
 
 ### 2. Custom Hook Usage
 
 ```tsx
-import { useReviewSystem } from '@/components/reviews'
+import { useReviewSystem } from "@/components/reviews";
 
 function CustomLetterComponent({ letter }) {
   const {
@@ -88,29 +88,27 @@ function CustomLetterComponent({ letter }) {
     showReviewModal,
     closeReviewModal,
     submitReview,
-    currentLetterId
+    currentLetterId,
   } = useReviewSystem({
     autoShow: false, // Manual control
     onReviewSubmitted: (review) => {
       // Custom handling
-      analytics.track('review_submitted', { rating: review.rating })
-    }
-  })
+      analytics.track("review_submitted", { rating: review.rating });
+    },
+  });
 
   return (
     <div>
       <div>{letter.content}</div>
-      
+
       {/* Manual trigger */}
       <button onClick={() => showReviewModal(letter.id)}>
         Rate this letter
       </button>
-      
+
       {/* Show badge if earned */}
-      {badge.earned && (
-        <ContributorBadge badge={badge} />
-      )}
-      
+      {badge.earned && <ContributorBadge badge={badge} />}
+
       {/* Custom modal rendering */}
       <ReviewModal
         isOpen={isOpen}
@@ -119,14 +117,14 @@ function CustomLetterComponent({ letter }) {
         letterId={currentLetterId || letter.id}
       />
     </div>
-  )
+  );
 }
 ```
 
 ### 3. Analytics Dashboard
 
 ```tsx
-import { AnalyticsDashboard } from '@/components/reviews/analytics-dashboard'
+import { AnalyticsDashboard } from "@/components/reviews/analytics-dashboard";
 
 function AdminPage() {
   return (
@@ -134,7 +132,7 @@ function AdminPage() {
       <h1>Review Analytics</h1>
       <AnalyticsDashboard defaultPeriodDays={30} />
     </div>
-  )
+  );
 }
 ```
 
@@ -151,6 +149,7 @@ npx supabase db describe
 ```
 
 The migration creates:
+
 - `feedback_categories` table with seeded data
 - `letter_reviews` table with constraints and indexes
 - RLS policies for data security
@@ -165,8 +164,9 @@ No additional environment variables are required. The system uses existing Supab
 ### Rate Limiting
 
 Current limits (configurable in `lib/middleware/rate-limiter.ts`):
+
 - Reviews: 5 requests per 5 minutes
-- General API: 100 requests per minute  
+- General API: 100 requests per minute
 - Analytics: 10 requests per hour
 
 ### Validation Rules
@@ -179,19 +179,23 @@ Current limits (configurable in `lib/middleware/rate-limiter.ts`):
 ## Security Features
 
 ### Input Validation
+
 - Server-side validation for all inputs
 - HTML/script tag sanitization for feedback
 - Category validation against predefined list
 
 ### Rate Limiting
+
 - Per-user + per-IP rate limiting
 - Exponential backoff for repeated violations
 
 ### CSRF Protection
+
 - Origin/Referer header validation
 - SameSite cookie policies
 
 ### Access Control
+
 - Users can only review their own letters
 - Users can only see their own reviews
 - Analytics restricted to admin users
@@ -199,16 +203,19 @@ Current limits (configurable in `lib/middleware/rate-limiter.ts`):
 ## Accessibility
 
 ### Keyboard Navigation
+
 - Tab navigation through star rating
 - Arrow keys to change rating
 - Space/Enter to select rating
 
 ### Screen Readers
+
 - ARIA labels for all interactive elements
 - Role attributes for custom components
 - Descriptive error messages
 
 ### Focus Management
+
 - Visible focus indicators
 - Focus trapping in modal
 - Logical tab order
@@ -219,7 +226,7 @@ The system supports 5 languages with complete translations:
 
 - **French (fr)**: Default language
 - **English (en)**: Full translation
-- **Spanish (es)**: Full translation  
+- **Spanish (es)**: Full translation
 - **German (de)**: Full translation
 - **Italian (it)**: Full translation
 
@@ -230,6 +237,7 @@ The system supports 5 languages with complete translations:
 3. Update `languageCodeToLocale` mapping
 
 Example translation structure:
+
 ```json
 {
   "reviews": {
@@ -242,7 +250,7 @@ Example translation structure:
       "labels": {
         "1": "Very dissatisfied",
         "2": "Dissatisfied",
-        "3": "Neutral", 
+        "3": "Neutral",
         "4": "Satisfied",
         "5": "Very satisfied"
       }
@@ -254,16 +262,19 @@ Example translation structure:
 ## Performance Considerations
 
 ### Client-Side Optimizations
+
 - Local storage for modal dismissal state
 - Debounced API calls
 - Lazy component loading
 
 ### Database Optimizations
+
 - Indexes on frequently queried columns
 - Efficient aggregation queries
 - Pagination for large datasets
 
 ### Caching Strategy
+
 - Client-side caching of user reviews
 - Server-side caching of analytics data
 - CDN caching for static assets
@@ -271,6 +282,7 @@ Example translation structure:
 ## Analytics & Monitoring
 
 ### Available Metrics
+
 - Total reviews count
 - Average rating over time
 - Rating distribution (1-5 stars)
@@ -279,27 +291,31 @@ Example translation structure:
 - Export capabilities for detailed analysis
 
 ### Usage Analytics
+
 ```typescript
 // Track review events
-analytics.track('review_modal_shown', { letterId })
-analytics.track('review_submitted', { rating, hasCategories })
-analytics.track('review_skipped', { letterId })
-analytics.track('contributor_badge_earned', { reviewCount })
+analytics.track("review_modal_shown", { letterId });
+analytics.track("review_submitted", { rating, hasCategories });
+analytics.track("review_skipped", { letterId });
+analytics.track("contributor_badge_earned", { reviewCount });
 ```
 
 ## Error Handling
 
 ### Client-Side Errors
+
 - Network failures with retry logic
 - Validation errors with user-friendly messages
 - Rate limit exceeded notifications
 
 ### Server-Side Errors
+
 - Structured error responses with codes
 - Detailed logging without PII
 - Graceful degradation for non-critical features
 
 ### Common Error Codes
+
 - `VALIDATION_ERROR`: Invalid input data
 - `ALREADY_REVIEWED`: User already reviewed this letter
 - `RATE_LIMIT_EXCEEDED`: Too many requests
@@ -309,6 +325,7 @@ analytics.track('contributor_badge_earned', { reviewCount })
 ## Testing
 
 ### Unit Tests
+
 ```bash
 # Test individual components
 npm test components/reviews/
@@ -321,6 +338,7 @@ npm test lib/db/reviews/
 ```
 
 ### Integration Tests
+
 ```bash
 # Test complete review flow
 npm test e2e/reviews.test.ts
@@ -330,6 +348,7 @@ npm test e2e/analytics.test.ts
 ```
 
 ### Manual Testing Checklist
+
 - [ ] Review modal appears after 2.5s delay
 - [ ] Star rating works with keyboard navigation
 - [ ] Category selection enforces max 4 limit
@@ -345,23 +364,27 @@ npm test e2e/analytics.test.ts
 ### Common Issues
 
 **Modal doesn't appear**
+
 - Check if user is authenticated
 - Verify letterId is valid
 - Check browser console for errors
 - Ensure autoShow is enabled
 
 **Reviews not saving**
+
 - Verify database migration ran successfully
 - Check API endpoint responses
 - Confirm user owns the letter being reviewed
 - Check rate limiting status
 
 **Badge not showing**
+
 - Verify user has 3+ reviews in database
 - Check badge component props
 - Ensure badge checking function works
 
 **Analytics not loading**
+
 - Verify user has admin permissions
 - Check database function permissions
 - Review network requests for errors
@@ -370,16 +393,16 @@ npm test e2e/analytics.test.ts
 
 ```typescript
 // Enable debug logging
-localStorage.setItem('debug', 'reviews:*')
+localStorage.setItem("debug", "reviews:*");
 
 // Check review modal memory
-console.log(localStorage.getItem('lettercraft_review_modal_memory'))
+console.log(localStorage.getItem("lettercraft_review_modal_memory"));
 
 // Test badge checking
-import { supabase } from '@/lib/supabase-client'
-const result = await supabase.rpc('check_contributor_badge', { 
-  p_user_id: 'user-id' 
-})
+import { supabase } from "@/lib/supabase-client";
+const result = await supabase.rpc("check_contributor_badge", {
+  p_user_id: "user-id",
+});
 ```
 
 ## Migration Guide
@@ -402,6 +425,7 @@ const result = await supabase.rpc('check_contributor_badge', {
 ## Support
 
 For questions or issues:
+
 1. Check this documentation
 2. Review error logs in console
 3. Test in development environment

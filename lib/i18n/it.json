@@ -6,7 +6,7 @@
   },
   "navigation": {
     "dashboard": "Dashboard",
-    "generator": "Generatore", 
+    "generator": "Generatore",
     "letters": "Le Mie Lettere",
     "profile": "Profilo"
   },
@@ -28,7 +28,7 @@
       "description": "Personalizza e genera la tua lettera"
     },
     "preview": {
-      "title": "Anteprima", 
+      "title": "Anteprima",
       "description": "Rivedi e scarica la tua lettera"
     }
   },
@@ -349,7 +349,7 @@
       "retry": "Riprova",
       "refresh": "Aggiorna fatture",
       "refreshing": "Aggiornamento...",
-    "optional": "opzionale",
+      "optional": "opzionale",
       "download": "Scarica fattura",
       "downloadTitle": "Scarica fattura",
       "viewOnStripe": "Visualizza su Stripe",
@@ -513,6 +513,7 @@
     "question6": {
       "title": "In quale lingua vorresti generare la tua lettera di presentazione?",
       "placeholder": "Seleziona la lingua per la tua lettera",
+      "premiumFeature": "Funzione Premium",
       "detectedLanguage": "Lingua rilevata automaticamente: {language}",
       "french": "Francese",
       "english": "Inglese",
@@ -606,6 +607,7 @@
     "position": "Posizione",
     "company": "Azienda",
     "cvUsed": "CV utilizzato",
+    "toneUsed": "Tono utilizzato",
     "generatedOn": "Generato il"
   },
   "auth": {
@@ -763,7 +765,7 @@
         "description": "Stile tradizionale francese con Times New Roman"
       },
       "modern": {
-        "name": "Moderno", 
+        "name": "Moderno",
         "description": "Design pulito e contemporaneo"
       },
       "elegant": {
@@ -791,7 +793,7 @@
       "label": "Valutazione",
       "labels": {
         "1": "Molto insoddisfatto",
-        "2": "Insoddisfatto", 
+        "2": "Insoddisfatto",
         "3": "Neutrale",
         "4": "Soddisfatto",
         "5": "Molto soddisfatto"
@@ -806,7 +808,7 @@
     "categories": {
       "label": "Aspetti da migliorare (opzionale)",
       "content": "Contenuto",
-      "style": "Stile", 
+      "style": "Stile",
       "relevance": "Rilevanza",
       "length": "Lunghezza",
       "categoryLabel": "Categoria {category}",

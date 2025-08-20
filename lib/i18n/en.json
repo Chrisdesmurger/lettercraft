@@ -6,7 +6,7 @@
   },
   "navigation": {
     "dashboard": "Dashboard",
-    "generator": "Generator", 
+    "generator": "Generator",
     "letters": "My Letters",
     "profile": "Profile"
   },
@@ -28,7 +28,7 @@
       "description": "Customize and generate your letter"
     },
     "preview": {
-      "title": "Preview", 
+      "title": "Preview",
       "description": "Review and download your letter"
     }
   },
@@ -349,7 +349,7 @@
       "retry": "Retry",
       "refresh": "Refresh invoices",
       "refreshing": "Refreshing...",
-    "optional": "optional",
+      "optional": "optional",
       "download": "Download invoice",
       "downloadTitle": "Download invoice",
       "viewOnStripe": "View on Stripe",
@@ -513,6 +513,7 @@
     "question6": {
       "title": "In which language would you like to generate your cover letter?",
       "placeholder": "Select the language for your letter",
+      "premiumFeature": "Premium Feature",
       "detectedLanguage": "Automatically detected language: {language}",
       "french": "French",
       "english": "English",
@@ -606,6 +607,7 @@
     "position": "Position",
     "company": "Company",
     "cvUsed": "CV used",
+    "toneUsed": "Tone used",
     "generatedOn": "Generated on"
   },
   "auth": {
@@ -723,7 +725,7 @@
         "description": "Traditional French style with Times New Roman"
       },
       "modern": {
-        "name": "Modern", 
+        "name": "Modern",
         "description": "Clean and contemporary design"
       },
       "elegant": {
@@ -751,7 +753,7 @@
       "label": "Rating",
       "labels": {
         "1": "Very dissatisfied",
-        "2": "Dissatisfied", 
+        "2": "Dissatisfied",
         "3": "Neutral",
         "4": "Satisfied",
         "5": "Very satisfied"
@@ -766,7 +768,7 @@
     "categories": {
       "label": "Aspects to improve (optional)",
       "content": "Content",
-      "style": "Style", 
+      "style": "Style",
       "relevance": "Relevance",
       "length": "Length",
       "categoryLabel": "Category {category}",

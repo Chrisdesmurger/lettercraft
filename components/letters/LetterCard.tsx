@@ -1,126 +1,131 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { Tables } from '@/lib/supabase-client'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { 
-  FileText, 
-  Download, 
-  Eye, 
-  Calendar, 
-  Building, 
+import { useState } from "react";
+import { Tables } from "@/lib/supabase-client";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  FileText,
+  Download,
+  Eye,
+  Calendar,
+  Building,
   MapPin,
   Loader2,
-  Palette
-} from 'lucide-react'
-import { format } from 'date-fns'
-import { fr } from 'date-fns/locale'
-import toast from 'react-hot-toast'
-import { useI18n } from '@/lib/i18n-context'
-import { supabase } from '@/lib/supabase-client'
-import { generateLetterPdfWithTemplate, generateTextFile } from '@/lib/pdf'
-import { type LetterData } from '@/lib/pdf-templates'
-import TemplateSelector from '@/components/pdf/TemplateSelector'
-import { TONE_GUIDELINES, isValidToneKey } from '@/lib/tone-guidelines'
+  Palette,
+} from "lucide-react";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+import toast from "react-hot-toast";
+import { useI18n } from "@/lib/i18n-context";
+import { supabase } from "@/lib/supabase-client";
+import { generateLetterPdfWithTemplate, generateTextFile } from "@/lib/pdf";
+import { type LetterData } from "@/lib/pdf-templates";
+import TemplateSelector from "@/components/pdf/TemplateSelector";
+import { TONE_GUIDELINES, isValidToneKey } from "@/lib/tone-guidelines";
 
-type GeneratedLetter = Tables<'generated_letters'> & {
-  job_offers: Tables<'job_offers'> | null
-  candidates_profile: { title: string } | null
-}
+type GeneratedLetter = Tables<"generated_letters"> & {
+  job_offers: Tables<"job_offers"> | null;
+  candidates_profile: { title: string } | null;
+};
 
 interface LetterCardProps {
-  letter: GeneratedLetter
-  onView: () => void
+  letter: GeneratedLetter;
+  onView: () => void;
 }
 
 export default function LetterCard({ letter, onView }: LetterCardProps) {
-  const { t } = useI18n()
-  const [isDownloading, setIsDownloading] = useState(false)
-  const [selectedTemplateId, setSelectedTemplateId] = useState('classic')
-  const [showTemplateSelector, setShowTemplateSelector] = useState(false)
+  const { t } = useI18n();
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [selectedTemplateId, setSelectedTemplateId] = useState("classic");
+  const [showTemplateSelector, setShowTemplateSelector] = useState(false);
 
   // Récupérer les informations sur le ton
   const getToneDisplay = () => {
-    const toneKey = letter.tone_key || 'professionnel'
-    if (toneKey === 'personnalisé' && letter.tone_custom) {
+    const toneKey = letter.tone_key || "professionnel";
+    if (toneKey === "personnalisé" && letter.tone_custom) {
       return {
-        label: 'Personnalisé',
-        description: letter.tone_custom
-      }
-    } else if (isValidToneKey(toneKey) && TONE_GUIDELINES[toneKey as keyof typeof TONE_GUIDELINES]) {
-      const guideline = TONE_GUIDELINES[toneKey as keyof typeof TONE_GUIDELINES]
+        label: "Personnalisé",
+        description: letter.tone_custom,
+      };
+    } else if (
+      isValidToneKey(toneKey) &&
+      TONE_GUIDELINES[toneKey as keyof typeof TONE_GUIDELINES]
+    ) {
+      const guideline =
+        TONE_GUIDELINES[toneKey as keyof typeof TONE_GUIDELINES];
       return {
         label: guideline.label,
-        description: guideline.description
-      }
+        description: guideline.description,
+      };
     } else {
       return {
-        label: 'Professionnel',
-        description: 'Style formel et structuré'
-      }
+        label: "Professionnel",
+        description: "Style formel et structuré",
+      };
     }
-  }
+  };
 
-  const toneInfo = getToneDisplay()
+  const toneInfo = getToneDisplay();
 
   // Convertir les données de la lettre vers le format LetterData
   const letterData: LetterData = {
-    content: letter.content || 'Contenu de la lettre non disponible',
-    jobTitle: letter.job_offers?.title || '',
-    company: letter.job_offers?.company || '',
-    candidateName: letter.candidates_profile?.title || 'Candidat', // Utilise le titre du profil candidat
-    candidateEmail: '', // Ces infos ne sont pas directement disponibles dans la structure actuelle
-    candidatePhone: '',
-    candidateAddress: '',
-    location: 'Paris', // Valeur par défaut
-    date: new Date().toLocaleDateString('fr-FR', { 
-      day: 'numeric', 
-      month: 'long', 
-      year: 'numeric' 
-    })
-  }
+    content: letter.content || "Contenu de la lettre non disponible",
+    jobTitle: letter.job_offers?.title || "",
+    company: letter.job_offers?.company || "",
+    candidateName: letter.candidates_profile?.title || "Candidat", // Utilise le titre du profil candidat
+    candidateEmail: "", // Ces infos ne sont pas directement disponibles dans la structure actuelle
+    candidatePhone: "",
+    candidateAddress: "",
+    location: "Paris", // Valeur par défaut
+    date: new Date().toLocaleDateString("fr-FR", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    }),
+  };
 
-  const fileName = `lettre-motivation-${letter.job_offers?.company || 'entreprise'}-${letter.job_offers?.title || 'poste'}`
+  const fileName = `lettre-motivation-${letter.job_offers?.company || "entreprise"}-${letter.job_offers?.title || "poste"}`;
 
   const handleDownloadPdf = async () => {
-    setIsDownloading(true)
+    setIsDownloading(true);
     try {
-      console.log('Starting PDF download with template:', selectedTemplateId)
-      
+      console.log("Starting PDF download with template:", selectedTemplateId);
+
       await generateLetterPdfWithTemplate(letterData, fileName, {
         templateId: selectedTemplateId,
-        format: 'a4',
-        quality: 0.98
-      })
-      
-      console.log('PDF generation successful')
-      toast.success('PDF téléchargé avec succès')
-      
+        format: "a4",
+        quality: 0.98,
+      });
+
+      console.log("PDF generation successful");
+      toast.success("PDF téléchargé avec succès");
     } catch (error) {
-      console.error('PDF download error:', error)
-      toast.error(`Erreur lors du téléchargement PDF: ${error instanceof Error ? error.message : 'Erreur inconnue'}`)
+      console.error("PDF download error:", error);
+      toast.error(
+        `Erreur lors du téléchargement PDF: ${error instanceof Error ? error.message : "Erreur inconnue"}`,
+      );
     } finally {
-      setIsDownloading(false)
+      setIsDownloading(false);
     }
-  }
+  };
 
   const handleDownloadTxt = async () => {
-    setIsDownloading(true)
+    setIsDownloading(true);
     try {
-      generateTextFile(letterData.content || '', fileName)
-      toast.success('Fichier texte téléchargé')
+      generateTextFile(letterData.content || "", fileName);
+      toast.success("Fichier texte téléchargé");
     } catch (error) {
-      console.error('TXT download error:', error)
-      toast.error('Erreur lors du téléchargement TXT')
+      console.error("TXT download error:", error);
+      toast.error("Erreur lors du téléchargement TXT");
     } finally {
-      setIsDownloading(false)
+      setIsDownloading(false);
     }
-  }
+  };
 
-  const createdDate = new Date(letter.created_at)
-  const jobOffer = letter.job_offers
+  const createdDate = new Date(letter.created_at);
+  const jobOffer = letter.job_offers;
 
   return (
     <Card className="hover:shadow-lg transition-shadow duration-200 border-l-4 border-l-orange-400">
@@ -128,11 +133,13 @@ export default function LetterCard({ letter, onView }: LetterCardProps) {
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <CardTitle className="text-lg font-semibold text-gray-900 mb-1 line-clamp-2">
-              {jobOffer?.title || t('job.unspecifiedTitle')}
+              {jobOffer?.title || t("job.unspecifiedTitle")}
             </CardTitle>
             <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
               <Building className="w-4 h-4" />
-              <span className="font-medium">{jobOffer?.company || t('job.unspecifiedCompany')}</span>
+              <span className="font-medium">
+                {jobOffer?.company || t("job.unspecifiedCompany")}
+              </span>
             </div>
             {jobOffer?.location && (
               <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
@@ -151,16 +158,14 @@ export default function LetterCard({ letter, onView }: LetterCardProps) {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2 text-sm text-gray-500">
             <Calendar className="w-4 h-4" />
-            <span>
-              {format(createdDate, 'dd MMM yyyy', { locale: fr })}
-            </span>
+            <span>{format(createdDate, "dd MMM yyyy", { locale: fr })}</span>
           </div>
         </div>
 
         {/* Badge ton d'écriture */}
         <div className="mb-4">
-          <Badge 
-            variant="secondary" 
+          <Badge
+            variant="secondary"
             className="bg-blue-50 text-blue-700 border-blue-200 text-xs"
             title={toneInfo.description}
           >
@@ -178,7 +183,7 @@ export default function LetterCard({ letter, onView }: LetterCardProps) {
             className="flex-1"
           >
             <Eye className="w-4 h-4 mr-2" />
-            {t('letter.view')}
+            {t("letter.view")}
           </Button>
           <Button
             variant="outline"
@@ -225,7 +230,7 @@ export default function LetterCard({ letter, onView }: LetterCardProps) {
                   </>
                 )}
               </Button>
-              
+
               <Button
                 variant="outline"
                 size="sm"
@@ -239,11 +244,12 @@ export default function LetterCard({ letter, onView }: LetterCardProps) {
 
             {/* Informations */}
             <div className="text-xs text-muted-foreground">
-              <strong>Modèle:</strong> {selectedTemplateId} • <strong>Format:</strong> A4
+              <strong>Modèle:</strong> {selectedTemplateId} •{" "}
+              <strong>Format:</strong> A4
             </div>
           </div>
         )}
       </CardContent>
     </Card>
-  )
+  );
 }

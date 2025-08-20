@@ -18,30 +18,32 @@ headers: {
 ```
 
 **Vérifications :**
+
 - ✅ Token valide et non expiré
 - ✅ Utilisateur existe dans la base de données
 - ✅ Session active
 
 ### 2. **Contrôle d'accès basé sur les rôles (RBAC)**
 
-| Niveau | Actions autorisées | Conditions |
-|--------|-------------------|------------|
-| **Utilisateur** | `create`, `update`, `sync` | Ses propres données uniquement |
-| **Admin** | Toutes les actions | Utilisateurs avec `subscription_tier = 'premium'` |
-| **Interne** | Toutes les actions | Appels avec secret interne |
+| Niveau          | Actions autorisées         | Conditions                                        |
+| --------------- | -------------------------- | ------------------------------------------------- |
+| **Utilisateur** | `create`, `update`, `sync` | Ses propres données uniquement                    |
+| **Admin**       | Toutes les actions         | Utilisateurs avec `subscription_tier = 'premium'` |
+| **Interne**     | Toutes les actions         | Appels avec secret interne                        |
 
 ### 3. **Rate Limiting**
 
 Protection contre les attaques par déni de service.
 
-| Type d'action | Limite | Fenêtre |
-|---------------|--------|---------|
-| **Actions normales** | 100 req/min | 60 secondes |
-| **Actions admin** | 50 req/min | 60 secondes |
-| **Actions dangereuses** | 10 req/min | 60 secondes |
-| **Appels internes** | 1000 req/min | 60 secondes |
+| Type d'action           | Limite       | Fenêtre     |
+| ----------------------- | ------------ | ----------- |
+| **Actions normales**    | 100 req/min  | 60 secondes |
+| **Actions admin**       | 50 req/min   | 60 secondes |
+| **Actions dangereuses** | 10 req/min   | 60 secondes |
+| **Appels internes**     | 1000 req/min | 60 secondes |
 
 **Headers de réponse :**
+
 ```
 X-RateLimit-Remaining: 45
 X-RateLimit-Reset: 2025-01-27T10:30:00Z
@@ -52,6 +54,7 @@ X-RateLimit-Reset: 2025-01-27T10:30:00Z
 Chaque action a son propre schéma de validation.
 
 **Exemple pour `create` :**
+
 ```javascript
 {
   email: { required: true, format: 'email' },
@@ -62,6 +65,7 @@ Chaque action a son propre schéma de validation.
 ```
 
 **Types de validation :**
+
 - ✅ Types de données (string, number, array)
 - ✅ Longueurs min/max
 - ✅ Formats (email, UUID)
@@ -80,6 +84,7 @@ headers: {
 ```
 
 **Avantages :**
+
 - 🚀 Pas de dépendance à l'authentification utilisateur
 - ⚡ Rate limiting élevé pour les opérations internes
 - 🛡️ Protection contre les appels externes malveillants
@@ -96,6 +101,7 @@ Toutes les actions sensibles sont loggées.
 ```
 
 **Types de logs :**
+
 - ✅ Actions admin/dangereuses
 - ✅ Tentatives d'accès refusées
 - ✅ Erreurs de validation
@@ -104,16 +110,19 @@ Toutes les actions sensibles sont loggées.
 ## 🚨 Classification des actions
 
 ### **Actions publiques** (utilisateur authentifié)
+
 - `create` - Créer un contact
 - `update` - Mettre à jour ses données
 - `sync` - Synchroniser son profil
 
 ### **Actions administrateur** (permissions élevées)
+
 - `bulk` - Synchronisation en lot
 - `sync-all-lists` - Maintenance des listes
 - `update-lists` - Modifier les listes d'un contact
 
 ### **Actions dangereuses** (audit renforcé)
+
 - `delete` - Supprimer un contact
 - `create-missing` - Migration complète
 
@@ -147,6 +156,7 @@ node scripts/test-security.js
 ```
 
 **Tests inclus :**
+
 - ✅ Requêtes sans authentification
 - ✅ Tokens invalides
 - ✅ Validation des données
@@ -177,17 +187,19 @@ curl -X POST http://localhost:3000/api/sync-contact \
 ### **Pour les développeurs**
 
 1. **Toujours utiliser l'API interne** pour les synchronisations automatiques
+
 ```javascript
-import { autoSyncUser } from '@/lib/internal-api'
-await autoSyncUser(userId, 'profile-update')
+import { autoSyncUser } from "@/lib/internal-api";
+await autoSyncUser(userId, "profile-update");
 ```
 
 2. **Gérer les erreurs sans bloquer l'UX**
+
 ```javascript
 try {
-  await autoSyncUser(userId, 'source')
+  await autoSyncUser(userId, "source");
 } catch (error) {
-  console.warn('Sync failed:', error)
+  console.warn("Sync failed:", error);
   // Continue sans interrompre l'utilisateur
 }
 ```
@@ -204,34 +216,42 @@ try {
 ### **Pour la production**
 
 1. **Variables d'environnement sécurisées**
+
 ```env
 INTERNAL_API_SECRET=64-char-random-hex-string
 ```
 
 2. **Monitoring actif**
+
 - Alertes sur les échecs d'authentification répétés
 - Surveillance du rate limiting
 - Logs d'audit des actions sensibles
 
 3. **Rotation des secrets**
+
 - Changer le secret interne trimestriellement
 - Renouveler les tokens API Brevo annuellement
 
 ## ⚠️ Vulnérabilités connues et mitigations
 
 ### **1. Attaque par force brute**
+
 **Mitigation :** Rate limiting strict (10 req/min pour actions sensibles)
 
 ### **2. Élévation de privilèges**
+
 **Mitigation :** Vérification stricte des permissions à chaque requête
 
 ### **3. Injection de données**
+
 **Mitigation :** Validation complète avec schémas TypeScript
 
 ### **4. Déni de service**
+
 **Mitigation :** Rate limiting par IP + User-Agent
 
 ### **5. Fuite de données**
+
 **Mitigation :** Utilisateurs ne peuvent accéder qu'à leurs propres données
 
 ## 📞 Incident de sécurité
@@ -257,4 +277,4 @@ En cas de problème de sécurité :
 - [ ] ✅ Tests de sécurité passés
 - [ ] ✅ Monitoring configuré
 
-*Dernière mise à jour : Janvier 2025*
+_Dernière mise à jour : Janvier 2025_

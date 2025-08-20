@@ -3,367 +3,384 @@
  * Intègre le questionnaire d'onboarding comme première étape
  */
 
-'use client'
+"use client";
 
-import React, { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { useRouter } from 'next/navigation'
-import { useUser } from '@/hooks/useUser'
-import { useI18n } from '@/lib/i18n-context'
-import CVUpload from '@/components/CVUpload'
-import JobOfferExtractor from '@/components/JobOfferExtractor'
-import LetterGenerator from '@/components/LetterGenerator'
-import LetterPreview from '@/components/LetterPreview'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { Progress } from '@/components/ui/progress'
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
+import { useUser } from "@/hooks/useUser";
+import { useI18n } from "@/lib/i18n-context";
+import CVUpload from "@/components/CVUpload";
+import JobOfferExtractor from "@/components/JobOfferExtractor";
+import LetterGenerator from "@/components/LetterGenerator";
+import LetterPreview from "@/components/LetterPreview";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import {
-    ChevronRight,
-    ChevronLeft,
-    User,
-    FileText,
-    Briefcase,
-    Sparkles,
-    Eye,
-    Check
-} from 'lucide-react'
-import toast, { Toaster } from 'react-hot-toast'
-import { cn } from '@/lib/utils'
+  ChevronRight,
+  ChevronLeft,
+  User,
+  FileText,
+  Briefcase,
+  Sparkles,
+  Eye,
+  Check,
+} from "lucide-react";
+import toast, { Toaster } from "react-hot-toast";
+import { cn } from "@/lib/utils";
 
 // Configuration des étapes
 const getSteps = (t: any) => [
-    {
-        id: 'cv',
-        title: t('steps.cv.title'),
-        description: t('steps.cv.description'),
-        icon: FileText,
-        component: CVUpload,
-        validation: async (data: any) => {
-            return data.cvUploaded === true
-        }
+  {
+    id: "cv",
+    title: t("steps.cv.title"),
+    description: t("steps.cv.description"),
+    icon: FileText,
+    component: CVUpload,
+    validation: async (data: any) => {
+      return data.cvUploaded === true;
     },
-    {
-        id: 'job',
-        title: t('steps.jobOffer.title'),
-        description: t('steps.jobOffer.description'),
-        icon: Briefcase,
-        component: JobOfferExtractor,
-        validation: async (data: any) => {
-            return data.jobOffer && data.jobOffer.title && data.jobOffer.company
-        }
+  },
+  {
+    id: "job",
+    title: t("steps.jobOffer.title"),
+    description: t("steps.jobOffer.description"),
+    icon: Briefcase,
+    component: JobOfferExtractor,
+    validation: async (data: any) => {
+      return data.jobOffer && data.jobOffer.title && data.jobOffer.company;
     },
-    {
-        id: 'generate',
-        title: t('steps.generate.title'),
-        description: t('steps.generate.description'),
-        icon: Sparkles,
-        component: LetterGenerator,
-        validation: async (data: any) => {
-            return true // Pas de validation requise
-        }
+  },
+  {
+    id: "generate",
+    title: t("steps.generate.title"),
+    description: t("steps.generate.description"),
+    icon: Sparkles,
+    component: LetterGenerator,
+    validation: async (data: any) => {
+      return true; // Pas de validation requise
     },
-    {
-        id: 'preview',
-        title: t('steps.preview.title'),
-        description: t('steps.preview.description'),
-        icon: Eye,
-        component: LetterPreview,
-        validation: async (data: any) => {
-            return true
-        }
-    }
-]
+  },
+  {
+    id: "preview",
+    title: t("steps.preview.title"),
+    description: t("steps.preview.description"),
+    icon: Eye,
+    component: LetterPreview,
+    validation: async (data: any) => {
+      return true;
+    },
+  },
+];
 
 interface FlowData {
-    // Données du profil
-    category?: string
-    responses?: Record<string, string>
+  // Données du profil
+  category?: string;
+  responses?: Record<string, string>;
 
-    // Données du CV
-    cvUploaded?: boolean
-    cvData?: any
+  // Données du CV
+  cvUploaded?: boolean;
+  cvData?: any;
 
-    // Données de l'offre
-    jobOffer?: {
-        title: string
-        company: string
-        description: string
-        requirements?: string[]
-    }
+  // Données de l'offre
+  jobOffer?: {
+    title: string;
+    company: string;
+    description: string;
+    requirements?: string[];
+  };
 
-    // Lettre générée
-    generatedLetter?: string
-    letterId?: string
-    letterLanguage?: string
+  // Lettre générée
+  generatedLetter?: string;
+  letterId?: string;
+  letterLanguage?: string;
 }
 
 export default function LetterCreationFlow() {
-    const router = useRouter()
-    const { user, isLoading: userLoading } = useUser() // Récupérer loading
-    const { t } = useI18n()
-    const [currentStep, setCurrentStep] = useState(0)
-    const [flowData, setFlowData] = useState<FlowData>({})
-    const [isValidating, setIsValidating] = useState(false)
-    const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set())
-    
-    const steps = getSteps(t)
+  const router = useRouter();
+  const { user, isLoading: userLoading } = useUser(); // Récupérer loading
+  const { t } = useI18n();
+  const [currentStep, setCurrentStep] = useState(0);
+  const [flowData, setFlowData] = useState<FlowData>({});
+  const [isValidating, setIsValidating] = useState(false);
+  const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
 
-    // Rediriger si non connecté
+  const steps = getSteps(t);
+
+  // Rediriger si non connecté
   useEffect(() => {
     if (!userLoading && !user) {
-      router.push('/login')
+      router.push("/login");
     }
-  }, [user, userLoading, router])
+  }, [user, userLoading, router]);
 
-    // Sauvegarder les données dans le localStorage pour persistance
-    useEffect(() => {
-        const savedData = localStorage.getItem('letterCreationFlow')
-        if (savedData) {
-            try {
-                const parsed = JSON.parse(savedData)
-                setFlowData(parsed.data || {})
-                setCurrentStep(parsed.step || 0)
-                setCompletedSteps(new Set(parsed.completed || []))
-            } catch (error) {
-                console.error('Erreur lors du chargement des données:', error)
-            }
-        }
-    }, [])
-
-    // Sauvegarder à chaque changement
-    useEffect(() => {
-        localStorage.setItem('letterCreationFlow', JSON.stringify({
-            data: flowData,
-            step: currentStep,
-            completed: Array.from(completedSteps)
-        }))
-    }, [flowData, currentStep, completedSteps])
-
-    const CurrentStepComponent = steps[currentStep].component
-
-    // Mise à jour des données du flow
-    const updateFlowData = (stepData: Partial<FlowData>) => {
-        setFlowData(prev => ({ ...prev, ...stepData }))
+  // Sauvegarder les données dans le localStorage pour persistance
+  useEffect(() => {
+    const savedData = localStorage.getItem("letterCreationFlow");
+    if (savedData) {
+      try {
+        const parsed = JSON.parse(savedData);
+        setFlowData(parsed.data || {});
+        setCurrentStep(parsed.step || 0);
+        setCompletedSteps(new Set(parsed.completed || []));
+      } catch (error) {
+        console.error("Erreur lors du chargement des données:", error);
+      }
     }
+  }, []);
 
-    // Navigation entre les étapes
-    const goToNext = async () => {
-        if (currentStep >= steps.length - 1) return
+  // Sauvegarder à chaque changement
+  useEffect(() => {
+    localStorage.setItem(
+      "letterCreationFlow",
+      JSON.stringify({
+        data: flowData,
+        step: currentStep,
+        completed: Array.from(completedSteps),
+      }),
+    );
+  }, [flowData, currentStep, completedSteps]);
 
-        setIsValidating(true)
-        try {
-            // Valider l'étape actuelle
-            const isValid = await steps[currentStep].validation(flowData)
+  const CurrentStepComponent = steps[currentStep].component;
 
-            if (isValid) {
-                setCompletedSteps(prev => new Set(prev).add(currentStep))
-                setCurrentStep(currentStep + 1)
+  // Mise à jour des données du flow
+  const updateFlowData = (stepData: Partial<FlowData>) => {
+    setFlowData((prev) => ({ ...prev, ...stepData }));
+  };
 
-                // Animation de scroll vers le haut
-                window.scrollTo({ top: 0, behavior: 'smooth' })
-            } else {
-                toast.error('Veuillez compléter cette étape avant de continuer')
-            }
-        } catch (error) {
-            console.error('Erreur de validation:', error)
-            toast.error('Une erreur est survenue')
-        } finally {
-            setIsValidating(false)
-        }
+  // Navigation entre les étapes
+  const goToNext = async () => {
+    if (currentStep >= steps.length - 1) return;
+
+    setIsValidating(true);
+    try {
+      // Valider l'étape actuelle
+      const isValid = await steps[currentStep].validation(flowData);
+
+      if (isValid) {
+        setCompletedSteps((prev) => new Set(prev).add(currentStep));
+        setCurrentStep(currentStep + 1);
+
+        // Animation de scroll vers le haut
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } else {
+        toast.error("Veuillez compléter cette étape avant de continuer");
+      }
+    } catch (error) {
+      console.error("Erreur de validation:", error);
+      toast.error("Une erreur est survenue");
+    } finally {
+      setIsValidating(false);
     }
+  };
 
-    const goToPrevious = () => {
-        if (currentStep > 0) {
-            setCurrentStep(currentStep - 1)
-            window.scrollTo({ top: 0, behavior: 'smooth' })
-        }
+  const goToPrevious = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
+  };
 
-    const goToStep = (stepIndex: number) => {
-        // Permettre de naviguer vers les étapes précédentes ou complétées
-        if (stepIndex <= currentStep || completedSteps.has(stepIndex - 1)) {
-            setCurrentStep(stepIndex)
-            window.scrollTo({ top: 0, behavior: 'smooth' })
-        }
+  const goToStep = (stepIndex: number) => {
+    // Permettre de naviguer vers les étapes précédentes ou complétées
+    if (stepIndex <= currentStep || completedSteps.has(stepIndex - 1)) {
+      setCurrentStep(stepIndex);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
+  };
 
-    // Réinitialiser le flow
-    const resetFlow = () => {
-        setFlowData({})
-        setCurrentStep(0)
-        setCompletedSteps(new Set())
-        localStorage.removeItem('letterCreationFlow')
-        toast.success('Nouveau processus de création démarré')
-    }
+  // Réinitialiser le flow
+  const resetFlow = () => {
+    setFlowData({});
+    setCurrentStep(0);
+    setCompletedSteps(new Set());
+    localStorage.removeItem("letterCreationFlow");
+    toast.success("Nouveau processus de création démarré");
+  };
 
-    const progressPercentage = ((currentStep + 1) / steps.length) * 100
+  const progressPercentage = ((currentStep + 1) / steps.length) * 100;
 
-    return (
-        <div className="min-h-screen bg-gray-50">
-            <Toaster />
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <Toaster />
 
-            <div className="container mx-auto py-8 px-4">
-                {/* Header avec progression */}
-                <div className="mb-8">
-                    <div className="flex justify-between items-center mb-6">
-                        <h1 className="text-3xl font-bold">Créer une lettre de motivation</h1>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={resetFlow}
-                            className="text-gray-600"
-                        >
-                            Recommencer
-                        </Button>
-                    </div>
+      <div className="container mx-auto py-8 px-4">
+        {/* Header avec progression */}
+        <div className="mb-8">
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-3xl font-bold">
+              Créer une lettre de motivation
+            </h1>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={resetFlow}
+              className="text-gray-600"
+            >
+              Recommencer
+            </Button>
+          </div>
 
-                    {/* Stepper desktop */}
-                    <div className="hidden md:block">
-                        <div className="flex justify-between mb-4">
-                            {steps.map((step, index) => {
-                                const Icon = step.icon
-                                const isActive = index === currentStep
-                                const isCompleted = completedSteps.has(index)
-                                const isClickable = index <= currentStep || completedSteps.has(index - 1)
+          {/* Stepper desktop */}
+          <div className="hidden md:block">
+            <div className="flex justify-between mb-4">
+              {steps.map((step, index) => {
+                const Icon = step.icon;
+                const isActive = index === currentStep;
+                const isCompleted = completedSteps.has(index);
+                const isClickable =
+                  index <= currentStep || completedSteps.has(index - 1);
 
-                                return (
-                                    <button
-                                        key={step.id}
-                                        onClick={() => goToStep(index)}
-                                        disabled={!isClickable}
-                                        className={cn(
-                                            "flex-1 text-center transition-all",
-                                            isClickable && "cursor-pointer hover:opacity-80",
-                                            !isClickable && "cursor-not-allowed opacity-50"
-                                        )}
-                                    >
-                                        <div className="relative">
-                                            <div
-                                                className={cn(
-                                                    "w-12 h-12 mx-auto rounded-full flex items-center justify-center transition-all",
-                                                    isActive && "bg-primary text-white ring-4 ring-primary/20",
-                                                    isCompleted && !isActive && "bg-green-500 text-white",
-                                                    !isActive && !isCompleted && "bg-gray-200 text-gray-500"
-                                                )}
-                                            >
-                                                {isCompleted && !isActive ? (
-                                                    <Check className="w-5 h-5" />
-                                                ) : (
-                                                    <Icon className="w-5 h-5" />
-                                                )}
-                                            </div>
-
-                                            {index < steps.length - 1 && (
-                                                <div
-                                                    className={cn(
-                                                        "absolute top-6 left-[50%] w-full h-0.5 transition-all",
-                                                        index < currentStep || isCompleted
-                                                            ? "bg-primary"
-                                                            : "bg-gray-200"
-                                                    )}
-                                                    style={{ width: 'calc(100% + 2rem)', marginLeft: '1.5rem' }}
-                                                />
-                                            )}
-                                        </div>
-
-                                        <div className="mt-3">
-                                            <p className={cn(
-                                                "font-medium text-sm",
-                                                isActive ? "text-primary" : "text-gray-700"
-                                            )}>
-                                                {step.title}
-                                            </p>
-                                            <p className="text-xs text-gray-500 mt-1 hidden lg:block">
-                                                {step.description}
-                                            </p>
-                                        </div>
-                                    </button>
-                                )
-                            })}
-                        </div>
-                    </div>
-
-                    {/* Progress bar mobile */}
-                    <div className="md:hidden">
-                        <div className="flex justify-between items-center mb-2">
-                            <span className="text-sm font-medium">
-                                Étape {currentStep + 1} sur {steps.length}
-                            </span>
-                            <span className="text-sm text-gray-500">
-                                {steps[currentStep].title}
-                            </span>
-                        </div>
-                        <Progress value={progressPercentage} className="h-2" />
-                    </div>
-                </div>
-
-                {/* Contenu de l'étape */}
-                <Card className="p-6 md:p-8">
-                    <AnimatePresence mode="wait">
-                        <motion.div
-                            key={currentStep}
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -20 }}
-                            transition={{ duration: 0.3 }}
-                        >
-                            <div className="mb-6">
-                                <h2 className="text-2xl font-semibold mb-2">
-                                    {steps[currentStep].title}
-                                </h2>
-                                <p className="text-gray-600">
-                                    {steps[currentStep].description}
-                                </p>
-                            </div>
-
-                            <CurrentStepComponent
-                                data={flowData}
-                                onUpdate={updateFlowData}
-                                onNext={goToNext}
-                            />
-                        </motion.div>
-                    </AnimatePresence>
-                </Card>
-
-                {/* Navigation */}
-                <div className="flex justify-between mt-8">
-                    <Button
-                        onClick={goToPrevious}
-                        disabled={currentStep === 0}
-                        variant="outline"
-                        size="lg"
-                    >
-                        <ChevronLeft className="mr-2 h-4 w-4" />
-                        {t('common.previous')}
-                    </Button>
-
-                    <Button
-                        onClick={goToNext}
-                        disabled={currentStep === steps.length - 1 || isValidating}
-                        size="lg"
-                    >
-                        {isValidating ? (
-                            <>
-                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                                {t('common.loading')}
-                            </>
-                        ) : (
-                            <>
-                                {currentStep === steps.length - 2 ? t('steps.preview.title') : t('common.next')}
-                                <ChevronRight className="ml-2 h-4 w-4" />
-                            </>
+                return (
+                  <button
+                    key={step.id}
+                    onClick={() => goToStep(index)}
+                    disabled={!isClickable}
+                    className={cn(
+                      "flex-1 text-center transition-all",
+                      isClickable && "cursor-pointer hover:opacity-80",
+                      !isClickable && "cursor-not-allowed opacity-50",
+                    )}
+                  >
+                    <div className="relative">
+                      <div
+                        className={cn(
+                          "w-12 h-12 mx-auto rounded-full flex items-center justify-center transition-all",
+                          isActive &&
+                            "bg-primary text-white ring-4 ring-primary/20",
+                          isCompleted && !isActive && "bg-green-500 text-white",
+                          !isActive &&
+                            !isCompleted &&
+                            "bg-gray-200 text-gray-500",
                         )}
-                    </Button>
-                </div>
+                      >
+                        {isCompleted && !isActive ? (
+                          <Check className="w-5 h-5" />
+                        ) : (
+                          <Icon className="w-5 h-5" />
+                        )}
+                      </div>
 
-                {/* Aide contextuelle */}
-                <div className="mt-8 p-4 bg-blue-50 rounded-lg">
-                    <p className="text-sm text-blue-800">
-                        💡 <strong>Astuce :</strong> Vos réponses sont sauvegardées automatiquement.
-                        Vous pouvez revenir à tout moment pour continuer votre lettre.
-                    </p>
-                </div>
+                      {index < steps.length - 1 && (
+                        <div
+                          className={cn(
+                            "absolute top-6 left-[50%] w-full h-0.5 transition-all",
+                            index < currentStep || isCompleted
+                              ? "bg-primary"
+                              : "bg-gray-200",
+                          )}
+                          style={{
+                            width: "calc(100% + 2rem)",
+                            marginLeft: "1.5rem",
+                          }}
+                        />
+                      )}
+                    </div>
+
+                    <div className="mt-3">
+                      <p
+                        className={cn(
+                          "font-medium text-sm",
+                          isActive ? "text-primary" : "text-gray-700",
+                        )}
+                      >
+                        {step.title}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1 hidden lg:block">
+                        {step.description}
+                      </p>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
+          </div>
+
+          {/* Progress bar mobile */}
+          <div className="md:hidden">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-sm font-medium">
+                Étape {currentStep + 1} sur {steps.length}
+              </span>
+              <span className="text-sm text-gray-500">
+                {steps[currentStep].title}
+              </span>
+            </div>
+            <Progress value={progressPercentage} className="h-2" />
+          </div>
         </div>
-    )
+
+        {/* Contenu de l'étape */}
+        <Card className="p-6 md:p-8">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentStep}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="mb-6">
+                <h2 className="text-2xl font-semibold mb-2">
+                  {steps[currentStep].title}
+                </h2>
+                <p className="text-gray-600">
+                  {steps[currentStep].description}
+                </p>
+              </div>
+
+              <CurrentStepComponent
+                data={flowData}
+                onUpdate={updateFlowData}
+                onNext={goToNext}
+              />
+            </motion.div>
+          </AnimatePresence>
+        </Card>
+
+        {/* Navigation */}
+        <div className="flex justify-between mt-8">
+          <Button
+            onClick={goToPrevious}
+            disabled={currentStep === 0}
+            variant="outline"
+            size="lg"
+          >
+            <ChevronLeft className="mr-2 h-4 w-4" />
+            {t("common.previous")}
+          </Button>
+
+          <Button
+            onClick={goToNext}
+            disabled={currentStep === steps.length - 1 || isValidating}
+            size="lg"
+          >
+            {isValidating ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                {t("common.loading")}
+              </>
+            ) : (
+              <>
+                {currentStep === steps.length - 2
+                  ? t("steps.preview.title")
+                  : t("common.next")}
+                <ChevronRight className="ml-2 h-4 w-4" />
+              </>
+            )}
+          </Button>
+        </div>
+
+        {/* Aide contextuelle */}
+        <div className="mt-8 p-4 bg-blue-50 rounded-lg">
+          <p className="text-sm text-blue-800">
+            💡 <strong>Astuce :</strong> Vos réponses sont sauvegardées
+            automatiquement. Vous pouvez revenir à tout moment pour continuer
+            votre lettre.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
 }

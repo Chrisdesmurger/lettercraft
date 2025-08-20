@@ -6,7 +6,7 @@
   },
   "navigation": {
     "dashboard": "Dashboard",
-    "generator": "Generator", 
+    "generator": "Generator",
     "letters": "Meine Briefe",
     "profile": "Profil"
   },
@@ -28,7 +28,7 @@
       "description": "Passen Sie Ihren Brief an und generieren Sie ihn"
     },
     "preview": {
-      "title": "Vorschau", 
+      "title": "Vorschau",
       "description": "Überprüfen und laden Sie Ihren Brief herunter"
     }
   },
@@ -349,7 +349,7 @@
       "retry": "Wiederholen",
       "refresh": "Rechnungen aktualisieren",
       "refreshing": "Aktualisieren...",
-    "optional": "optional",
+      "optional": "optional",
       "download": "Rechnung herunterladen",
       "downloadTitle": "Rechnung herunterladen",
       "viewOnStripe": "Auf Stripe anzeigen",
@@ -513,6 +513,7 @@
     "question6": {
       "title": "In welcher Sprache möchten Sie Ihr Bewerbungsschreiben generieren?",
       "placeholder": "Wählen Sie die Sprache für Ihren Brief",
+      "premiumFeature": "Premium-Funktion",
       "detectedLanguage": "Automatisch erkannte Sprache: {language}",
       "french": "Französisch",
       "english": "Englisch",
@@ -606,6 +607,7 @@
     "position": "Position",
     "company": "Unternehmen",
     "cvUsed": "Verwendeter Lebenslauf",
+    "toneUsed": "Verwendeter Ton",
     "generatedOn": "Erstellt am"
   },
   "auth": {
@@ -763,7 +765,7 @@
         "description": "Traditioneller französischer Stil mit Times New Roman"
       },
       "modern": {
-        "name": "Modern", 
+        "name": "Modern",
         "description": "Sauberes und zeitgemäßes Design"
       },
       "elegant": {
@@ -791,7 +793,7 @@
       "label": "Bewertung",
       "labels": {
         "1": "Sehr unzufrieden",
-        "2": "Unzufrieden", 
+        "2": "Unzufrieden",
         "3": "Neutral",
         "4": "Zufrieden",
         "5": "Sehr zufrieden"
@@ -806,7 +808,7 @@
     "categories": {
       "label": "Verbesserungsbereiche (optional)",
       "content": "Inhalt",
-      "style": "Stil", 
+      "style": "Stil",
       "relevance": "Relevanz",
       "length": "Länge",
       "categoryLabel": "Kategorie {category}",

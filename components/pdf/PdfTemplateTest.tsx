@@ -1,12 +1,12 @@
-'use client'
+"use client";
 
-import React from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import TemplateSelector from './TemplateSelector'
-import PdfExportControls from './PdfExportControls'
-import { useUserProfile } from '@/hooks/useUserProfile'
-import type { LetterData } from '@/lib/pdf-templates'
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import TemplateSelector from "./TemplateSelector";
+import PdfExportControls from "./PdfExportControls";
+import { useUserProfile } from "@/hooks/useUserProfile";
+import type { LetterData } from "@/lib/pdf-templates";
 
 // Données de test pour le PDF
 const testLetterData: LetterData = {
@@ -21,21 +21,21 @@ Je suis particulièrement intéressé par votre approche innovante du développe
 Je serais ravi de pouvoir échanger avec vous sur cette opportunité et vous démontrer ma motivation.
 
 Dans l'attente de votre retour, je vous prie d'agréer, Madame, Monsieur, mes salutations distinguées.`,
-  jobTitle: 'Développeur Full-Stack',
-  company: 'Tech Solutions',
-  candidateName: 'Jean Dupont',
-  candidateAddress: '456 Avenue des Candidats\n69000 Lyon',
-  candidatePhone: '+33 6 12 34 56 78',
-  candidateEmail: 'jean.dupont@email.com',
-  date: new Date().toLocaleDateString('fr-FR'),
-  location: 'Lyon'
-}
+  jobTitle: "Développeur Full-Stack",
+  company: "Tech Solutions",
+  candidateName: "Jean Dupont",
+  candidateAddress: "456 Avenue des Candidats\n69000 Lyon",
+  candidatePhone: "+33 6 12 34 56 78",
+  candidateEmail: "jean.dupont@email.com",
+  date: new Date().toLocaleDateString("fr-FR"),
+  location: "Lyon",
+};
 
 export default function PdfTemplateTest() {
-  const { profile } = useUserProfile()
-  const [selectedTemplate, setSelectedTemplate] = React.useState('classic')
+  const { profile } = useUserProfile();
+  const [selectedTemplate, setSelectedTemplate] = React.useState("classic");
 
-  const isPremium = profile?.subscription_tier === 'premium'
+  const isPremium = profile?.subscription_tier === "premium";
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
@@ -53,9 +53,12 @@ export default function PdfTemplateTest() {
           <div className="bg-muted p-4 rounded-lg">
             <h3 className="font-semibold mb-2">État de l'abonnement</h3>
             <p>
-              Utilisateur: <strong>{isPremium ? "Premium" : "Free"}</strong><br />
-              Email: {profile?.email || "Non connecté"}<br />
-              Accès aux templates: {isPremium ? "Tous les modèles" : "Modèle Classic uniquement"}
+              Utilisateur: <strong>{isPremium ? "Premium" : "Free"}</strong>
+              <br />
+              Email: {profile?.email || "Non connecté"}
+              <br />
+              Accès aux templates:{" "}
+              {isPremium ? "Tous les modèles" : "Modèle Classic uniquement"}
             </p>
           </div>
 
@@ -79,20 +82,37 @@ export default function PdfTemplateTest() {
 
           {/* Informations sur les restrictions */}
           <div className="bg-blue-50 p-4 rounded-lg">
-            <h3 className="font-semibold mb-2 text-blue-800">Restrictions implémentées</h3>
+            <h3 className="font-semibold mb-2 text-blue-800">
+              Restrictions implémentées
+            </h3>
             <ul className="text-sm text-blue-700 space-y-1">
-              <li>✅ Utilisateurs free: accès uniquement au modèle "Classic"</li>
-              <li>✅ Modèles premium floutés et non-cliquables pour les utilisateurs free</li>
-              <li>✅ Icône de verrouillage sur les modèles premium restreints</li>
+              <li>
+                ✅ Utilisateurs free: accès uniquement au modèle "Classic"
+              </li>
+              <li>
+                ✅ Modèles premium floutés et non-cliquables pour les
+                utilisateurs free
+              </li>
+              <li>
+                ✅ Icône de verrouillage sur les modèles premium restreints
+              </li>
               <li>✅ Badge "Premium" sur les modèles non-accessibles</li>
-              <li>✅ Message d'upgrade dans PdfExportControls pour utilisateurs free</li>
-              <li>✅ Boutons d'upgrade vers la page d'abonnement (/profile?tab=subscription)</li>
-              <li>✅ Protection côté client contre la sélection de modèles premium</li>
+              <li>
+                ✅ Message d'upgrade dans PdfExportControls pour utilisateurs
+                free
+              </li>
+              <li>
+                ✅ Boutons d'upgrade vers la page d'abonnement
+                (/profile?tab=subscription)
+              </li>
+              <li>
+                ✅ Protection côté client contre la sélection de modèles premium
+              </li>
               <li>✅ Support multilingue des messages de restriction</li>
             </ul>
           </div>
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

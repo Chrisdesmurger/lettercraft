@@ -1,51 +1,63 @@
-'use client'
+"use client";
 
-import React, { useState, useEffect, useCallback } from 'react'
-import { motion } from 'framer-motion'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { Textarea } from '@/components/ui/textarea'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
-import { Checkbox } from '@/components/ui/checkbox'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { ChevronRight, ChevronLeft, AlertCircle, CheckCircle, Palette } from 'lucide-react'
-import { cn } from '@/lib/utils'
-import type { QuestionnaireQuestion } from '@/hooks/useQuestionnaireFlow'
-import { useI18n } from '@/lib/i18n-context'
+import React, { useState, useEffect, useCallback } from "react";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  ChevronRight,
+  ChevronLeft,
+  AlertCircle,
+  CheckCircle,
+  Palette,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import type { QuestionnaireQuestion } from "@/hooks/useQuestionnaireFlow";
+import { useI18n } from "@/lib/i18n-context";
 
 interface QuestionCardProps {
-  question: QuestionnaireQuestion
-  value: any
-  onChange: (value: any) => void
-  onNext: () => void
-  onPrevious: () => void
-  canGoNext: boolean
-  canGoPrevious: boolean
-  isLastQuestion: boolean
-  questionNumber: number
-  totalQuestions: number
-  cvData?: any
-  jobOfferData?: any
+  question: QuestionnaireQuestion;
+  value: any;
+  onChange: (value: any) => void;
+  onNext: () => void;
+  onPrevious: () => void;
+  canGoNext: boolean;
+  canGoPrevious: boolean;
+  isLastQuestion: boolean;
+  questionNumber: number;
+  totalQuestions: number;
+  cvData?: any;
+  jobOfferData?: any;
 }
 
 const cardVariants = {
   enter: (direction: number) => ({
     x: direction > 0 ? 1000 : -1000,
-    opacity: 0
+    opacity: 0,
   }),
   center: {
     zIndex: 1,
     x: 0,
-    opacity: 1
+    opacity: 1,
   },
   exit: (direction: number) => ({
     zIndex: 0,
     x: direction < 0 ? 1000 : -1000,
-    opacity: 0
-  })
-}
+    opacity: 0,
+  }),
+};
 
 export default function QuestionCard({
   question,
@@ -59,88 +71,112 @@ export default function QuestionCard({
   questionNumber,
   totalQuestions,
   cvData,
-  jobOfferData
+  jobOfferData,
 }: QuestionCardProps) {
-  const { t } = useI18n()
-  const [error, setError] = useState<string | null>(null)
-  const [localValue, setLocalValue] = useState(value)
+  const { t } = useI18n();
+  const [error, setError] = useState<string | null>(null);
+  const [localValue, setLocalValue] = useState(value);
 
   useEffect(() => {
-    setLocalValue(value)
-  }, [value])
+    setLocalValue(value);
+  }, [value]);
 
-  const handleValueChange = useCallback((newValue: any) => {
-    setLocalValue(newValue)
-    onChange(newValue)
-    
-    // Validation en temps réel
-    if (question.validation) {
-      const validationError = question.validation(newValue)
-      setError(validationError)
-    } else {
-      setError(null)
-    }
-  }, [onChange, question.validation])
+  const handleValueChange = useCallback(
+    (newValue: any) => {
+      setLocalValue(newValue);
+      onChange(newValue);
+
+      // Validation en temps réel
+      if (question.validation) {
+        const validationError = question.validation(newValue);
+        setError(validationError);
+      } else {
+        setError(null);
+      }
+    },
+    [onChange, question.validation],
+  );
 
   // Auto-sélection de la langue détectée pour la question de langue
   useEffect(() => {
-    if (question.id === 'language' && jobOfferData?.language && !value) {
+    if (question.id === "language" && jobOfferData?.language && !value) {
       // Auto-sélectionner la langue détectée si aucune valeur n'est encore définie
-      const detectedLanguage = jobOfferData.language
-      if (question.options?.some(opt => opt.value === detectedLanguage)) {
-        handleValueChange(detectedLanguage)
+      const detectedLanguage = jobOfferData.language;
+      if (question.options?.some((opt) => opt.value === detectedLanguage)) {
+        handleValueChange(detectedLanguage);
       }
     }
-  }, [question.id, jobOfferData?.language, value, question.options, handleValueChange])
+  }, [
+    question.id,
+    jobOfferData?.language,
+    value,
+    question.options,
+    handleValueChange,
+  ]);
 
   const handleNext = () => {
     if (question.validation) {
-      const validationError = question.validation(localValue)
+      const validationError = question.validation(localValue);
       if (validationError) {
-        setError(validationError)
-        return
+        setError(validationError);
+        return;
       }
     }
-    onNext()
-  }
+    onNext();
+  };
 
   const renderInput = () => {
     switch (question.type) {
-      case 'text':
+      case "text":
         return (
           <Input
-            value={localValue || ''}
+            value={localValue || ""}
             onChange={(e) => handleValueChange(e.target.value)}
             placeholder={question.placeholder}
             className="min-h-[44px]"
           />
-        )
+        );
 
-      case 'textarea':
+      case "textarea":
         return (
           <Textarea
-            value={localValue || ''}
+            value={localValue || ""}
             onChange={(e) => handleValueChange(e.target.value)}
             placeholder={question.placeholder}
             className="min-h-[120px] resize-none"
             rows={5}
           />
-        )
+        );
 
-      case 'select':
+      case "select":
         return (
           <div className="space-y-4">
-            {question.id === 'language' && jobOfferData?.language && (
+            {/* Premium Feature Badge pour la question langue */}
+            {question.id === "language" && (
+              <div className="flex items-center gap-2 mb-4">
+                <Palette className="w-4 h-4 text-orange-600" />
+                <Badge
+                  variant="secondary"
+                  className="bg-orange-100 text-orange-800"
+                >
+                  {t("questionnaire.question6.premiumFeature")}
+                </Badge>
+              </div>
+            )}
+
+            {question.id === "language" && jobOfferData?.language && (
               <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
                 <p className="text-sm text-blue-800">
-                  {t('questionnaire.question6.detectedLanguage', { language: question.options?.find(opt => opt.value === jobOfferData.language)?.label || jobOfferData.language })}
+                  {t("questionnaire.question6.detectedLanguage", {
+                    language:
+                      question.options?.find(
+                        (opt) => opt.value === jobOfferData.language,
+                      )?.label || jobOfferData.language,
+                  })}
                 </p>
               </div>
             )}
-            <RadioGroup
-              value={localValue}
-              onValueChange={handleValueChange}
-            >
+            <RadioGroup value={localValue} onValueChange={handleValueChange}>
               {question.options?.map((option) => (
                 <div key={option.value} className="flex items-center space-x-2">
                   <RadioGroupItem value={option.value} id={option.value} />
@@ -151,9 +187,9 @@ export default function QuestionCard({
               ))}
             </RadioGroup>
           </div>
-        )
+        );
 
-      case 'multi_select':
+      case "multi_select":
         return (
           <div className="space-y-2">
             {question.options?.map((option) => (
@@ -162,11 +198,13 @@ export default function QuestionCard({
                   id={option.value}
                   checked={(localValue || []).includes(option.value)}
                   onCheckedChange={(checked) => {
-                    const currentValues = localValue || []
+                    const currentValues = localValue || [];
                     if (checked) {
-                      handleValueChange([...currentValues, option.value])
+                      handleValueChange([...currentValues, option.value]);
                     } else {
-                      handleValueChange(currentValues.filter((v: string) => v !== option.value))
+                      handleValueChange(
+                        currentValues.filter((v: string) => v !== option.value),
+                      );
                     }
                   }}
                 />
@@ -176,33 +214,43 @@ export default function QuestionCard({
               </div>
             ))}
           </div>
-        )
+        );
 
-      case 'select_experience':
+      case "select_experience":
         return (
           <div className="space-y-3">
             {cvData?.experiences?.map((experience: any, index: number) => (
               <Card
                 key={index}
                 className={cn(
-                  'cursor-pointer transition-all hover:shadow-md',
-                  localValue?.experience_id === experience.id && 'ring-2 ring-orange-500 bg-orange-50'
+                  "cursor-pointer transition-all hover:shadow-md",
+                  localValue?.experience_id === experience.id &&
+                    "ring-2 ring-orange-500 bg-orange-50",
                 )}
-                onClick={() => handleValueChange({
-                  experience_id: experience.id || `exp-${index}`,
-                  experience_title: experience.title || experience.position || t('questionnaire.experience'),
-                  key_points: experience.key_points || []
-                })}
+                onClick={() =>
+                  handleValueChange({
+                    experience_id: experience.id || `exp-${index}`,
+                    experience_title:
+                      experience.title ||
+                      experience.position ||
+                      t("questionnaire.experience"),
+                    key_points: experience.key_points || [],
+                  })
+                }
               >
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <h4 className="font-normal text-gray-900">
-                        {experience.title || experience.position || t('questionnaire.experience')}
+                        {experience.title ||
+                          experience.position ||
+                          t("questionnaire.experience")}
                       </h4>
                       {(experience.company || experience.duration) && (
                         <p className="text-sm text-gray-600 mt-1">
-                          {[experience.company, experience.duration].filter(Boolean).join(' • ')}
+                          {[experience.company, experience.duration]
+                            .filter(Boolean)
+                            .join(" • ")}
                         </p>
                       )}
                       {experience.description && (
@@ -211,7 +259,8 @@ export default function QuestionCard({
                         </p>
                       )}
                     </div>
-                    {localValue?.experience_id === (experience.id || `exp-${index}`) && (
+                    {localValue?.experience_id ===
+                      (experience.id || `exp-${index}`) && (
                       <CheckCircle className="w-5 h-5 text-orange-500 flex-shrink-0" />
                     )}
                   </div>
@@ -219,97 +268,117 @@ export default function QuestionCard({
               </Card>
             ))}
           </div>
-        )
+        );
 
-      case 'multi_select_skills':
-        const jobSkills = jobOfferData?.extracted_keywords || []
-        const cvSkills = cvData?.skills || []
-        const allSkills = [...new Set([...jobSkills, ...cvSkills])]
+      case "multi_select_skills":
+        const jobSkills = jobOfferData?.extracted_keywords || [];
+        const cvSkills = cvData?.skills || [];
+        const allSkills = [...new Set([...jobSkills, ...cvSkills])];
 
         return (
           <div className="space-y-4">
             <div className="flex flex-wrap gap-2">
               {allSkills.map((skill: string, index: number) => {
-                const isSelected = (localValue || []).includes(skill)
-                const isFromJob = jobSkills.includes(skill)
-                const isFromCV = cvSkills.includes(skill)
+                const isSelected = (localValue || []).includes(skill);
+                const isFromJob = jobSkills.includes(skill);
+                const isFromCV = cvSkills.includes(skill);
 
                 return (
                   <Badge
                     key={index}
-                    variant={isSelected ? 'default' : 'outline'}
+                    variant={isSelected ? "default" : "outline"}
                     className={cn(
-                      'cursor-pointer transition-all hover:shadow-sm',
-                      isSelected && 'bg-orange-500 text-white',
-                      isFromJob && !isSelected && 'border-blue-500 text-blue-700',
-                      isFromCV && !isSelected && 'border-green-500 text-green-700'
+                      "cursor-pointer transition-all hover:shadow-sm",
+                      isSelected && "bg-orange-500 text-white",
+                      isFromJob &&
+                        !isSelected &&
+                        "border-blue-500 text-blue-700",
+                      isFromCV &&
+                        !isSelected &&
+                        "border-green-500 text-green-700",
                     )}
                     onClick={() => {
-                      const currentValues = localValue || []
+                      const currentValues = localValue || [];
                       if (isSelected) {
-                        handleValueChange(currentValues.filter((v: string) => v !== skill))
+                        handleValueChange(
+                          currentValues.filter((v: string) => v !== skill),
+                        );
                       } else {
-                        handleValueChange([...currentValues, skill])
+                        handleValueChange([...currentValues, skill]);
                       }
                     }}
                   >
                     {skill}
-                    {isFromJob && (
-                      <span className="ml-1 text-xs">📋</span>
-                    )}
-                    {isFromCV && (
-                      <span className="ml-1 text-xs">📄</span>
-                    )}
+                    {isFromJob && <span className="ml-1 text-xs">📋</span>}
+                    {isFromCV && <span className="ml-1 text-xs">📄</span>}
                   </Badge>
-                )
+                );
               })}
             </div>
             <div className="text-xs text-gray-500 space-y-1">
-              <p>{t('questionnaire.skillsFromOffer')}</p>
-              <p>{t('questionnaire.skillsFromCV')}</p>
+              <p>{t("questionnaire.skillsFromOffer")}</p>
+              <p>{t("questionnaire.skillsFromCV")}</p>
             </div>
           </div>
-        )
+        );
 
-      case 'tone_selector':
-        const toneValue = localValue || { toneKey: 'professionnel', customText: '' }
-        
+      case "tone_selector":
+        const toneValue = localValue || {
+          toneKey: "professionnel",
+          customText: "",
+        };
+
         return (
           <div className="space-y-6">
             {/* Premium Feature Badge */}
             <div className="flex items-center gap-2 mb-4">
               <Palette className="w-4 h-4 text-orange-600" />
-              <Badge variant="secondary" className="bg-orange-100 text-orange-800">
-                {t('questionnaire.question7.premiumFeature')}
+              <Badge
+                variant="secondary"
+                className="bg-orange-100 text-orange-800"
+              >
+                {t("questionnaire.question7.premiumFeature")}
               </Badge>
             </div>
 
             {/* Tone Selection */}
             <div className="space-y-4">
-              <RadioGroup 
-                value={toneValue.toneKey} 
+              <RadioGroup
+                value={toneValue.toneKey}
                 onValueChange={(selectedTone) => {
                   handleValueChange({
                     toneKey: selectedTone,
-                    customText: selectedTone === 'personnalisé' ? toneValue.customText : ''
-                  })
+                    customText:
+                      selectedTone === "personnalisé"
+                        ? toneValue.customText
+                        : "",
+                  });
                 }}
               >
                 {question.options?.map((option: any) => (
                   <div key={option.value} className="space-y-2">
                     <div className="flex items-start space-x-3 p-3 border rounded-lg hover:bg-gray-50 transition-colors">
-                      <RadioGroupItem 
-                        value={option.value} 
-                        id={option.value} 
+                      <RadioGroupItem
+                        value={option.value}
+                        id={option.value}
                         className="mt-0.5"
                       />
-                      <div className="flex-1 cursor-pointer" onClick={() => {
-                        handleValueChange({
-                          toneKey: option.value,
-                          customText: option.value === 'personnalisé' ? toneValue.customText : ''
-                        })
-                      }}>
-                        <Label htmlFor={option.value} className="cursor-pointer font-medium">
+                      <div
+                        className="flex-1 cursor-pointer"
+                        onClick={() => {
+                          handleValueChange({
+                            toneKey: option.value,
+                            customText:
+                              option.value === "personnalisé"
+                                ? toneValue.customText
+                                : "",
+                          });
+                        }}
+                      >
+                        <Label
+                          htmlFor={option.value}
+                          className="cursor-pointer font-medium"
+                        >
                           {option.label}
                         </Label>
                         {option.description && (
@@ -319,7 +388,8 @@ export default function QuestionCard({
                         )}
                         {option.example && (
                           <p className="text-xs text-gray-400 mt-1 italic">
-                            {t('questionnaire.question7.example')} "{option.example}"
+                            {t("questionnaire.question7.example")} "
+                            {option.example}"
                           </p>
                         )}
                       </div>
@@ -329,43 +399,48 @@ export default function QuestionCard({
               </RadioGroup>
 
               {/* Custom tone text input */}
-              {toneValue.toneKey === 'personnalisé' && (
+              {toneValue.toneKey === "personnalisé" && (
                 <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                  <Label htmlFor="customToneText" className="text-sm font-medium mb-2 block">
-                    {t('questionnaire.question7.customToneLabel')}
+                  <Label
+                    htmlFor="customToneText"
+                    className="text-sm font-medium mb-2 block"
+                  >
+                    {t("questionnaire.question7.customToneLabel")}
                   </Label>
                   <Textarea
                     id="customToneText"
-                    value={toneValue.customText || ''}
+                    value={toneValue.customText || ""}
                     onChange={(e) => {
                       handleValueChange({
-                        toneKey: 'personnalisé',
-                        customText: e.target.value
-                      })
+                        toneKey: "personnalisé",
+                        customText: e.target.value,
+                      });
                     }}
-                    placeholder={t('questionnaire.question7.customTonePlaceholder')}
+                    placeholder={t(
+                      "questionnaire.question7.customTonePlaceholder",
+                    )}
                     maxLength={120}
                     rows={3}
                     className="resize-none"
                   />
                   <div className="flex justify-between items-center mt-2">
                     <p className="text-xs text-gray-500">
-                      {t('questionnaire.question7.customToneHelp')}
+                      {t("questionnaire.question7.customToneHelp")}
                     </p>
                     <span className="text-xs text-gray-400">
-                      {(toneValue.customText || '').length}/120
+                      {(toneValue.customText || "").length}/120
                     </span>
                   </div>
                 </div>
               )}
             </div>
           </div>
-        )
+        );
 
       default:
-        return null
+        return null;
     }
-  }
+  };
 
   return (
     <motion.div
@@ -377,7 +452,7 @@ export default function QuestionCard({
       exit="exit"
       transition={{
         x: { type: "spring", stiffness: 300, damping: 30 },
-        opacity: { duration: 0.2 }
+        opacity: { duration: 0.2 },
       }}
       className="w-full max-w-2xl mx-auto"
     >
@@ -386,16 +461,19 @@ export default function QuestionCard({
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium text-gray-500">
-                {t('questionnaire.questionOf', { questionNumber: questionNumber.toString(), totalQuestions: totalQuestions.toString() })}
+                {t("questionnaire.questionOf", {
+                  questionNumber: questionNumber.toString(),
+                  totalQuestions: totalQuestions.toString(),
+                })}
               </span>
               {question.required && (
                 <Badge variant="outline" className="text-xs">
-                  {t('questionnaire.required')}
+                  {t("questionnaire.required")}
                 </Badge>
               )}
             </div>
             <div className="w-32 bg-gray-200 rounded-full h-2">
-              <div 
+              <div
                 className="bg-orange-500 h-2 rounded-full transition-all duration-300"
                 style={{ width: `${(questionNumber / totalQuestions) * 100}%` }}
               />
@@ -408,7 +486,7 @@ export default function QuestionCard({
 
         <CardContent className="space-y-4">
           {renderInput()}
-          
+
           {error && (
             <div className="flex items-center gap-2 text-red-600 text-sm">
               <AlertCircle className="w-4 h-4" />
@@ -425,7 +503,7 @@ export default function QuestionCard({
             className="flex items-center gap-2"
           >
             <ChevronLeft className="w-4 h-4" />
-            {t('common.previous')}
+            {t("common.previous")}
           </Button>
 
           <Button
@@ -433,11 +511,13 @@ export default function QuestionCard({
             disabled={!canGoNext || !!error}
             className="flex items-center gap-2"
           >
-            {isLastQuestion ? t('questionnaire.generateLetter') : t('common.next')}
+            {isLastQuestion
+              ? t("questionnaire.generateLetter")
+              : t("common.next")}
             <ChevronRight className="w-4 h-4" />
           </Button>
         </CardFooter>
       </Card>
     </motion.div>
-  )
+  );
 }

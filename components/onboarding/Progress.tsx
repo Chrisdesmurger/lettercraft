@@ -1,10 +1,10 @@
-'use client'
+"use client";
 interface ProgressProps {
-  current: number
-  total: number
+  current: number;
+  total: number;
 }
 export default function Progress({ current, total }: ProgressProps) {
-  const percent = ((current + 1) / total) * 100
+  const percent = ((current + 1) / total) * 100;
   return (
     <div className="w-full h-2 bg-gray-200 rounded-full mb-6">
       <div
@@ -12,5 +12,5 @@ export default function Progress({ current, total }: ProgressProps) {
         style={{ width: `${percent}%` }}
       />
     </div>
-  )
+  );
 }

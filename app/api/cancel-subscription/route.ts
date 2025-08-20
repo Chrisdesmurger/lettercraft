@@ -1,25 +1,25 @@
-import { NextRequest, NextResponse } from 'next/server'
-import Stripe from 'stripe'
-import { supabaseAdmin } from '@/lib/supabase-admin'
-import { securityMiddleware, validateInput } from '@/lib/api-security'
-import { brevoEmailService } from '@/lib/brevo-client'
+import { NextRequest, NextResponse } from "next/server";
+import Stripe from "stripe";
+import { supabaseAdmin } from "@/lib/supabase-admin";
+import { securityMiddleware, validateInput } from "@/lib/api-security";
+import { brevoEmailService } from "@/lib/brevo-client";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 // Schéma de validation pour l'annulation d'abonnement
 const cancelSubscriptionSchema = {
   userId: {
     required: true,
-    type: 'string',
+    type: "string",
     minLength: 1,
-    maxLength: 100
+    maxLength: 100,
   },
   cancellationReason: {
     required: false,
-    type: 'string',
-    maxLength: 500
-  }
-}
+    type: "string",
+    maxLength: 500,
+  },
+};
 
 export async function POST(request: NextRequest) {
   try {
@@ -27,85 +27,91 @@ export async function POST(request: NextRequest) {
     const security = await securityMiddleware(request, {
       requireAuth: true,
       rateLimit: { maxRequests: 5, windowMs: 60000 }, // 5 requêtes par minute max
-      validationSchema: cancelSubscriptionSchema
-    })
+      validationSchema: cancelSubscriptionSchema,
+    });
 
     if (!security.allowed) {
-      const headers = security.error?.headers || {}
+      const headers = security.error?.headers || {};
       return NextResponse.json(
-        { error: security.error?.message || 'Accès refusé' },
-        { status: security.error?.status || 403, headers }
-      )
+        { error: security.error?.message || "Accès refusé" },
+        { status: security.error?.status || 403, headers },
+      );
     }
 
-    const { userId, cancellationReason } = security.validatedData!
-    const context = security.context!
+    const { userId, cancellationReason } = security.validatedData!;
+    const context = security.context!;
 
     // Vérifier que l'utilisateur authentifié correspond à l'userId demandé
     if (context.userId !== userId) {
-      console.warn(`🚨 Tentative d'annulation non autorisée: utilisateur ${context.userId} essaie d'annuler l'abonnement de ${userId}`)
+      console.warn(
+        `🚨 Tentative d'annulation non autorisée: utilisateur ${context.userId} essaie d'annuler l'abonnement de ${userId}`,
+      );
       return NextResponse.json(
-        { error: 'Vous ne pouvez annuler que votre propre abonnement' },
-        { status: 403 }
-      )
+        { error: "Vous ne pouvez annuler que votre propre abonnement" },
+        { status: 403 },
+      );
     }
 
     // Get user's subscription info (bypass RLS with admin)
-    const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(userId)
+    const { data: authUser } =
+      await supabaseAdmin.auth.admin.getUserById(userId);
     const { data: userProfile, error: profileError } = await supabaseAdmin
-      .from('user_profiles')
-      .select('stripe_customer_id, stripe_subscription_id, first_name, last_name, language')
-      .eq('user_id', userId)
-      .single()
+      .from("user_profiles")
+      .select(
+        "stripe_customer_id, stripe_subscription_id, first_name, last_name, language",
+      )
+      .eq("user_id", userId)
+      .single();
 
     if (!authUser?.user || profileError || !userProfile) {
-      console.error('Error fetching user profile:', profileError)
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      )
+      console.error("Error fetching user profile:", profileError);
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
-    
-    const userEmail = authUser.user.email!
+
+    const userEmail = authUser.user.email!;
 
     if (!userProfile.stripe_subscription_id) {
       return NextResponse.json(
-        { error: 'No active subscription found' },
-        { status: 400 }
-      )
+        { error: "No active subscription found" },
+        { status: 400 },
+      );
     }
 
     // Get current subscription from Stripe to get period end date
-    const subscription = await stripe.subscriptions.retrieve(userProfile.stripe_subscription_id)
+    const subscription = await stripe.subscriptions.retrieve(
+      userProfile.stripe_subscription_id,
+    );
 
-    if (subscription.status !== 'active') {
+    if (subscription.status !== "active") {
       return NextResponse.json(
-        { error: 'Subscription is not active' },
-        { status: 400 }
-      )
+        { error: "Subscription is not active" },
+        { status: 400 },
+      );
     }
 
     // Vérifier que l'abonnement n'est pas déjà marqué pour annulation
     if (subscription.cancel_at_period_end) {
       return NextResponse.json(
-        { error: 'L\'abonnement est déjà programmé pour annulation' },
-        { status: 400 }
-      )
+        { error: "L'abonnement est déjà programmé pour annulation" },
+        { status: 400 },
+      );
     }
 
     // Vérifier que l'abonnement appartient bien à l'utilisateur
     if (subscription.customer !== userProfile.stripe_customer_id) {
-      console.error(`🚨 SÉCURITÉ: Tentative d'annulation d'abonnement non autorisée. User: ${userId}, Customer: ${userProfile.stripe_customer_id}, Subscription Customer: ${subscription.customer}`)
+      console.error(
+        `🚨 SÉCURITÉ: Tentative d'annulation d'abonnement non autorisée. User: ${userId}, Customer: ${userProfile.stripe_customer_id}, Subscription Customer: ${subscription.customer}`,
+      );
       return NextResponse.json(
-        { error: 'Abonnement non trouvé' },
-        { status: 404 }
-      )
+        { error: "Abonnement non trouvé" },
+        { status: 404 },
+      );
     }
 
     // Nettoyer et valider la raison d'annulation
-    const sanitizedReason = cancellationReason 
+    const sanitizedReason = cancellationReason
       ? cancellationReason.trim().substring(0, 500)
-      : 'Aucune raison fournie'
+      : "Aucune raison fournie";
 
     // Cancel subscription at period end
     const updatedSubscription = await stripe.subscriptions.update(
@@ -115,160 +121,195 @@ export async function POST(request: NextRequest) {
         metadata: {
           ...subscription.metadata,
           cancellation_reason: sanitizedReason,
-          cancelled_by_user: 'true',
+          cancelled_by_user: "true",
           cancelled_at: new Date().toISOString(),
           cancelled_by_user_id: userId,
-          cancelled_from_ip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'
-        }
-      }
-    )
+          cancelled_from_ip:
+            request.headers.get("x-forwarded-for") ||
+            request.headers.get("x-real-ip") ||
+            "unknown",
+        },
+      },
+    );
 
     // Update local subscription record immediately for better UX
     try {
       await supabaseAdmin
-        .from('stripe_subscriptions')
+        .from("stripe_subscriptions")
         .update({
           cancel_at_period_end: true,
           canceled_at: new Date().toISOString(),
           metadata: {
             cancellation_reason: sanitizedReason,
-            cancelled_by_user: 'true',
-            cancelled_at: new Date().toISOString()
+            cancelled_by_user: "true",
+            cancelled_at: new Date().toISOString(),
           },
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
-        .eq('stripe_subscription_id', userProfile.stripe_subscription_id)
-        
-      console.log('✅ Local subscription updated with cancellation flag')
+        .eq("stripe_subscription_id", userProfile.stripe_subscription_id);
+
+      console.log("✅ Local subscription updated with cancellation flag");
     } catch (localUpdateError) {
-      console.warn('Warning: Could not update local subscription record:', localUpdateError)
+      console.warn(
+        "Warning: Could not update local subscription record:",
+        localUpdateError,
+      );
       // Don't fail the cancellation if local update fails
     }
 
     // Log de sécurité pour l'annulation
-    console.log(`🚫 [SECURITY] Subscription cancellation:`)
-    console.log(`   - Subscription ID: ${userProfile.stripe_subscription_id}`)
-    console.log(`   - User ID: ${userId}`)
-    console.log(`   - Email: ${userEmail}`)
-    console.log(`   - End date: ${(updatedSubscription as any).current_period_end ? new Date((updatedSubscription as any).current_period_end * 1000).toISOString() : 'unknown'}`)
-    console.log(`   - Reason: ${sanitizedReason}`)
-    console.log(`   - IP: ${request.headers.get('x-forwarded-for') || 'unknown'}`)
+    console.log(`🚫 [SECURITY] Subscription cancellation:`);
+    console.log(`   - Subscription ID: ${userProfile.stripe_subscription_id}`);
+    console.log(`   - User ID: ${userId}`);
+    console.log(`   - Email: ${userEmail}`);
+    console.log(
+      `   - End date: ${(updatedSubscription as any).current_period_end ? new Date((updatedSubscription as any).current_period_end * 1000).toISOString() : "unknown"}`,
+    );
+    console.log(`   - Reason: ${sanitizedReason}`);
+    console.log(
+      `   - IP: ${request.headers.get("x-forwarded-for") || "unknown"}`,
+    );
 
     // Store cancellation feedback (optional)
-    if (sanitizedReason && sanitizedReason !== 'Aucune raison fournie') {
+    if (sanitizedReason && sanitizedReason !== "Aucune raison fournie") {
       try {
-        await supabaseAdmin
-          .from('user_feedback')
-          .insert({
-            user_id: userId,
-            feedback_type: 'subscription_cancellation',
-            feedback_text: sanitizedReason,
-            metadata: {
-              subscription_id: userProfile.stripe_subscription_id,
-              cancelled_at: new Date().toISOString(),
-              end_date: (updatedSubscription as any).current_period_end 
-                ? new Date((updatedSubscription as any).current_period_end * 1000).toISOString()
-                : null
-            },
-            created_at: new Date().toISOString()
-          })
+        await supabaseAdmin.from("user_feedback").insert({
+          user_id: userId,
+          feedback_type: "subscription_cancellation",
+          feedback_text: sanitizedReason,
+          metadata: {
+            subscription_id: userProfile.stripe_subscription_id,
+            cancelled_at: new Date().toISOString(),
+            end_date: (updatedSubscription as any).current_period_end
+              ? new Date(
+                  (updatedSubscription as any).current_period_end * 1000,
+                ).toISOString()
+              : null,
+          },
+          created_at: new Date().toISOString(),
+        });
       } catch (feedbackError) {
-        console.warn('Could not store cancellation feedback:', feedbackError)
+        console.warn("Could not store cancellation feedback:", feedbackError);
         // Don't fail the cancellation if feedback storage fails
       }
     }
 
     // Ne pas exposer d'informations sensibles dans la réponse
-    const cancellationDate = (updatedSubscription as any).current_period_end 
-      ? new Date((updatedSubscription as any).current_period_end * 1000).toISOString()
-      : null
+    const cancellationDate = (updatedSubscription as any).current_period_end
+      ? new Date(
+          (updatedSubscription as any).current_period_end * 1000,
+        ).toISOString()
+      : null;
 
     // Envoyer l'email de confirmation d'annulation
     if (cancellationDate) {
       try {
-        const userName = `${userProfile.first_name || ''} ${userProfile.last_name || ''}`.trim() || 'utilisateur'
-        const userLanguage = userProfile.language || 'fr'
-        
+        const userName =
+          `${userProfile.first_name || ""} ${userProfile.last_name || ""}`.trim() ||
+          "utilisateur";
+        const userLanguage = userProfile.language || "fr";
+
         await brevoEmailService.sendSubscriptionCancelledEmail(
           userEmail,
           userName,
           cancellationDate,
-          userLanguage
-        )
-        
-        console.log(`📧 Email d'annulation envoyé à ${userEmail}`)
+          userLanguage,
+        );
+
+        console.log(`📧 Email d'annulation envoyé à ${userEmail}`);
       } catch (emailError) {
         // Ne pas faire échouer l'annulation si l'email échoue
-        console.warn('Erreur lors de l\'envoi de l\'email d\'annulation:', emailError)
+        console.warn(
+          "Erreur lors de l'envoi de l'email d'annulation:",
+          emailError,
+        );
       }
-      
+
       // Synchroniser le contact Brevo pour mettre à jour le statut d'abonnement
       try {
         await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/sync-contact`, {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
-            'X-Internal-Secret': process.env.INTERNAL_API_SECRET || 'lettercraft-internal-secret-2025',
-            'X-Internal-Source': 'cancel-subscription'
+            "Content-Type": "application/json",
+            "X-Internal-Secret":
+              process.env.INTERNAL_API_SECRET ||
+              "lettercraft-internal-secret-2025",
+            "X-Internal-Source": "cancel-subscription",
           },
           body: JSON.stringify({
             userId: userId,
-            action: 'sync'
-          })
-        })
-        console.log(`🔄 Contact Brevo synchronisé après annulation pour l'utilisateur ${userId}`)
+            action: "sync",
+          }),
+        });
+        console.log(
+          `🔄 Contact Brevo synchronisé après annulation pour l'utilisateur ${userId}`,
+        );
       } catch (syncError) {
-        console.warn('Erreur synchronisation contact Brevo après annulation:', syncError)
+        console.warn(
+          "Erreur synchronisation contact Brevo après annulation:",
+          syncError,
+        );
         // Ne pas faire échouer l'annulation si la sync échoue
       }
     }
 
     return NextResponse.json({
       success: true,
-      message: 'Votre abonnement sera annulé à la fin de la période de facturation actuelle',
+      message:
+        "Votre abonnement sera annulé à la fin de la période de facturation actuelle",
       cancellationDate,
       subscription: {
         cancel_at_period_end: true,
-        current_period_end: (updatedSubscription as any).current_period_end
-      }
-    })
-
+        current_period_end: (updatedSubscription as any).current_period_end,
+      },
+    });
   } catch (error) {
     // Log détaillé pour le debug mais réponse générique pour la sécurité
-    console.error('🚨 [SECURITY] Error in cancel-subscription API:', {
-      error: error instanceof Error ? error.message : 'Unknown error',
+    console.error("🚨 [SECURITY] Error in cancel-subscription API:", {
+      error: error instanceof Error ? error.message : "Unknown error",
       stack: error instanceof Error ? error.stack : undefined,
-      userId: request.headers.get('x-user-id') || 'unknown',
-      ip: request.headers.get('x-forwarded-for') || 'unknown',
-      userAgent: request.headers.get('user-agent') || 'unknown'
-    })
-    
+      userId: request.headers.get("x-user-id") || "unknown",
+      ip: request.headers.get("x-forwarded-for") || "unknown",
+      userAgent: request.headers.get("user-agent") || "unknown",
+    });
+
     if (error instanceof Stripe.errors.StripeError) {
       // Log l'erreur Stripe mais ne pas exposer les détails
-      console.error('🚨 Stripe error details:', error.code, error.type, error.message)
-      
+      console.error(
+        "🚨 Stripe error details:",
+        error.code,
+        error.type,
+        error.message,
+      );
+
       return NextResponse.json(
-        { error: 'Erreur lors de l\'annulation de l\'abonnement. Veuillez réessayer.' },
-        { status: 400 }
-      )
+        {
+          error:
+            "Erreur lors de l'annulation de l'abonnement. Veuillez réessayer.",
+        },
+        { status: 400 },
+      );
     }
 
     return NextResponse.json(
-      { error: 'Une erreur interne s\'est produite. Veuillez contacter le support.' },
-      { status: 500 }
-    )
+      {
+        error:
+          "Une erreur interne s'est produite. Veuillez contacter le support.",
+      },
+      { status: 500 },
+    );
   }
 }
 
 // Only allow POST requests
 export async function GET() {
-  return NextResponse.json({ error: 'Method not allowed' }, { status: 405 })
+  return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
 }
 
 export async function PUT() {
-  return NextResponse.json({ error: 'Method not allowed' }, { status: 405 })
+  return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
 }
 
 export async function DELETE() {
-  return NextResponse.json({ error: 'Method not allowed' }, { status: 405 })
+  return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
 }

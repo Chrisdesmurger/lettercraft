@@ -7,6 +7,7 @@ The CV extraction system has been completely redesigned to provide comprehensive
 ## Features
 
 ### Complete Data Extraction
+
 - **Personal Information**: Name, email, phone, location, LinkedIn, website
 - **Professional Summary**: AI-extracted career objective or professional summary
 - **Work Experience**: Detailed breakdown with positions, companies, dates, descriptions, key achievements
@@ -19,7 +20,9 @@ The CV extraction system has been completely redesigned to provide comprehensive
 - **Additional**: Volunteer work, interests
 
 ### Achievement Extraction Enhancement (2025)
+
 The system now includes advanced achievement identification that:
+
 - **Separates achievements from descriptions**: Distinguishes between routine responsibilities and standout accomplishments
 - **Identifies quantified results**: Extracts numerical data like "30% cost reduction", "$2M revenue growth"
 - **Recognizes awards and recognitions**: Captures "Employee of the month", "Top 5% performer"
@@ -29,6 +32,7 @@ The system now includes advanced achievement identification that:
 ### Technical Architecture
 
 #### OpenAI Integration
+
 ```typescript
 // Model Configuration
 MODEL: 'gpt-4o-mini' // Cost-optimized for structured extraction
@@ -38,44 +42,46 @@ MAX_TOKENS: 2000
 ```
 
 #### Data Structure
+
 ```typescript
 interface ExtractedCVData {
   // Basic fields (legacy compatible)
-  first_name: string | null
-  last_name: string | null
-  skills: string[]
-  experiences: string[]
-  education: string[]
-  
+  first_name: string | null;
+  last_name: string | null;
+  skills: string[];
+  experiences: string[];
+  education: string[];
+
   // Enhanced contact fields
-  email: string | null
-  phone: string | null
-  location: string | null
-  linkedin: string | null
-  website: string | null
-  summary: string | null
-  
+  email: string | null;
+  phone: string | null;
+  location: string | null;
+  linkedin: string | null;
+  website: string | null;
+  summary: string | null;
+
   // Structured arrays
-  projects: Project[]
-  certifications: Certification[]
-  languages: Language[]
-  achievements: string[]
-  volunteer: string[]
-  interests: string[]
-  
+  projects: Project[];
+  certifications: Certification[];
+  languages: Language[];
+  achievements: string[];
+  volunteer: string[];
+  interests: string[];
+
   // Complete structured data
   structured_data: {
-    contact: ContactInfo
-    professional_summary: string
-    detailed_experiences: Experience[]
-    detailed_education: Education[]
-    categorized_skills: CategorizedSkills
+    contact: ContactInfo;
+    professional_summary: string;
+    detailed_experiences: Experience[];
+    detailed_education: Education[];
+    categorized_skills: CategorizedSkills;
     // ... all extracted data
-  }
+  };
 }
 ```
 
 #### Database Schema Updates
+
 ```sql
 -- New columns added to candidates_profile table
 ALTER TABLE candidates_profile ADD COLUMN
@@ -99,9 +105,10 @@ ALTER TABLE candidates_profile ADD COLUMN
 ### API Endpoint: `/api/extract-cv`
 
 #### Process Flow
+
 1. **File Reception**: Accepts PDF, JPEG, PNG files via FormData
 2. **Temporary Storage**: Files stored in `/tmp` with unique names
-3. **OpenAI Processing**: 
+3. **OpenAI Processing**:
    - Creates Assistant with file_search capability
    - Uploads file to OpenAI
    - Processes with detailed extraction prompt
@@ -110,7 +117,9 @@ ALTER TABLE candidates_profile ADD COLUMN
 5. **Cleanup**: Removes temporary files and OpenAI resources
 
 #### Extraction Prompt
+
 The system uses a comprehensive prompt that instructs GPT-4o-mini to:
+
 - Extract ALL available information from the document
 - Read multi-page documents completely
 - Structure data according to the defined JSON schema
@@ -121,6 +130,7 @@ The system uses a comprehensive prompt that instructs GPT-4o-mini to:
 ### Components Integration
 
 #### CVUpload Component
+
 - Handles file upload via `/api/upload-cv`
 - Calls `/api/extract-cv` for AI processing
 - Saves extracted data to `candidates_profile` table
@@ -130,6 +140,7 @@ The system uses a comprehensive prompt that instructs GPT-4o-mini to:
 - Provides detailed console logging for debugging
 
 #### Data Flow
+
 ```
 User Upload → File Storage → AI Extraction → Data Normalization → Database Storage → CV Activation
 ```
@@ -137,12 +148,14 @@ User Upload → File Storage → AI Extraction → Data Normalization → Databa
 ## Benefits
 
 ### For Users
+
 - **Comprehensive Data**: All CV information captured and searchable
 - **Automatic Processing**: No manual data entry required
 - **Structured Output**: Clean, organized data presentation
 - **Enhanced Matching**: Better job-CV matching with detailed skills and experience
 
 ### For Application
+
 - **Rich Data**: Detailed user profiles for better letter generation
 - **Backward Compatibility**: Existing features continue to work
 - **Future-Proof**: Structured data enables new features
@@ -151,12 +164,14 @@ User Upload → File Storage → AI Extraction → Data Normalization → Databa
 ## Error Handling
 
 ### Robust Processing
+
 - **File Validation**: Type and size checks before processing
 - **Graceful Fallbacks**: Default values if extraction fails
 - **Resource Cleanup**: Automatic cleanup of temporary files and OpenAI resources
 - **Detailed Logging**: Comprehensive error tracking and debugging
 
 ### Common Issues
+
 - **Large Files**: 10MB limit enforced
 - **Unsupported Formats**: Only PDF, JPEG, PNG accepted
 - **Parsing Errors**: Fallback to basic structure if JSON parsing fails
@@ -165,6 +180,7 @@ User Upload → File Storage → AI Extraction → Data Normalization → Databa
 ## Future Enhancements
 
 ### Planned Features
+
 - **Multi-language CV support**: Detection and processing of CVs in different languages
 - **Photo extraction**: Profile photo extraction and storage
 - **Skill matching**: AI-powered skill matching with job requirements
@@ -172,6 +188,7 @@ User Upload → File Storage → AI Extraction → Data Normalization → Databa
 - **Data validation**: AI-powered data validation and correction
 
 ### Performance Optimizations
+
 - **Caching**: Cache extraction results for identical files
 - **Batch Processing**: Support for multiple CV uploads
 - **Background Processing**: Async processing for large files
@@ -180,12 +197,14 @@ User Upload → File Storage → AI Extraction → Data Normalization → Databa
 ## Monitoring
 
 ### Key Metrics
+
 - **Extraction Success Rate**: Percentage of successful extractions
 - **Data Completeness**: Average number of fields extracted per CV
 - **Processing Time**: Average time for extraction completion
 - **Error Rates**: Tracking of different error types
 
 ### Logging
+
 - **Console Logs**: Detailed step-by-step processing logs
 - **Error Tracking**: Comprehensive error capture and reporting
 - **Performance Metrics**: Processing time and resource usage tracking

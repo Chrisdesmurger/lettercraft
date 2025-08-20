@@ -7,6 +7,7 @@
 **Description:**
 
 ## Summary
+
 • Complete multilingual account deletion system with email confirmation flow
 • Subscription plan updates with new feature organization  
 • Support email configuration and email confirmation field removal
@@ -14,6 +15,7 @@
 • German and Italian translations for account deletion process
 
 ## Key Features
+
 • **Account deletion workflow**: Request → Email confirmation → Scheduled deletion (72h grace period)
 • **Subscription cancellation**: Immediate Stripe subscription cancellation on account deletion
 • **Multilingual support**: Full i18n support (FR, EN, DE, IT, ES) for deletion process
@@ -22,10 +24,11 @@
 • **CV upload fixes**: Resolved authentication issues in upload flow
 
 ## Test plan
+
 - [ ] Test account deletion request flow in all supported languages
 - [ ] Verify email confirmation system works correctly
 - [ ] Test subscription cancellation on account deletion
-- [ ] Verify CV upload functionality works without authentication errors  
+- [ ] Verify CV upload functionality works without authentication errors
 - [ ] Test grace period cancellation functionality
 - [ ] Verify all email templates render correctly in multiple languages
 

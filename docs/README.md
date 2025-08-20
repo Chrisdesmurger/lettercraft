@@ -5,9 +5,11 @@ Ce dossier contient la documentation technique détaillée pour les différents 
 ## 📋 Fichiers disponibles
 
 ### [BREVO_API.md](./BREVO_API.md)
+
 Documentation complète de l'API de synchronisation des contacts avec Brevo.
 
 **Contenu :**
+
 - 🔗 Tous les endpoints disponibles
 - 📋 Actions supportées (create, update, delete, bulk, sync, etc.)
 - 🏷️ Gestion des listes et segmentation
@@ -21,9 +23,11 @@ Documentation complète de l'API de synchronisation des contacts avec Brevo.
 ## 🛠️ Scripts utilitaires
 
 ### [../scripts/brevo-sync.js](../scripts/brevo-sync.js)
+
 Script en ligne de commande pour les opérations Brevo.
 
 **Usage :**
+
 ```bash
 # Migration initiale - créer tous les contacts manquants
 node scripts/brevo-sync.js create-missing
@@ -55,4 +59,4 @@ Pour ajouter ou modifier la documentation :
 
 ---
 
-*Dernière mise à jour : Janvier 2025*
+_Dernière mise à jour : Janvier 2025_

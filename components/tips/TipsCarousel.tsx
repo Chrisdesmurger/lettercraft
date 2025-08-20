@@ -1,33 +1,35 @@
-'use client'
+"use client";
 
-import React, { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { 
-  ChevronLeft, 
-  ChevronRight,
-  RefreshCw
-} from 'lucide-react'
-import { cn } from '@/lib/utils'
-import { useI18n } from '@/lib/i18n-context'
-import { getRandomTips, getTopTips, getTipsByCategory, type Tip } from '@/lib/tips-data'
-
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useI18n } from "@/lib/i18n-context";
+import {
+  getRandomTips,
+  getTopTips,
+  getTipsByCategory,
+  type Tip,
+} from "@/lib/tips-data";
 
 interface TipCardProps {
-  tip: Tip
-  isActive: boolean
+  tip: Tip;
+  isActive: boolean;
 }
 
 function TipCard({ tip, isActive }: TipCardProps) {
-  const { t } = useI18n()
+  const { t } = useI18n();
 
   return (
-    <Card className={cn(
-      "h-full transition-all duration-300 hover:shadow-lg",
-      isActive ? "ring-2 ring-orange-400 shadow-lg" : "shadow-md"
-    )}>
+    <Card
+      className={cn(
+        "h-full transition-all duration-300 hover:shadow-lg",
+        isActive ? "ring-2 ring-orange-400 shadow-lg" : "shadow-md",
+      )}
+    >
       <CardContent className="p-6 h-full flex flex-col">
         <div className="mb-4">
           <div className="flex items-center gap-2 mb-2">
@@ -35,12 +37,15 @@ function TipCard({ tip, isActive }: TipCardProps) {
               {t(`tips.${tip.id}.title`)}
             </h3>
             {tip.priority >= 5 && (
-              <Badge variant="secondary" className="text-xs bg-orange-100 text-orange-700">
+              <Badge
+                variant="secondary"
+                className="text-xs bg-orange-100 text-orange-700"
+              >
                 Top
               </Badge>
             )}
           </div>
-          
+
           <p className="text-sm text-gray-600 leading-relaxed">
             {t(`tips.${tip.id}.description`)}
           </p>
@@ -53,24 +58,24 @@ function TipCard({ tip, isActive }: TipCardProps) {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
 
 interface TipsCarouselProps {
-  mode?: 'random' | 'top' | 'category'
-  category?: Tip['category']
-  count?: number
-  autoplay?: boolean
-  autoplayDelay?: number
-  showControls?: boolean
-  showIndicators?: boolean
-  className?: string
-  title?: string
-  subtitle?: string
+  mode?: "random" | "top" | "category";
+  category?: Tip["category"];
+  count?: number;
+  autoplay?: boolean;
+  autoplayDelay?: number;
+  showControls?: boolean;
+  showIndicators?: boolean;
+  className?: string;
+  title?: string;
+  subtitle?: string;
 }
 
 export default function TipsCarousel({
-  mode = 'random',
+  mode = "random",
   category,
   count = 9, // Augmenté pour avoir assez de conseils pour le défilement
   autoplay = true,
@@ -79,81 +84,85 @@ export default function TipsCarousel({
   showIndicators = true,
   className,
   title,
-  subtitle
+  subtitle,
 }: TipsCarouselProps) {
-  const { t } = useI18n()
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [tips, setTips] = useState<Tip[]>([])
-  const [isAutoplayRunning, setIsAutoplayRunning] = useState(autoplay)
+  const { t } = useI18n();
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [tips, setTips] = useState<Tip[]>([]);
+  const [isAutoplayRunning, setIsAutoplayRunning] = useState(autoplay);
 
   // Générer les conseils selon le mode
   useEffect(() => {
-    let selectedTips: Tip[]
-    
+    let selectedTips: Tip[];
+
     switch (mode) {
-      case 'top':
-        selectedTips = getTopTips(count)
-        break
-      case 'category':
-        selectedTips = category ? getTipsByCategory(category).slice(0, count) : getRandomTips(count)
-        break
+      case "top":
+        selectedTips = getTopTips(count);
+        break;
+      case "category":
+        selectedTips = category
+          ? getTipsByCategory(category).slice(0, count)
+          : getRandomTips(count);
+        break;
       default:
-        selectedTips = getRandomTips(count, category)
+        selectedTips = getRandomTips(count, category);
     }
-    
-    setTips(selectedTips)
-    setCurrentIndex(0)
-  }, [mode, category, count])
+
+    setTips(selectedTips);
+    setCurrentIndex(0);
+  }, [mode, category, count]);
 
   // Autoplay
   useEffect(() => {
-    if (!isAutoplayRunning || tips.length <= 1) return
+    if (!isAutoplayRunning || tips.length <= 1) return;
 
     const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % tips.length)
-    }, autoplayDelay)
+      setCurrentIndex((prev) => (prev + 1) % tips.length);
+    }, autoplayDelay);
 
-    return () => clearInterval(interval)
-  }, [isAutoplayRunning, tips.length, autoplayDelay])
+    return () => clearInterval(interval);
+  }, [isAutoplayRunning, tips.length, autoplayDelay]);
 
   // Navigation
   const goToPrevious = () => {
-    setCurrentIndex((prev) => (prev - 1 + tips.length) % tips.length)
-    setIsAutoplayRunning(false)
-  }
+    setCurrentIndex((prev) => (prev - 1 + tips.length) % tips.length);
+    setIsAutoplayRunning(false);
+  };
 
   const goToNext = () => {
-    setCurrentIndex((prev) => (prev + 1) % tips.length)
-    setIsAutoplayRunning(false)
-  }
+    setCurrentIndex((prev) => (prev + 1) % tips.length);
+    setIsAutoplayRunning(false);
+  };
 
   const goToSlide = (index: number) => {
-    setCurrentIndex(index)
-    setIsAutoplayRunning(false)
-  }
+    setCurrentIndex(index);
+    setIsAutoplayRunning(false);
+  };
 
   // Régénérer les conseils
   const regenerateTips = () => {
-    let newTips: Tip[]
-    
+    let newTips: Tip[];
+
     switch (mode) {
-      case 'top':
-        newTips = getTopTips(count)
-        break
-      case 'category':
-        newTips = category ? getTipsByCategory(category).slice(0, count) : getRandomTips(count)
-        break
+      case "top":
+        newTips = getTopTips(count);
+        break;
+      case "category":
+        newTips = category
+          ? getTipsByCategory(category).slice(0, count)
+          : getRandomTips(count);
+        break;
       default:
-        newTips = getRandomTips(count, category)
+        newTips = getRandomTips(count, category);
     }
-    
-    setTips(newTips)
-    setCurrentIndex(0)
-    setIsAutoplayRunning(autoplay)
-  }
+
+    setTips(newTips);
+    setCurrentIndex(0);
+    setIsAutoplayRunning(autoplay);
+  };
 
   if (tips.length === 0) {
-    return null
+    return null;
   }
 
   return (
@@ -163,9 +172,9 @@ export default function TipsCarousel({
         <div className="mb-6">
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-xl font-bold text-gray-900">
-              {title || t('tips.title')}
+              {title || t("tips.title")}
             </h2>
-            {mode === 'random' && (
+            {mode === "random" && (
               <Button
                 variant="ghost"
                 size="sm"
@@ -176,11 +185,7 @@ export default function TipsCarousel({
               </Button>
             )}
           </div>
-          {subtitle && (
-            <p className="text-gray-600 text-sm">
-              {subtitle}
-            </p>
-          )}
+          {subtitle && <p className="text-gray-600 text-sm">{subtitle}</p>}
         </div>
       )}
 
@@ -221,10 +226,10 @@ export default function TipsCarousel({
             >
               {(() => {
                 // S'assurer qu'on a toujours exactement 3 cartes
-                const visibleTips = []
+                const visibleTips = [];
                 for (let i = 0; i < 3; i++) {
-                  const tipIndex = (currentIndex + i) % tips.length
-                  visibleTips.push(tips[tipIndex])
+                  const tipIndex = (currentIndex + i) % tips.length;
+                  visibleTips.push(tips[tipIndex]);
                 }
                 return visibleTips.map((tip, index) => (
                   <TipCard
@@ -232,7 +237,7 @@ export default function TipsCarousel({
                     tip={tip}
                     isActive={false}
                   />
-                ))
+                ));
               })()}
             </motion.div>
           </AnimatePresence>
@@ -249,7 +254,7 @@ export default function TipsCarousel({
                   "w-2 h-2 rounded-full transition-all duration-200",
                   index === currentIndex
                     ? "bg-orange-500 w-6"
-                    : "bg-gray-300 hover:bg-gray-400"
+                    : "bg-gray-300 hover:bg-gray-400",
                 )}
               />
             ))}
@@ -257,5 +262,5 @@ export default function TipsCarousel({
         )}
       </div>
     </div>
-  )
+  );
 }

@@ -6,7 +6,7 @@ Pour appliquer cette migration, exécutez le SQL suivant dans l'éditeur SQL de 
 
 ```sql
 -- Add avatar_url column to user_profiles table and bio column
-ALTER TABLE user_profiles 
+ALTER TABLE user_profiles
 ADD COLUMN avatar_url TEXT,
 ADD COLUMN bio TEXT;
 
@@ -30,7 +30,8 @@ FOR DELETE USING (bucket_id = 'avatars' AND auth.uid()::text = (storage.folderna
 ```
 
 Cette migration ajoute :
+
 1. La colonne `avatar_url` à la table `user_profiles`
-2. La colonne `bio` à la table `user_profiles` 
+2. La colonne `bio` à la table `user_profiles`
 3. Un bucket de stockage `avatars` public
 4. Les politiques RLS pour sécuriser l'accès aux avatars

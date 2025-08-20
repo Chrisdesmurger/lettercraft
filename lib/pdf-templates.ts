@@ -1,79 +1,82 @@
 /**
  * PDF Templates for Letter Generation
- * 
+ *
  * This module provides different PDF templates with various styles and layouts
  * PDF content is in French with dynamic content from AI generation
  */
 
 export interface LetterData {
   // Legacy content for backward compatibility
-  content?: string
+  content?: string;
   // New section-based structure
-  subject?: string
-  greeting?: string
-  body?: string
+  subject?: string;
+  greeting?: string;
+  body?: string;
   // Metadata
-  jobTitle?: string
-  company?: string
-  candidateName?: string
-  candidateAddress?: string
-  candidatePhone?: string
-  candidateEmail?: string
-  date?: string
-  location?: string
-  language?: 'fr' | 'en' | 'es' | 'de' | 'it'
+  jobTitle?: string;
+  company?: string;
+  candidateName?: string;
+  candidateAddress?: string;
+  candidatePhone?: string;
+  candidateEmail?: string;
+  date?: string;
+  location?: string;
+  language?: "fr" | "en" | "es" | "de" | "it";
 }
 
 export interface PdfTemplate {
-  id: string
-  name: string
-  description: string
-  preview: string // URL vers un aperçu de l'image
-  generateHtml: (data: LetterData) => string
+  id: string;
+  name: string;
+  description: string;
+  preview: string; // URL vers un aperçu de l'image
+  generateHtml: (data: LetterData) => string;
 }
 
 // Traductions pour les éléments fixes des modèles PDF
 const PDF_TRANSLATIONS = {
   fr: {
-    company: 'Entreprise',
-    subject_prefix: 'Candidature spontanée',
-    greeting_formal: 'Madame, Monsieur,',
-    greeting_casual: 'Bonjour !',
-    the: 'le'
+    company: "Entreprise",
+    subject_prefix: "Candidature spontanée",
+    greeting_formal: "Madame, Monsieur,",
+    greeting_casual: "Bonjour !",
+    the: "le",
   },
   en: {
-    company: 'Company',
-    subject_prefix: 'Application',
-    greeting_formal: 'Dear Sir or Madam,',
-    greeting_casual: 'Hello!',
-    the: ''
+    company: "Company",
+    subject_prefix: "Application",
+    greeting_formal: "Dear Sir or Madam,",
+    greeting_casual: "Hello!",
+    the: "",
   },
   es: {
-    company: 'Empresa',
-    subject_prefix: 'Candidatura espontánea',
-    greeting_formal: 'Estimados señores,',
-    greeting_casual: '¡Hola!',
-    the: 'el'
+    company: "Empresa",
+    subject_prefix: "Candidatura espontánea",
+    greeting_formal: "Estimados señores,",
+    greeting_casual: "¡Hola!",
+    the: "el",
   },
   de: {
-    company: 'Unternehmen',
-    subject_prefix: 'Initiativbewerbung',
-    greeting_formal: 'Sehr geehrte Damen und Herren,',
-    greeting_casual: 'Hallo!',
-    the: 'den'
+    company: "Unternehmen",
+    subject_prefix: "Initiativbewerbung",
+    greeting_formal: "Sehr geehrte Damen und Herren,",
+    greeting_casual: "Hallo!",
+    the: "den",
   },
   it: {
-    company: 'Azienda',
-    subject_prefix: 'Candidatura spontanea',
-    greeting_formal: 'Gentili Signori,',
-    greeting_casual: 'Ciao!',
-    the: 'il'
-  }
-}
+    company: "Azienda",
+    subject_prefix: "Candidatura spontanea",
+    greeting_formal: "Gentili Signori,",
+    greeting_casual: "Ciao!",
+    the: "il",
+  },
+};
 
 // Fonction pour obtenir les traductions
-function getTranslations(language: string = 'fr') {
-  return PDF_TRANSLATIONS[language as keyof typeof PDF_TRANSLATIONS] || PDF_TRANSLATIONS.fr
+function getTranslations(language: string = "fr") {
+  return (
+    PDF_TRANSLATIONS[language as keyof typeof PDF_TRANSLATIONS] ||
+    PDF_TRANSLATIONS.fr
+  );
 }
 
 // Fonction pour extraire les sections depuis LetterData
@@ -81,60 +84,63 @@ function extractSections(data: LetterData) {
   // If we have structured sections, use them
   if (data.subject || data.greeting || data.body) {
     return {
-      subject: data.subject || '',
-      greeting: data.greeting || '',
-      body: data.body || ''
-    }
+      subject: data.subject || "",
+      greeting: data.greeting || "",
+      body: data.body || "",
+    };
   }
-  
+
   // Fallback to legacy content for backward compatibility
   if (data.content) {
-    const sections = parseLetterContent(data.content)
-    return sections
+    const sections = parseLetterContent(data.content);
+    return sections;
   }
-  
+
   // Default empty sections
   return {
-    subject: '',
-    greeting: '',
-    body: ''
-  }
+    subject: "",
+    greeting: "",
+    body: "",
+  };
 }
 
 // Parse legacy content to extract sections for backward compatibility
 function parseLetterContent(content: string) {
-  let subject = ''
-  let greeting = ''
-  let body = content
-  
+  let subject = "";
+  let greeting = "";
+  let body = content;
+
   // Extract subject if present
-  const subjectMatch = content.match(/^(Objet\s*:?|Subject\s*:?|Asunto\s*:?|Betreff\s*:?|Oggetto\s*:?)\s*(.+?)(\n|$)/im)
+  const subjectMatch = content.match(
+    /^(Objet\s*:?|Subject\s*:?|Asunto\s*:?|Betreff\s*:?|Oggetto\s*:?)\s*(.+?)(\n|$)/im,
+  );
   if (subjectMatch) {
-    subject = subjectMatch[2].trim()
-    body = body.replace(subjectMatch[0], '').trim()
+    subject = subjectMatch[2].trim();
+    body = body.replace(subjectMatch[0], "").trim();
   }
-  
+
   // Extract greeting from the beginning
-  const lines = body.split('\n')
-  const firstFewLines = lines.slice(0, 3)
+  const lines = body.split("\n");
+  const firstFewLines = lines.slice(0, 3);
   for (let i = 0; i < firstFewLines.length; i++) {
-    const line = firstFewLines[i].trim()
-    if (line && (
-      line.toLowerCase().includes('madame') ||
-      line.toLowerCase().includes('monsieur') ||
-      line.toLowerCase().includes('dear') ||
-      line.toLowerCase().includes('bonjour') ||
-      line.toLowerCase().includes('hello')
-    )) {
-      greeting = line
+    const line = firstFewLines[i].trim();
+    if (
+      line &&
+      (line.toLowerCase().includes("madame") ||
+        line.toLowerCase().includes("monsieur") ||
+        line.toLowerCase().includes("dear") ||
+        line.toLowerCase().includes("bonjour") ||
+        line.toLowerCase().includes("hello"))
+    ) {
+      greeting = line;
       // Remove greeting from body
-      const remainingLines = lines.slice(i + 1)
-      body = remainingLines.join('\n').trim()
-      break
+      const remainingLines = lines.slice(i + 1);
+      body = remainingLines.join("\n").trim();
+      break;
     }
   }
-  
-  return { subject, greeting, body }
+
+  return { subject, greeting, body };
 }
 
 /**
@@ -142,18 +148,36 @@ function parseLetterContent(content: string) {
  * Style traditionnel avec police Times New Roman
  */
 const classicTemplate: PdfTemplate = {
-  id: 'classic',
-  name: 'Classique',
-  description: 'Style traditionnel français avec Times New Roman',
-  preview: '/templates/classic-preview.jpg',
+  id: "classic",
+  name: "Classique",
+  description: "Style traditionnel français avec Times New Roman",
+  preview: "/templates/classic-preview.jpg",
   generateHtml: (data: LetterData) => {
     const translations = getTranslations(data.language);
-    const locale = data.language === 'en' ? 'en-US' : data.language === 'de' ? 'de-DE' : data.language === 'es' ? 'es-ES' : data.language === 'it' ? 'it-IT' : 'fr-FR';
-    const subjectLabel = data.language === 'fr' ? 'Objet :' : data.language === 'en' ? 'Subject:' : data.language === 'es' ? 'Asunto:' : data.language === 'de' ? 'Betreff:' : 'Oggetto:';
-    
+    const locale =
+      data.language === "en"
+        ? "en-US"
+        : data.language === "de"
+          ? "de-DE"
+          : data.language === "es"
+            ? "es-ES"
+            : data.language === "it"
+              ? "it-IT"
+              : "fr-FR";
+    const subjectLabel =
+      data.language === "fr"
+        ? "Objet :"
+        : data.language === "en"
+          ? "Subject:"
+          : data.language === "es"
+            ? "Asunto:"
+            : data.language === "de"
+              ? "Betreff:"
+              : "Oggetto:";
+
     // Extract sections from data
     const sections = extractSections(data);
-    
+
     return `
     <!DOCTYPE html>
     <html lang="fr">
@@ -221,15 +245,18 @@ const classicTemplate: PdfTemplate = {
       <div class="page">
         <div class="header">
           <div class="sender-info">
-            ${data.candidateAddress ? data.candidateAddress + '<br>' : ''}
-            ${data.candidatePhone || ''}${data.candidatePhone && data.candidateEmail ? ' • ' : ''}${data.candidateEmail || ''}
+            ${data.candidateAddress ? data.candidateAddress + "<br>" : ""}
+            ${data.candidatePhone || ""}${data.candidatePhone && data.candidateEmail ? " • " : ""}${data.candidateEmail || ""}
           </div>
         <div class="date-location">
-          ${data.location || ''}, ${translations.the} ${data.date || new Date().toLocaleDateString(locale, { 
-            day: 'numeric', 
-            month: 'long', 
-            year: 'numeric' 
-          })}
+          ${data.location || ""}, ${translations.the} ${
+            data.date ||
+            new Date().toLocaleDateString(locale, {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            })
+          }
         </div>
       </div>
       
@@ -241,34 +268,43 @@ const classicTemplate: PdfTemplate = {
         ${sections.greeting || translations.greeting_formal}
       </div>
       
-      <div class="content">${sections.body || data.content || 'Contenu de la lettre'}</div>
+      <div class="content">${sections.body || data.content || "Contenu de la lettre"}</div>
       
       <div class="signature">
-        ${data.candidateName || ''}
+        ${data.candidateName || ""}
       </div>
       </div>
     </body>
     </html>
     `;
-  }
-}
+  },
+};
 
 /**
  * Template 2: Moderne Minimaliste
  * Design épuré avec police sans-serif
  */
 const modernTemplate: PdfTemplate = {
-  id: 'modern',
-  name: 'Moderne',
-  description: 'Design épuré et contemporain',
-  preview: '/templates/modern-preview.jpg',
+  id: "modern",
+  name: "Moderne",
+  description: "Design épuré et contemporain",
+  preview: "/templates/modern-preview.jpg",
   generateHtml: (data: LetterData) => {
     const translations = getTranslations(data.language);
-    const locale = data.language === 'en' ? 'en-US' : data.language === 'de' ? 'de-DE' : data.language === 'es' ? 'es-ES' : data.language === 'it' ? 'it-IT' : 'fr-FR';
-    
+    const locale =
+      data.language === "en"
+        ? "en-US"
+        : data.language === "de"
+          ? "de-DE"
+          : data.language === "es"
+            ? "es-ES"
+            : data.language === "it"
+              ? "it-IT"
+              : "fr-FR";
+
     // Extract sections from data
     const sections = extractSections(data);
-    
+
     return `
     <!DOCTYPE html>
     <html lang="fr">
@@ -345,17 +381,20 @@ const modernTemplate: PdfTemplate = {
         <div class="header">
           <div class="sender-block">
             <div class="sender-contact">
-              ${data.candidateAddress ? data.candidateAddress + '<br>' : ''}
-              ${data.candidatePhone || ''}${data.candidatePhone && data.candidateEmail ? ' • ' : ''}${data.candidateEmail || ''}
+              ${data.candidateAddress ? data.candidateAddress + "<br>" : ""}
+              ${data.candidatePhone || ""}${data.candidatePhone && data.candidateEmail ? " • " : ""}${data.candidateEmail || ""}
             </div>
           </div>
           <div class="date-block">
-            ${data.location || ''}<br>
-            ${data.date || new Date().toLocaleDateString(locale, { 
-              day: 'numeric', 
-              month: 'long', 
-              year: 'numeric' 
-            })}
+            ${data.location || ""}<br>
+            ${
+              data.date ||
+              new Date().toLocaleDateString(locale, {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              })
+            }
           </div>
       </div>
       
@@ -368,34 +407,43 @@ const modernTemplate: PdfTemplate = {
         ${sections.greeting || translations.greeting_formal}
       </div>
       
-      <div class="content">${sections.body || data.content || 'Contenu de la lettre'}</div>
+      <div class="content">${sections.body || data.content || "Contenu de la lettre"}</div>
       
       <div class="signature">
-        <strong>${data.candidateName || ''}</strong>
+        <strong>${data.candidateName || ""}</strong>
       </div>
       </div>
     </body>
     </html>
     `;
-  }
-}
+  },
+};
 
 /**
  * Template 3: Élégant avec Accent
  * Design sophistiqué avec couleur d'accent
  */
 const elegantTemplate: PdfTemplate = {
-  id: 'elegant',
-  name: 'Élégant',
-  description: 'Design sophistiqué avec touches de couleur',
-  preview: '/templates/elegant-preview.jpg',
+  id: "elegant",
+  name: "Élégant",
+  description: "Design sophistiqué avec touches de couleur",
+  preview: "/templates/elegant-preview.jpg",
   generateHtml: (data: LetterData) => {
     const translations = getTranslations(data.language);
-    const locale = data.language === 'en' ? 'en-US' : data.language === 'de' ? 'de-DE' : data.language === 'es' ? 'es-ES' : data.language === 'it' ? 'it-IT' : 'fr-FR';
-    
+    const locale =
+      data.language === "en"
+        ? "en-US"
+        : data.language === "de"
+          ? "de-DE"
+          : data.language === "es"
+            ? "es-ES"
+            : data.language === "it"
+              ? "it-IT"
+              : "fr-FR";
+
     // Extract sections from data
     const sections = extractSections(data);
-    
+
     return `
     <!DOCTYPE html>
     <html lang="fr">
@@ -484,17 +532,20 @@ const elegantTemplate: PdfTemplate = {
       <div class="header">
         <div class="sender-block">
           <div class="sender-contact">
-            ${data.candidateAddress ? data.candidateAddress + '<br>' : ''}
-            ${data.candidatePhone || ''}${data.candidatePhone && data.candidateEmail ? ' • ' : ''}${data.candidateEmail || ''}
+            ${data.candidateAddress ? data.candidateAddress + "<br>" : ""}
+            ${data.candidatePhone || ""}${data.candidatePhone && data.candidateEmail ? " • " : ""}${data.candidateEmail || ""}
           </div>
         </div>
         <div class="date-block">
-          ${data.location || ''}<br>
-          ${data.date || new Date().toLocaleDateString(locale, { 
-            day: 'numeric', 
-            month: 'long', 
-            year: 'numeric' 
-          })}
+          ${data.location || ""}<br>
+          ${
+            data.date ||
+            new Date().toLocaleDateString(locale, {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            })
+          }
         </div>
       </div>
       
@@ -507,34 +558,43 @@ const elegantTemplate: PdfTemplate = {
         ${sections.greeting || translations.greeting_formal}
       </div>
       
-      <div class="content">${sections.body || data.content || 'Contenu de la lettre'}</div>
+      <div class="content">${sections.body || data.content || "Contenu de la lettre"}</div>
       
       <div class="signature">
-        <strong>${data.candidateName || ''}</strong>
+        <strong>${data.candidateName || ""}</strong>
       </div>
       </div>
     </body>
     </html>
     `;
-  }
-}
+  },
+};
 
 /**
  * Template 4: Créatif Coloré
  * Pour les métiers créatifs avec design moderne
  */
 const creativeTemplate: PdfTemplate = {
-  id: 'creative',
-  name: 'Créatif',
-  description: 'Design moderne et coloré pour les métiers créatifs',
-  preview: '/templates/creative-preview.jpg',
+  id: "creative",
+  name: "Créatif",
+  description: "Design moderne et coloré pour les métiers créatifs",
+  preview: "/templates/creative-preview.jpg",
   generateHtml: (data: LetterData) => {
     const translations = getTranslations(data.language);
-    const locale = data.language === 'en' ? 'en-US' : data.language === 'de' ? 'de-DE' : data.language === 'es' ? 'es-ES' : data.language === 'it' ? 'it-IT' : 'fr-FR';
-    
+    const locale =
+      data.language === "en"
+        ? "en-US"
+        : data.language === "de"
+          ? "de-DE"
+          : data.language === "es"
+            ? "es-ES"
+            : data.language === "it"
+              ? "it-IT"
+              : "fr-FR";
+
     // Extract sections from data
     const sections = extractSections(data);
-    
+
     return `
     <!DOCTYPE html>
     <html lang="fr">
@@ -636,17 +696,20 @@ const creativeTemplate: PdfTemplate = {
           <div class="header">
             <div class="sender-block">
               <div class="sender-contact">
-                ${data.candidateAddress ? data.candidateAddress + '<br>' : ''}
-                ${data.candidatePhone || ''}${data.candidatePhone && data.candidateEmail ? ' • ' : ''}${data.candidateEmail || ''}
+                ${data.candidateAddress ? data.candidateAddress + "<br>" : ""}
+                ${data.candidatePhone || ""}${data.candidatePhone && data.candidateEmail ? " • " : ""}${data.candidateEmail || ""}
               </div>
             </div>
             <div class="date-block">
-              ${data.location || ''}<br>
-              ${data.date || new Date().toLocaleDateString(locale, { 
-                day: 'numeric', 
-                month: 'long', 
-                year: 'numeric' 
-              })}
+              ${data.location || ""}<br>
+              ${
+                data.date ||
+                new Date().toLocaleDateString(locale, {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })
+              }
             </div>
           </div>
           
@@ -659,18 +722,18 @@ const creativeTemplate: PdfTemplate = {
             ${sections.greeting || translations.greeting_casual}
           </div>
           
-          <div class="content">${sections.body || data.content || 'Contenu de la lettre'}</div>
+          <div class="content">${sections.body || data.content || "Contenu de la lettre"}</div>
           
           <div class="signature">
-            <strong>${data.candidateName || ''}</strong>
+            <strong>${data.candidateName || ""}</strong>
           </div>
         </div>
       </div>
     </body>
     </html>
     `;
-  }
-}
+  },
+};
 
 /**
  * Tous les modèles disponibles
@@ -679,19 +742,19 @@ export const PDF_TEMPLATES: PdfTemplate[] = [
   classicTemplate,
   modernTemplate,
   elegantTemplate,
-  creativeTemplate
-]
+  creativeTemplate,
+];
 
 /**
  * Récupérer un modèle par son ID
  */
 export function getTemplateById(id: string): PdfTemplate | undefined {
-  return PDF_TEMPLATES.find(template => template.id === id)
+  return PDF_TEMPLATES.find((template) => template.id === id);
 }
 
 /**
  * Récupérer le modèle par défaut
  */
 export function getDefaultTemplate(): PdfTemplate {
-  return classicTemplate
+  return classicTemplate;
 }
