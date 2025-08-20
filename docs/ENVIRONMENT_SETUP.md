@@ -31,6 +31,7 @@ OPENAI_API_KEY=your_openai_api_key
 Pour vérifier que tout est configuré correctement :
 
 1. Redémarrez votre serveur de développement :
+
    ```bash
    npm run dev
    ```

@@ -3,16 +3,19 @@
 ## ✨ Fonctionnalités Ajoutées
 
 ### 🎯 **4 Modèles Professionnels**
+
 - **Classique** : Style traditionnel français (Times New Roman)
-- **Moderne** : Design épuré contemporain (Helvetica)  
+- **Moderne** : Design épuré contemporain (Helvetica)
 - **Élégant** : Sophistiqué avec dégradés (Georgia)
 - **Créatif** : Coloré pour métiers créatifs (Moderne + Emojis)
 
 ### 🔧 **Composants UI**
+
 - `PdfExportControls` : Interface complète d'export avec sélection
 - `TemplateSelector` : Sélecteur de modèles avec aperçus visuels
 
 ### ⚡ **API Améliorée**
+
 - `generateLetterPdfWithTemplate()` : Nouvelle fonction avec modèles
 - Support des données structurées `LetterData`
 - Options avancées par modèle
@@ -38,32 +41,33 @@ examples/
 ## 🚀 **Utilisation Rapide**
 
 ### Import du Composant
+
 ```tsx
-import PdfExportControls from '@/components/pdf/PdfExportControls'
+import PdfExportControls from "@/components/pdf/PdfExportControls";
 ```
 
 ### Préparation des Données
+
 ```tsx
 const letterData = {
   content: "Votre lettre...",
   jobTitle: "Développeur",
   company: "TechCorp",
   candidateName: "Jean Dupont",
-  candidateEmail: "jean@email.com"
-}
+  candidateEmail: "jean@email.com",
+};
 ```
 
 ### Rendu du Composant
+
 ```tsx
-<PdfExportControls 
-  letterData={letterData}
-  fileName="ma-lettre-motivation"
-/>
+<PdfExportControls letterData={letterData} fileName="ma-lettre-motivation" />
 ```
 
 ## 🎨 **Aperçu des Modèles**
 
 ### Classique 📄
+
 ```
 ┌─────────────────────────────┐
 │ Jean Dupont                 │
@@ -86,6 +90,7 @@ const letterData = {
 ```
 
 ### Moderne 🔷
+
 ```
 ┌─────────────────────────────┐
 │ JEAN DUPONT                 │
@@ -105,6 +110,7 @@ const letterData = {
 ```
 
 ### Élégant 🎭
+
 ```
 ┌─────────────────────────────┐
 │ ████ JEAN DUPONT ████       │
@@ -123,6 +129,7 @@ const letterData = {
 ```
 
 ### Créatif 🌈
+
 ```
 ┌─═══════════════════════════─┐
 │ ┃    JEAN DUPONT ✨        ┃ │
@@ -155,4 +162,5 @@ const letterData = {
 Voir `docs/PDF_TEMPLATES_GUIDE.md` pour le guide détaillé d'utilisation et de personnalisation.
 
 ---
+
 **🤖 Créé avec Claude Code pour LetterCraft**

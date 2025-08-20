@@ -1,66 +1,66 @@
-'use client'
+"use client";
 
-import { useState, useEffect, Suspense } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { supabase } from '@/lib/supabase-client'
-import ProfileLayout from '@/components/profile/ProfileLayout'
-import Header from '@/components/Header'
-import { toast } from 'react-hot-toast'
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { supabase } from "@/lib/supabase-client";
+import ProfileLayout from "@/components/profile/ProfileLayout";
+import Header from "@/components/Header";
+import { toast } from "react-hot-toast";
 
 function ProfileContent() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const [loading, setLoading] = useState(true)
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const handlePaymentSuccess = async (userId: string) => {
       try {
-        const response = await fetch('/api/handle-payment-success', {
-          method: 'POST',
+        const response = await fetch("/api/handle-payment-success", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({ userId }),
-        })
+        });
 
-        const result = await response.json()
-        
-        console.log('Payment success API response:', { 
-          status: response.status, 
-          result 
-        })
-        
+        const result = await response.json();
+
+        console.log("Payment success API response:", {
+          status: response.status,
+          result,
+        });
+
         if (result.success) {
-          toast.success('Abonnement Premium activé ! 🎉')
+          toast.success("Abonnement Premium activé ! 🎉");
           // Refresh subscription status without full page reload
-          window.dispatchEvent(new CustomEvent('subscription-updated'))
+          window.dispatchEvent(new CustomEvent("subscription-updated"));
         } else {
-          console.error('Failed to update subscription:', result.error)
-          toast.error('Erreur lors de la mise à jour de l\'abonnement')
+          console.error("Failed to update subscription:", result.error);
+          toast.error("Erreur lors de la mise à jour de l'abonnement");
         }
       } catch (error) {
-        console.error('Error handling payment success:', error)
+        console.error("Error handling payment success:", error);
       }
-    }
+    };
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) {
-        router.push('/login')
+        router.push("/login");
       } else {
         // Check for payment success
-        const paymentStatus = searchParams.get('payment')
-        if (paymentStatus === 'success' && session.user) {
-          console.log('Payment success detected, updating subscription...')
-          handlePaymentSuccess(session.user.id)
-          
+        const paymentStatus = searchParams.get("payment");
+        if (paymentStatus === "success" && session.user) {
+          console.log("Payment success detected, updating subscription...");
+          handlePaymentSuccess(session.user.id);
+
           // Clean up URL
-          router.replace('/profile', { scroll: false })
+          router.replace("/profile", { scroll: false });
         }
-        
-        setLoading(false)
+
+        setLoading(false);
       }
-    })
-  }, [router, searchParams])
+    });
+  }, [router, searchParams]);
 
   if (loading) {
     return (
@@ -70,34 +70,38 @@ function ProfileContent() {
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
     <>
       <Header />
-      <Suspense fallback={
-        <div className="flex items-center justify-center py-10">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
-        </div>
-      }>
+      <Suspense
+        fallback={
+          <div className="flex items-center justify-center py-10">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+          </div>
+        }
+      >
         <ProfileLayout />
       </Suspense>
     </>
-  )
+  );
 }
 
 export default function ProfilePage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-amber-50">
-        <Header />
-        <div className="flex items-center justify-center py-10">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-amber-50">
+          <Header />
+          <div className="flex items-center justify-center py-10">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <ProfileContent />
     </Suspense>
-  )
+  );
 }

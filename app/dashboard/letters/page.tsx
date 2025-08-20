@@ -1,81 +1,85 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabase-client'
-import Header from '@/components/Header'
-import LettersList from '@/components/letters/LettersList'
-import { Skeleton } from '@/components/ui/skeleton'
-import { AlertCircle, FileText } from 'lucide-react'
-import { useI18n } from '@/lib/i18n-context'
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase-client";
+import Header from "@/components/Header";
+import LettersList from "@/components/letters/LettersList";
+import { Skeleton } from "@/components/ui/skeleton";
+import { AlertCircle, FileText } from "lucide-react";
+import { useI18n } from "@/lib/i18n-context";
 
 export default function LettersPage() {
-  const router = useRouter()
-  const { t } = useI18n()
-  const [user, setUser] = useState<any>(null)
-  const [letters, setLetters] = useState<any[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
+  const router = useRouter();
+  const { t } = useI18n();
+  const [user, setUser] = useState<any>(null);
+  const [letters, setLetters] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) {
-        router.push('/login')
+        router.push("/login");
       } else {
-        setUser(session.user)
-        setLoading(false)
-        fetchLetters(session.user)
+        setUser(session.user);
+        setLoading(false);
+        fetchLetters(session.user);
       }
-    })
-  }, [router])
+    });
+  }, [router]);
 
   const fetchLetters = async (currentUser: any) => {
-    if (!currentUser) return
-    
+    if (!currentUser) return;
+
     try {
-      setIsLoading(true)
-      setError(null)
+      setIsLoading(true);
+      setError(null);
 
       // Récupérer les lettres de l'utilisateur
       const { data, error } = await supabase
-        .from('generated_letters')
-        .select(`
+        .from("generated_letters")
+        .select(
+          `
           *,
           job_offers(*),
           candidates_profile(title)
-        `)
-        .eq('user_id', currentUser.id)
-        .order('created_at', { ascending: false })
+        `,
+        )
+        .eq("user_id", currentUser.id)
+        .order("created_at", { ascending: false });
 
       if (error) {
-        console.error('Erreur lors de la récupération des lettres:', error)
-        setError(t('error.cantLoadLetters'))
-        return
+        console.error("Erreur lors de la récupération des lettres:", error);
+        setError(t("error.cantLoadLetters"));
+        return;
       }
 
-      setLetters(data || [])
+      setLetters(data || []);
     } catch (err) {
-      console.error('Erreur lors de la récupération des lettres:', err)
-      setError(t('error.cantLoadLetters'))
+      console.error("Erreur lors de la récupération des lettres:", err);
+      setError(t("error.cantLoadLetters"));
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   if (loading) {
-    return <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
-        <p className="text-gray-600">{t('common.loading')}</p>
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">{t("common.loading")}</p>
+        </div>
       </div>
-    </div>
+    );
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      
+
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
@@ -83,12 +87,10 @@ export default function LettersPage() {
               <FileText className="w-5 h-5 text-white" />
             </div>
             <h1 className="text-3xl font-bold text-gray-900">
-              {t('dashboard.title')}
+              {t("dashboard.title")}
             </h1>
           </div>
-          <p className="text-gray-600">
-            {t('dashboard.subtitle')}
-          </p>
+          <p className="text-gray-600">{t("dashboard.subtitle")}</p>
         </div>
 
         {error && (
@@ -119,5 +121,5 @@ export default function LettersPage() {
         )}
       </main>
     </div>
-  )
+  );
 }

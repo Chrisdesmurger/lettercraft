@@ -4,32 +4,38 @@
  */
 
 export interface EmailRequest {
-  type: 'welcome' | 'subscription_confirmed' | 'payment_failed' | 'quota_limit' | 'quota_warning'
-  userEmail: string
-  userName: string
-  userLanguage?: string
+  type:
+    | "welcome"
+    | "subscription_confirmed"
+    | "payment_failed"
+    | "quota_limit"
+    | "quota_warning";
+  userEmail: string;
+  userName: string;
+  userLanguage?: string;
   // Paramètres optionnels selon le type
-  invoiceUrl?: string
-  currentQuota?: number
-  maxQuota?: number
-  remainingQuota?: number
-  resetDate?: string
+  invoiceUrl?: string;
+  currentQuota?: number;
+  maxQuota?: number;
+  remainingQuota?: number;
+  resetDate?: string;
 }
 
 export interface EmailResponse {
-  success: boolean
-  message?: string
-  error?: string
+  success: boolean;
+  message?: string;
+  error?: string;
 }
 
 /**
  * Classe principale pour l'envoi d'emails côté client
  */
 export class EmailClient {
-  private baseUrl: string
+  private baseUrl: string;
 
   constructor(baseUrl?: string) {
-    this.baseUrl = baseUrl || (typeof window !== 'undefined' ? window.location.origin : '')
+    this.baseUrl =
+      baseUrl || (typeof window !== "undefined" ? window.location.origin : "");
   }
 
   /**
@@ -38,24 +44,24 @@ export class EmailClient {
   async sendEmail(emailData: EmailRequest): Promise<boolean> {
     try {
       const response = await fetch(`${this.baseUrl}/api/send-email`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(emailData),
-      })
+      });
 
-      const result: EmailResponse = await response.json()
-      
+      const result: EmailResponse = await response.json();
+
       if (!response.ok) {
-        console.error('Erreur envoi email:', result.error || 'Erreur inconnue')
-        return false
+        console.error("Erreur envoi email:", result.error || "Erreur inconnue");
+        return false;
       }
 
-      return result.success
+      return result.success;
     } catch (error) {
-      console.error('Erreur sendEmail:', error)
-      return false
+      console.error("Erreur sendEmail:", error);
+      return false;
     }
   }
 
@@ -63,16 +69,16 @@ export class EmailClient {
    * Envoie un email de bienvenue
    */
   async sendWelcomeEmail(
-    userEmail: string, 
-    userName: string, 
-    userLanguage: string = 'fr'
+    userEmail: string,
+    userName: string,
+    userLanguage: string = "fr",
   ): Promise<boolean> {
     return this.sendEmail({
-      type: 'welcome',
+      type: "welcome",
       userEmail,
       userName,
-      userLanguage
-    })
+      userLanguage,
+    });
   }
 
   /**
@@ -82,15 +88,15 @@ export class EmailClient {
     userEmail: string,
     userName: string,
     invoiceUrl?: string,
-    userLanguage: string = 'fr'
+    userLanguage: string = "fr",
   ): Promise<boolean> {
     return this.sendEmail({
-      type: 'subscription_confirmed',
+      type: "subscription_confirmed",
       userEmail,
       userName,
       userLanguage,
-      invoiceUrl
-    })
+      invoiceUrl,
+    });
   }
 
   /**
@@ -100,15 +106,15 @@ export class EmailClient {
     userEmail: string,
     userName: string,
     invoiceUrl?: string,
-    userLanguage: string = 'fr'
+    userLanguage: string = "fr",
   ): Promise<boolean> {
     return this.sendEmail({
-      type: 'payment_failed',
+      type: "payment_failed",
       userEmail,
       userName,
       userLanguage,
-      invoiceUrl
-    })
+      invoiceUrl,
+    });
   }
 
   /**
@@ -120,17 +126,17 @@ export class EmailClient {
     currentQuota: number,
     maxQuota: number,
     resetDate: string,
-    userLanguage: string = 'fr'
+    userLanguage: string = "fr",
   ): Promise<boolean> {
     return this.sendEmail({
-      type: 'quota_limit',
+      type: "quota_limit",
       userEmail,
       userName,
       userLanguage,
       currentQuota,
       maxQuota,
-      resetDate
-    })
+      resetDate,
+    });
   }
 
   /**
@@ -140,24 +146,24 @@ export class EmailClient {
     userEmail: string,
     userName: string,
     remainingQuota: number,
-    userLanguage: string = 'fr'
+    userLanguage: string = "fr",
   ): Promise<boolean> {
     return this.sendEmail({
-      type: 'quota_warning',
+      type: "quota_warning",
       userEmail,
       userName,
       userLanguage,
-      remainingQuota
-    })
+      remainingQuota,
+    });
   }
 }
 
 // Instance singleton du client email
-export const emailClient = new EmailClient()
+export const emailClient = new EmailClient();
 
 /**
  * Hook React pour utiliser le client email
  */
 export function useEmailClient() {
-  return emailClient
+  return emailClient;
 }

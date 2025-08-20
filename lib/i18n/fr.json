@@ -6,7 +6,7 @@
   },
   "navigation": {
     "dashboard": "Dashboard",
-    "generator": "Générateur", 
+    "generator": "Générateur",
     "letters": "Mes Lettres",
     "profile": "Profil"
   },
@@ -28,7 +28,7 @@
       "description": "Personnalisez et générez votre lettre"
     },
     "preview": {
-      "title": "Aperçu", 
+      "title": "Aperçu",
       "description": "Relisez et téléchargez votre lettre"
     }
   },
@@ -548,17 +548,66 @@
     "question6": {
       "title": "Dans quelle langue souhaitez-vous générer votre lettre de motivation ?",
       "placeholder": "Sélectionnez la langue de votre lettre",
+      "premiumFeature": "Fonctionnalité Premium",
       "detectedLanguage": "Langue détectée automatiquement : {language}",
       "french": "Français",
       "english": "Anglais",
       "spanish": "Espagnol"
+    },
+    "question7": {
+      "title": "Choisissez le ton de votre lettre de motivation",
+      "placeholder": "Sélectionnez le style d'écriture qui vous représente",
+      "premiumFeature": "Fonctionnalité Premium",
+      "example": "Exemple :",
+      "customToneLabel": "Décrivez votre ton personnalisé (max 120 caractères)",
+      "customTonePlaceholder": "Ex: Décontracté mais respectueux, avec une pointe d'humour...",
+      "customToneHelp": "Soyez spécifique sur le style d'écriture souhaité",
+      "tones": {
+        "professional": {
+          "label": "Professionnel",
+          "description": "Style formel et structuré, idéal pour les candidatures traditionnelles",
+          "example": "J'ai l'honneur de vous présenter ma candidature..."
+        },
+        "warm": {
+          "label": "Chaleureux",
+          "description": "Ton cordial et humain qui crée une connexion personnelle",
+          "example": "C'est avec un réel enthousiasme que je vous écris..."
+        },
+        "direct": {
+          "label": "Direct",
+          "description": "Approche franche et efficace, va droit au but",
+          "example": "Mes 5 ans d'expérience correspondent exactement à vos besoins..."
+        },
+        "persuasive": {
+          "label": "Persuasif",
+          "description": "Met l'accent sur la valeur ajoutée et les bénéfices",
+          "example": "Mon expertise vous permettra d'augmenter vos performances..."
+        },
+        "creative": {
+          "label": "Créatif",
+          "description": "Style original avec des expressions variées et une touche d'originalité",
+          "example": "Comme un puzzle dont chaque pièce trouve sa place..."
+        },
+        "concise": {
+          "label": "Concis",
+          "description": "Maximum d'impact en minimum de mots",
+          "example": "Développeur expérimenté. Résultats prouvés. Disponible immédiatement."
+        },
+        "custom": {
+          "label": "Personnalisé",
+          "description": "Décrivez le ton souhaité en quelques mots"
+        }
+      }
     },
     "validation": {
       "required": "Ce champ est requis",
       "min50chars": "Veuillez saisir au moins 50 caractères",
       "min30chars": "Veuillez saisir au moins 30 caractères",
       "selectExperience": "Veuillez sélectionner une expérience",
-      "selectSkills": "Veuillez sélectionner au moins une compétence"
+      "selectSkills": "Veuillez sélectionner au moins une compétence",
+      "selectTone": "Veuillez sélectionner un ton d'écriture",
+      "customToneRequired": "Le texte personnalisé est requis pour le ton personnalisé",
+      "customToneTooLong": "Le texte personnalisé ne peut pas dépasser 120 caractères"
     }
   },
   "flow": {
@@ -593,6 +642,7 @@
     "position": "Poste",
     "company": "Entreprise",
     "cvUsed": "CV utilisé",
+    "toneUsed": "Ton utilisé",
     "generatedOn": "Généré le"
   },
   "account": {
@@ -676,7 +726,7 @@
         "whatWillBeDeleted": "Ce qui sera supprimé :",
         "deletionList": {
           "profile": "• Votre profil et informations personnelles",
-          "cvs": "• Tous vos CV téléchargés", 
+          "cvs": "• Tous vos CV téléchargés",
           "letters": "• Toutes vos lettres générées et sauvegardées",
           "history": "• Votre historique d'utilisation",
           "subscription": "• Votre abonnement (avec annulation immédiate)"
@@ -714,7 +764,7 @@
         "description": "Style traditionnel français avec Times New Roman"
       },
       "modern": {
-        "name": "Moderne", 
+        "name": "Moderne",
         "description": "Design épuré et contemporain"
       },
       "elegant": {
@@ -742,7 +792,7 @@
       "label": "Note",
       "labels": {
         "1": "Très insatisfait",
-        "2": "Insatisfait", 
+        "2": "Insatisfait",
         "3": "Neutre",
         "4": "Satisfait",
         "5": "Très satisfait"
@@ -757,7 +807,7 @@
     "categories": {
       "label": "Aspects à améliorer (optionnel)",
       "content": "Contenu",
-      "style": "Style", 
+      "style": "Style",
       "relevance": "Pertinence",
       "length": "Longueur",
       "categoryLabel": "Catégorie {category}",

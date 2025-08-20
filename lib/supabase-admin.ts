@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from "@supabase/supabase-js";
 
 // Admin client with service role key to bypass RLS when needed
 export const supabaseAdmin = createClient(
@@ -7,7 +7,7 @@ export const supabaseAdmin = createClient(
   {
     auth: {
       autoRefreshToken: false,
-      persistSession: false
-    }
-  }
-)
+      persistSession: false,
+    },
+  },
+);

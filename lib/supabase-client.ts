@@ -21,7 +21,7 @@ export type Database = {
           birth_date: string | null;
           avatar_url: string | null;
           bio: string | null;
-          subscription_tier: 'free' | 'premium';
+          subscription_tier: "free" | "premium";
           subscription_end_date: string | null;
           stripe_customer_id: string | null;
           stripe_subscription_id: string | null;
@@ -39,7 +39,7 @@ export type Database = {
           birth_date?: string | null;
           avatar_url?: string | null;
           bio?: string | null;
-          subscription_tier?: 'free' | 'premium';
+          subscription_tier?: "free" | "premium";
           subscription_end_date?: string | null;
           stripe_customer_id?: string | null;
           stripe_subscription_id?: string | null;
@@ -57,7 +57,7 @@ export type Database = {
           birth_date?: string | null;
           avatar_url?: string | null;
           bio?: string | null;
-          subscription_tier?: 'free' | 'premium';
+          subscription_tier?: "free" | "premium";
           subscription_end_date?: string | null;
           stripe_customer_id?: string | null;
           stripe_subscription_id?: string | null;
@@ -343,6 +343,8 @@ export type Database = {
           skills_match: string[];
           company_values: string;
           additional_context: string | null;
+          language: string | null;
+          writing_tone: { toneKey: string; customText: string } | null;
           created_at: string;
           updated_at: string;
         };
@@ -356,6 +358,8 @@ export type Database = {
           skills_match: string[];
           company_values: string;
           additional_context?: string | null;
+          language?: string | null;
+          writing_tone?: { toneKey: string; customText: string } | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -369,6 +373,8 @@ export type Database = {
           skills_match?: string[];
           company_values?: string;
           additional_context?: string | null;
+          language?: string | null;
+          writing_tone?: { toneKey: string; customText: string } | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -388,6 +394,8 @@ export type Database = {
           pdf_url: string | null;
           generation_settings: any;
           openai_model: string;
+          tone_key: string;
+          tone_custom: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -405,6 +413,8 @@ export type Database = {
           pdf_url?: string | null;
           generation_settings?: any;
           openai_model?: string;
+          tone_key?: string;
+          tone_custom?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -422,6 +432,8 @@ export type Database = {
           pdf_url?: string | null;
           generation_settings?: any;
           openai_model?: string;
+          tone_key?: string;
+          tone_custom?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -438,7 +450,7 @@ export type Database = {
           birth_date: string | null;
           avatar_url: string | null;
           bio: string | null;
-          subscription_tier: 'free' | 'premium';
+          subscription_tier: "free" | "premium";
           subscription_end_date: string | null;
           stripe_customer_id: string | null;
           stripe_subscription_id: string | null;
@@ -459,7 +471,7 @@ export type Database = {
           birth_date: string | null;
           avatar_url: string | null;
           bio: string | null;
-          subscription_tier: 'free' | 'premium';
+          subscription_tier: "free" | "premium";
           subscription_end_date: string | null;
           stripe_customer_id: string | null;
           stripe_subscription_id: string | null;
@@ -478,7 +490,7 @@ export type Database = {
           birth_date?: string | null;
           avatar_url?: string | null;
           bio?: string | null;
-          subscription_tier?: 'free' | 'premium';
+          subscription_tier?: "free" | "premium";
           subscription_end_date?: string | null;
           stripe_customer_id?: string | null;
           stripe_subscription_id?: string | null;
@@ -497,7 +509,7 @@ export type Database = {
           birth_date?: string | null;
           avatar_url?: string | null;
           bio?: string | null;
-          subscription_tier?: 'free' | 'premium';
+          subscription_tier?: "free" | "premium";
           subscription_end_date?: string | null;
           stripe_customer_id?: string | null;
           stripe_subscription_id?: string | null;
@@ -603,7 +615,8 @@ export const db = {
   languages: () => supabase.from("languages"),
   candidatesProfile: () => supabase.from("candidates_profile"),
   jobOffers: () => supabase.from("job_offers"),
-  letterQuestionnaireResponses: () => supabase.from("letter_questionnaire_responses"),
+  letterQuestionnaireResponses: () =>
+    supabase.from("letter_questionnaire_responses"),
   generatedLetters: () => supabase.from("generated_letters"),
   letterReviews: () => supabase.from("letter_reviews"),
   feedbackCategories: () => supabase.from("feedback_categories"),

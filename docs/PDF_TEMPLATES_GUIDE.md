@@ -5,24 +5,28 @@ Ce guide explique comment utiliser le nouveau système de modèles PDF pour pers
 ## 🎨 Modèles Disponibles
 
 ### 1. **Classique** (`classic`)
+
 - **Style** : Traditionnel français
 - **Police** : Times New Roman
 - **Usage** : Secteurs traditionnels (banque, administration, juridique)
 - **Caractéristiques** : Format formel, mise en page standard
 
-### 2. **Moderne** (`modern`) 
+### 2. **Moderne** (`modern`)
+
 - **Style** : Épuré et contemporain
 - **Police** : Helvetica/Arial
 - **Usage** : Tech, startups, métiers modernes
 - **Caractéristiques** : Design minimaliste, couleurs sobres
 
 ### 3. **Élégant** (`elegant`)
+
 - **Style** : Sophistiqué avec touches de couleur
 - **Police** : Georgia
 - **Usage** : Conseil, luxe, communication
 - **Caractéristiques** : Dégradé en en-tête, mise en page raffinée
 
 ### 4. **Créatif** (`creative`)
+
 - **Style** : Moderne et coloré
 - **Police** : Helvetica
 - **Usage** : Design, marketing, métiers créatifs
@@ -33,35 +37,35 @@ Ce guide explique comment utiliser le nouveau système de modèles PDF pour pers
 ### Méthode Simple - Composant PdfExportControls
 
 ```tsx
-import PdfExportControls from '@/components/pdf/PdfExportControls'
-import { type LetterData } from '@/lib/pdf-templates'
+import PdfExportControls from "@/components/pdf/PdfExportControls";
+import { type LetterData } from "@/lib/pdf-templates";
 
 function MyLetterComponent({ data }) {
   const letterData: LetterData = {
     content: data.generatedLetter,
     jobTitle: data.jobOffer.title,
     company: data.jobOffer.company,
-    candidateName: data.profile.firstName + ' ' + data.profile.lastName,
+    candidateName: data.profile.firstName + " " + data.profile.lastName,
     candidateEmail: data.profile.email,
     candidatePhone: data.profile.phone,
     candidateAddress: data.profile.address,
     location: data.profile.city,
-  }
+  };
 
   return (
-    <PdfExportControls 
+    <PdfExportControls
       letterData={letterData}
       fileName="ma-lettre-motivation"
     />
-  )
+  );
 }
 ```
 
 ### Méthode Avancée - API Directe
 
 ```tsx
-import { generateLetterPdfWithTemplate } from '@/lib/pdf'
-import { type LetterData, type PdfOptions } from '@/lib/pdf-templates'
+import { generateLetterPdfWithTemplate } from "@/lib/pdf";
+import { type LetterData, type PdfOptions } from "@/lib/pdf-templates";
 
 async function generateCustomPdf() {
   const letterData: LetterData = {
@@ -70,16 +74,16 @@ async function generateCustomPdf() {
     company: "TechCorp",
     candidateName: "Jean Dupont",
     // ... autres champs
-  }
+  };
 
   const options: PdfOptions = {
-    templateId: 'modern', // Choisir le modèle
-    format: 'a4',
+    templateId: "modern", // Choisir le modèle
+    format: "a4",
     quality: 0.98,
-    margin: 1
-  }
+    margin: 1,
+  };
 
-  await generateLetterPdfWithTemplate(letterData, 'ma-lettre', options)
+  await generateLetterPdfWithTemplate(letterData, "ma-lettre", options);
 }
 ```
 
@@ -89,15 +93,15 @@ async function generateCustomPdf() {
 
 ```typescript
 interface LetterData {
-  content: string              // Contenu principal de la lettre
-  jobTitle?: string           // Intitulé du poste
-  company?: string            // Nom de l'entreprise
-  candidateName?: string      // Prénom et nom du candidat
-  candidateAddress?: string   // Adresse complète
-  candidatePhone?: string     // Numéro de téléphone
-  candidateEmail?: string     // Email
-  date?: string              // Date (optionnel, auto-générée)
-  location?: string          // Ville (par défaut: Paris)
+  content: string; // Contenu principal de la lettre
+  jobTitle?: string; // Intitulé du poste
+  company?: string; // Nom de l'entreprise
+  candidateName?: string; // Prénom et nom du candidat
+  candidateAddress?: string; // Adresse complète
+  candidatePhone?: string; // Numéro de téléphone
+  candidateEmail?: string; // Email
+  date?: string; // Date (optionnel, auto-générée)
+  location?: string; // Ville (par défaut: Paris)
 }
 ```
 
@@ -105,25 +109,29 @@ interface LetterData {
 
 ```typescript
 interface PdfOptions {
-  templateId?: string         // ID du modèle ('classic', 'modern', etc.)
-  format?: 'a4' | 'letter'   // Format de page
-  margin?: number             // Marges (en pouces)
-  quality?: number            // Qualité (0-1)
-  scale?: number              // Échelle de rendu
+  templateId?: string; // ID du modèle ('classic', 'modern', etc.)
+  format?: "a4" | "letter"; // Format de page
+  margin?: number; // Marges (en pouces)
+  quality?: number; // Qualité (0-1)
+  scale?: number; // Échelle de rendu
 }
 ```
 
 ## 🎛️ Composants Disponibles
 
 ### PdfExportControls
+
 Composant complet avec sélection de modèles et boutons d'export.
+
 - ✅ Interface utilisateur complète
 - ✅ Sélection de modèles
 - ✅ Export PDF et TXT
 - ✅ États de chargement
 
 ### TemplateSelector
+
 Sélecteur de modèles standalone.
+
 - ✅ Aperçu des modèles
 - ✅ Modal de sélection
 - ✅ Prévisualisations visuelles
@@ -131,12 +139,14 @@ Sélecteur de modèles standalone.
 ## 🔄 Migration depuis l'Ancien Système
 
 ### Avant (LetterPreview.tsx)
+
 ```tsx
 // Ancien système
-await generatePdfFromElement(letterRef.current, fileName)
+await generatePdfFromElement(letterRef.current, fileName);
 ```
 
 ### Après (Avec Modèles)
+
 ```tsx
 // Nouveau système avec modèles
 const letterData = {
@@ -144,11 +154,11 @@ const letterData = {
   jobTitle: data?.jobOffer?.title,
   company: data?.jobOffer?.company,
   // ...
-}
+};
 
 await generateLetterPdfWithTemplate(letterData, fileName, {
-  templateId: 'modern'
-})
+  templateId: "modern",
+});
 ```
 
 ## 🎨 Personnalisation Avancée
@@ -159,17 +169,17 @@ await generateLetterPdfWithTemplate(letterData, fileName, {
 
 ```typescript
 const monNouveauTemplate: PdfTemplate = {
-  id: 'mon-template',
-  name: 'Mon Template',
-  description: 'Description de mon template',
-  preview: '/templates/mon-template-preview.jpg',
+  id: "mon-template",
+  name: "Mon Template",
+  description: "Description de mon template",
+  preview: "/templates/mon-template-preview.jpg",
   generateHtml: (data: LetterData) => `
     <!DOCTYPE html>
     <html>
     <!-- Votre HTML personnalisé -->
     </html>
-  `
-}
+  `,
+};
 
 // Ajoutez-le à l'export
 export const PDF_TEMPLATES = [
@@ -177,8 +187,8 @@ export const PDF_TEMPLATES = [
   modernTemplate,
   elegantTemplate,
   creativeTemplate,
-  monNouveauTemplate // ← Nouveau modèle
-]
+  monNouveauTemplate, // ← Nouveau modèle
+];
 ```
 
 2. **Ajoutez les styles et icônes dans `TemplateSelector.tsx`**
@@ -193,7 +203,7 @@ export const PDF_TEMPLATES = [
 
 - **Finance/Banque/Juridique** → `classic`
 - **Tech/Startups** → `modern`
-- **Conseil/Luxe** → `elegant` 
+- **Conseil/Luxe** → `elegant`
 - **Design/Marketing/Créatif** → `creative`
 
 ### Optimisation Performance

@@ -1,157 +1,146 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
+  <head>
     <title>Create Pull Request</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f6f8fa;
-        }
-        .container {
-            background: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #0366d6;
-            margin-bottom: 20px;
-        }
-        .button {
-            background-color: #28a745;
-            color: white;
-            padding: 12px 24px;
-            text-decoration: none;
-            border-radius: 6px;
-            font-weight: bold;
-            display: inline-block;
-            margin: 20px 0;
-        }
-        .button:hover {
-            background-color: #218838;
-        }
-        .code {
-            background-color: #f6f8fa;
-            padding: 15px;
-            border-radius: 6px;
-            border-left: 4px solid #0366d6;
-            margin: 15px 0;
-            font-family: monospace;
-            white-space: pre-wrap;
-        }
-        .info {
-            background-color: #e6f3ff;
-            padding: 15px;
-            border-radius: 6px;
-            border-left: 4px solid #0366d6;
-            margin: 15px 0;
-        }
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f6f8fa;
+      }
+      .container {
+        background: white;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        color: #0366d6;
+        margin-bottom: 20px;
+      }
+      .button {
+        background-color: #28a745;
+        color: white;
+        padding: 12px 24px;
+        text-decoration: none;
+        border-radius: 6px;
+        font-weight: bold;
+        display: inline-block;
+        margin: 20px 0;
+      }
+      .button:hover {
+        background-color: #218838;
+      }
+      .code {
+        background-color: #f6f8fa;
+        padding: 15px;
+        border-radius: 6px;
+        border-left: 4px solid #0366d6;
+        margin: 15px 0;
+        font-family: monospace;
+        white-space: pre-wrap;
+      }
+      .info {
+        background-color: #e6f3ff;
+        padding: 15px;
+        border-radius: 6px;
+        border-left: 4px solid #0366d6;
+        margin: 15px 0;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="container">
-        <h1>🚀 Créer la Pull Request</h1>
-        
-        <div class="info">
-            <strong>Statut:</strong> Tous les changements ont été poussés vers la branche <code>feature/account-deletion-and-cv-upload-fix</code>
-        </div>
+      <h1>🚀 Créer la Pull Request</h1>
 
-        <a href="https://github.com/Chrisdesmurger/lettercraft/compare/main...feature/account-deletion-and-cv-upload-fix" class="button" target="_blank">
-            Créer la Pull Request sur GitHub
-        </a>
+      <div class="info">
+        <strong>Statut:</strong> Tous les changements ont été poussés vers la
+        branche <code>feature/account-deletion-and-cv-upload-fix</code>
+      </div>
 
-        <h2>📋 Titre à utiliser:</h2>
-        <div class="code">feat: Complete account deletion system with configurable emails and subscription plan updates</div>
+      <a
+        href="https://github.com/Chrisdesmurger/lettercraft/compare/main...feature/account-deletion-and-cv-upload-fix"
+        class="button"
+        target="_blank"
+      >
+        Créer la Pull Request sur GitHub
+      </a>
 
-        <h2>📝 Description à copier-coller:</h2>
-        <div class="code">## Summary
-- ✅ **Immediate Stripe subscription cancellation** on account deletion confirmation
-- ✅ **Configurable support email** via BREVO_SUPPORT_EMAIL environment variable
-- ✅ **Complete multilingual support** for account deletion process (FR, EN, ES, DE, IT)
-- ✅ **Updated subscription plans** with restructured feature organization
-- ✅ **Fixed UI bugs** including pluralization and missing translations
+      <h2>📋 Titre à utiliser:</h2>
+      <div class="code">
+        feat: Complete account deletion system with configurable emails and
+        subscription plan updates
+      </div>
 
-## Key Features
+      <h2>📝 Description à copier-coller:</h2>
+      <div class="code">
+        ## Summary - ✅ **Immediate Stripe subscription cancellation** on
+        account deletion confirmation - ✅ **Configurable support email** via
+        BREVO_SUPPORT_EMAIL environment variable - ✅ **Complete multilingual
+        support** for account deletion process (FR, EN, ES, DE, IT) - ✅
+        **Updated subscription plans** with restructured feature organization -
+        ✅ **Fixed UI bugs** including pluralization and missing translations ##
+        Key Features ### 🔧 Immediate Subscription Cancellation - Account
+        deletion now triggers immediate Stripe subscription cancellation - No
+        cron jobs needed - cancellation happens instantly on email confirmation
+        - Updated email templates to warn users about irreversible subscription
+        cancellation ### 📧 Configurable Support Email - Added
+        `BREVO_SUPPORT_EMAIL` environment variable for customizable contact
+        email - Replaced all hardcoded support emails with dynamic configuration
+        - Removed optional "Receive confirmation email" field (now mandatory)
+        ### 🌐 Complete Internationalization - Full translation support for
+        account deletion process in 5 languages - Fixed pluralization bugs
+        showing raw ICU syntax - Restored missing authentication translation
+        keys - Added comprehensive German and Italian translations ### 💎
+        Updated Subscription Plans **Plan Gratuit (Free):** - ✅ 10 lettres de
+        motivation par mois - ✅ Templates de base - ❌ Génération multilingue
+        (Premium only) - ❌ Support par email (Premium only) - ❌ Ton
+        personnalisable (Premium only) **Plan Premium:** - ✅ Lettres illimitées
+        - ✅ Support par email - ✅ Génération multilingue - ✅ Ton
+        personnalisable (new feature) - ✅ Exportation avancée ## Environment
+        Variables New configuration options: ```env
+        BREVO_SUPPORT_EMAIL=contact@lettercraft.fr ``` ## Test Plan - [x]
+        Account deletion flow with immediate subscription cancellation - [x]
+        Email templates display correct support email addresses - [x]
+        Subscription plans show updated feature lists - [x] All translations
+        work correctly across 5 languages - [x] Pluralization displays properly
+        without ICU syntax - [x] Authentication flows work in all languages 🤖
+        Generated with [Claude Code](https://claude.ai/code)
+      </div>
 
-### 🔧 Immediate Subscription Cancellation
-- Account deletion now triggers immediate Stripe subscription cancellation
-- No cron jobs needed - cancellation happens instantly on email confirmation
-- Updated email templates to warn users about irreversible subscription cancellation
+      <h2>📊 Résumé des changements:</h2>
+      <ul>
+        <li><strong>10 commits</strong> avec toutes les fonctionnalités</li>
+        <li><strong>8 fichiers</strong> principaux modifiés</li>
+        <li><strong>5 langues</strong> supportées (FR, EN, ES, DE, IT)</li>
+        <li><strong>Suppression immédiate</strong> d'abonnement Stripe</li>
+        <li><strong>Email de support</strong> configurable</li>
+        <li><strong>Plans d'abonnement</strong> mis à jour</li>
+      </ul>
 
-### 📧 Configurable Support Email
-- Added `BREVO_SUPPORT_EMAIL` environment variable for customizable contact email
-- Replaced all hardcoded support emails with dynamic configuration
-- Removed optional "Receive confirmation email" field (now mandatory)
-
-### 🌐 Complete Internationalization
-- Full translation support for account deletion process in 5 languages
-- Fixed pluralization bugs showing raw ICU syntax
-- Restored missing authentication translation keys
-- Added comprehensive German and Italian translations
-
-### 💎 Updated Subscription Plans
-
-**Plan Gratuit (Free):**
-- ✅ 10 lettres de motivation par mois
-- ✅ Templates de base
-- ❌ Génération multilingue (Premium only)
-- ❌ Support par email (Premium only)
-- ❌ Ton personnalisable (Premium only)
-
-**Plan Premium:**
-- ✅ Lettres illimitées
-- ✅ Support par email
-- ✅ Génération multilingue
-- ✅ Ton personnalisable (new feature)
-- ✅ Exportation avancée
-
-## Environment Variables
-New configuration options:
-```env
-BREVO_SUPPORT_EMAIL=contact@lettercraft.fr
-```
-
-## Test Plan
-- [x] Account deletion flow with immediate subscription cancellation
-- [x] Email templates display correct support email addresses
-- [x] Subscription plans show updated feature lists
-- [x] All translations work correctly across 5 languages
-- [x] Pluralization displays properly without ICU syntax
-- [x] Authentication flows work in all languages
-
-🤖 Generated with [Claude Code](https://claude.ai/code)</div>
-
-        <h2>📊 Résumé des changements:</h2>
-        <ul>
-            <li><strong>10 commits</strong> avec toutes les fonctionnalités</li>
-            <li><strong>8 fichiers</strong> principaux modifiés</li>
-            <li><strong>5 langues</strong> supportées (FR, EN, ES, DE, IT)</li>
-            <li><strong>Suppression immédiate</strong> d'abonnement Stripe</li>
-            <li><strong>Email de support</strong> configurable</li>
-            <li><strong>Plans d'abonnement</strong> mis à jour</li>
-        </ul>
-
-        <div class="info">
-            <strong>Instructions:</strong>
-            <ol>
-                <li>Cliquez sur le bouton vert ci-dessus</li>
-                <li>Copiez-collez le titre dans le champ "Title"</li>
-                <li>Copiez-collez la description dans le champ "Description"</li>
-                <li>Cliquez sur "Create pull request"</li>
-            </ol>
-        </div>
+      <div class="info">
+        <strong>Instructions:</strong>
+        <ol>
+          <li>Cliquez sur le bouton vert ci-dessus</li>
+          <li>Copiez-collez le titre dans le champ "Title"</li>
+          <li>Copiez-collez la description dans le champ "Description"</li>
+          <li>Cliquez sur "Create pull request"</li>
+        </ol>
+      </div>
     </div>
 
     <script>
-        // Auto-ouvrir le lien dans le navigateur après 2 secondes
-        setTimeout(() => {
-            if (confirm("Voulez-vous ouvrir GitHub pour créer la Pull Request ?")) {
-                window.open("https://github.com/Chrisdesmurger/lettercraft/compare/main...feature/account-deletion-and-cv-upload-fix", '_blank');
-            }
-        }, 2000);
+      // Auto-ouvrir le lien dans le navigateur après 2 secondes
+      setTimeout(() => {
+        if (confirm("Voulez-vous ouvrir GitHub pour créer la Pull Request ?")) {
+          window.open(
+            "https://github.com/Chrisdesmurger/lettercraft/compare/main...feature/account-deletion-and-cv-upload-fix",
+            "_blank",
+          );
+        }
+      }, 2000);
     </script>
-</body>
+  </body>
 </html>

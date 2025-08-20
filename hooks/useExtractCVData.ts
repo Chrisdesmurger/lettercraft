@@ -29,19 +29,19 @@ export function useExtractCVData(
         if (dlError || !file) throw dlError || new Error("download failed");
 
         const form = new FormData();
-        form.append('file', file);
+        form.append("file", file);
 
-        const response = await fetch('/api/extract-cv', {
-          method: 'POST',
+        const response = await fetch("/api/extract-cv", {
+          method: "POST",
           body: form,
         });
-        if (!response.ok) throw new Error('extraction failed');
+        if (!response.ok) throw new Error("extraction failed");
         const extracted: ExtractedProfile = await response.json();
 
         await supabase
           .from("candidates_profile")
           .update(extracted)
-          .eq("id", profileId)
+          .eq("id", profileId);
 
         setData(extracted);
       } catch (e: any) {

@@ -10,13 +10,13 @@
  * @returns URL proxy pour accéder au fichier
  */
 export function getStorageProxyUrl(bucket: string, path: string): string {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
   const params = new URLSearchParams({
     bucket,
-    path
-  })
-  
-  return `${baseUrl}/api/storage-proxy?${params.toString()}`
+    path,
+  });
+
+  return `${baseUrl}/api/storage-proxy?${params.toString()}`;
 }
 
 /**
@@ -24,24 +24,31 @@ export function getStorageProxyUrl(bucket: string, path: string): string {
  * @param supabaseStorageUrl - URL complète Supabase Storage
  * @returns Objet avec bucket et path, ou null si l'URL n'est pas valide
  */
-export function parseSupabaseStorageUrl(supabaseStorageUrl: string): { bucket: string; path: string } | null {
+export function parseSupabaseStorageUrl(
+  supabaseStorageUrl: string,
+): { bucket: string; path: string } | null {
   try {
-    const url = new URL(supabaseStorageUrl)
-    
+    const url = new URL(supabaseStorageUrl);
+
     // Format attendu: https://[project].supabase.co/storage/v1/object/[bucket]/[path]
-    const pathParts = url.pathname.split('/')
-    
-    if (pathParts.length < 6 || pathParts[2] !== 'storage' || pathParts[3] !== 'v1' || pathParts[4] !== 'object') {
-      return null
+    const pathParts = url.pathname.split("/");
+
+    if (
+      pathParts.length < 6 ||
+      pathParts[2] !== "storage" ||
+      pathParts[3] !== "v1" ||
+      pathParts[4] !== "object"
+    ) {
+      return null;
     }
-    
-    const bucket = pathParts[5]
-    const path = pathParts.slice(6).join('/')
-    
-    return { bucket, path }
+
+    const bucket = pathParts[5];
+    const path = pathParts.slice(6).join("/");
+
+    return { bucket, path };
   } catch (error) {
-    console.warn('Invalid Supabase Storage URL:', supabaseStorageUrl)
-    return null
+    console.warn("Invalid Supabase Storage URL:", supabaseStorageUrl);
+    return null;
   }
 }
 
@@ -51,14 +58,17 @@ export function parseSupabaseStorageUrl(supabaseStorageUrl: string): { bucket: s
  * @returns URL proxy, ou l'URL originale si la conversion échoue
  */
 export function convertToProxyUrl(supabaseStorageUrl: string): string {
-  const parsed = parseSupabaseStorageUrl(supabaseStorageUrl)
-  
+  const parsed = parseSupabaseStorageUrl(supabaseStorageUrl);
+
   if (!parsed) {
-    console.warn('Could not convert to proxy URL, returning original:', supabaseStorageUrl)
-    return supabaseStorageUrl
+    console.warn(
+      "Could not convert to proxy URL, returning original:",
+      supabaseStorageUrl,
+    );
+    return supabaseStorageUrl;
   }
-  
-  return getStorageProxyUrl(parsed.bucket, parsed.path)
+
+  return getStorageProxyUrl(parsed.bucket, parsed.path);
 }
 
 /**
@@ -68,18 +78,18 @@ export function useStorageProxy() {
   return {
     getProxyUrl: getStorageProxyUrl,
     convertUrl: convertToProxyUrl,
-    parseUrl: parseSupabaseStorageUrl
-  }
+    parseUrl: parseSupabaseStorageUrl,
+  };
 }
 
 /**
  * Types pour TypeScript
  */
 export interface StorageFile {
-  bucket: string
-  path: string
-  url?: string
-  proxyUrl?: string
+  bucket: string;
+  path: string;
+  url?: string;
+  proxyUrl?: string;
 }
 
 /**
@@ -90,20 +100,20 @@ export function createStorageFile(bucket: string, path: string): StorageFile {
     bucket,
     path,
     url: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/${bucket}/${path}`,
-    proxyUrl: getStorageProxyUrl(bucket, path)
-  }
+    proxyUrl: getStorageProxyUrl(bucket, path),
+  };
 }
 
 /**
  * Exemples d'utilisation :
- * 
+ *
  * // Générer une URL proxy directement
  * const proxyUrl = getStorageProxyUrl('documents', 'user-123/letter-456.pdf')
- * 
+ *
  * // Convertir une URL Supabase existante
  * const originalUrl = 'https://project.supabase.co/storage/v1/object/documents/user-123/letter.pdf'
  * const proxyUrl = convertToProxyUrl(originalUrl)
- * 
+ *
  * // Dans un composant React
  * const { getProxyUrl, convertUrl } = useStorageProxy()
  * const pdfUrl = getProxyUrl('documents', 'user-123/letter.pdf')

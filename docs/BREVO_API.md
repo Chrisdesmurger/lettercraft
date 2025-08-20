@@ -18,20 +18,21 @@ GET /api/sync-contact?email={email}
 Crée un nouveau contact dans Brevo avec les informations fournies.
 
 ```javascript
-const response = await fetch('/api/sync-contact', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
+const response = await fetch("/api/sync-contact", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
-    action: 'create',
-    email: 'user@example.com',      // Requis
-    firstName: 'Jean',              // Requis
-    lastName: 'Dupont',             // Requis
-    language: 'fr'                  // Optionnel (défaut: 'fr')
-  })
-})
+    action: "create",
+    email: "user@example.com", // Requis
+    firstName: "Jean", // Requis
+    lastName: "Dupont", // Requis
+    language: "fr", // Optionnel (défaut: 'fr')
+  }),
+});
 ```
 
 **Réponse :**
+
 ```json
 {
   "success": true,
@@ -46,27 +47,27 @@ Met à jour un contact en utilisant soit l'ID utilisateur, soit l'email.
 
 ```javascript
 // Option 1: Par ID utilisateur (recommandé)
-const response = await fetch('/api/sync-contact', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
+const response = await fetch("/api/sync-contact", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
-    action: 'update',
-    userId: 'user-uuid-here'        // Requis
-  })
-})
+    action: "update",
+    userId: "user-uuid-here", // Requis
+  }),
+});
 
 // Option 2: Par email avec données
-const response = await fetch('/api/sync-contact', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
+const response = await fetch("/api/sync-contact", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
-    action: 'update',
-    email: 'user@example.com',      // Requis
-    firstName: 'Jean',              // Optionnel
-    lastName: 'Dupont',             // Optionnel
-    language: 'en'                  // Optionnel
-  })
-})
+    action: "update",
+    email: "user@example.com", // Requis
+    firstName: "Jean", // Optionnel
+    lastName: "Dupont", // Optionnel
+    language: "en", // Optionnel
+  }),
+});
 ```
 
 ### 3. **delete** - Supprimer un contact
@@ -74,14 +75,14 @@ const response = await fetch('/api/sync-contact', {
 Supprime définitivement un contact de Brevo.
 
 ```javascript
-const response = await fetch('/api/sync-contact', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
+const response = await fetch("/api/sync-contact", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
-    action: 'delete',
-    email: 'user@example.com'       // Requis
-  })
-})
+    action: "delete",
+    email: "user@example.com", // Requis
+  }),
+});
 ```
 
 ### 4. **bulk** - Synchronisation en lot
@@ -89,21 +90,23 @@ const response = await fetch('/api/sync-contact', {
 Synchronise plusieurs utilisateurs par leurs IDs.
 
 ```javascript
-const response = await fetch('/api/sync-contact', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
+const response = await fetch("/api/sync-contact", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
-    action: 'bulk',
-    userIds: [                      // Requis (array)
-      'uuid-user-1',
-      'uuid-user-2',
-      'uuid-user-3'
-    ]
-  })
-})
+    action: "bulk",
+    userIds: [
+      // Requis (array)
+      "uuid-user-1",
+      "uuid-user-2",
+      "uuid-user-3",
+    ],
+  }),
+});
 ```
 
 **Réponse :**
+
 ```json
 {
   "success": true,
@@ -118,14 +121,14 @@ const response = await fetch('/api/sync-contact', {
 Synchronise complètement un utilisateur avec toutes ses données.
 
 ```javascript
-const response = await fetch('/api/sync-contact', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
+const response = await fetch("/api/sync-contact", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
-    action: 'sync',
-    userId: 'user-uuid-here'        // Requis
-  })
-})
+    action: "sync",
+    userId: "user-uuid-here", // Requis
+  }),
+});
 ```
 
 ### 6. **update-lists** - Gérer les listes
@@ -133,15 +136,15 @@ const response = await fetch('/api/sync-contact', {
 Met à jour les listes d'appartenance d'un contact.
 
 ```javascript
-const response = await fetch('/api/sync-contact', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
+const response = await fetch("/api/sync-contact", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
-    action: 'update-lists',
-    email: 'user@example.com',      // Requis
-    listIds: [1, 2, 4]             // Requis (array des IDs de listes)
-  })
-})
+    action: "update-lists",
+    email: "user@example.com", // Requis
+    listIds: [1, 2, 4], // Requis (array des IDs de listes)
+  }),
+});
 ```
 
 ### 7. **sync-all-lists** - Maintenance des listes
@@ -149,16 +152,17 @@ const response = await fetch('/api/sync-contact', {
 Synchronise toutes les listes pour tous les contacts (opération de maintenance).
 
 ```javascript
-const response = await fetch('/api/sync-contact', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
+const response = await fetch("/api/sync-contact", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
-    action: 'sync-all-lists'
-  })
-})
+    action: "sync-all-lists",
+  }),
+});
 ```
 
 **Réponse :**
+
 ```json
 {
   "success": true,
@@ -173,16 +177,17 @@ const response = await fetch('/api/sync-contact', {
 ⭐ **NOUVELLE FONCTIONNALITÉ** - Crée tous les contacts LetterCraft qui n'existent pas encore dans Brevo.
 
 ```javascript
-const response = await fetch('/api/sync-contact', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
+const response = await fetch("/api/sync-contact", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
-    action: 'create-missing'
-  })
-})
+    action: "create-missing",
+  }),
+});
 ```
 
 **Réponse :**
+
 ```json
 {
   "success": true,
@@ -198,11 +203,12 @@ const response = await fetch('/api/sync-contact', {
 Récupère les informations d'un contact existant.
 
 ```javascript
-const response = await fetch('/api/sync-contact?email=user@example.com')
-const data = await response.json()
+const response = await fetch("/api/sync-contact?email=user@example.com");
+const data = await response.json();
 ```
 
 **Réponse :**
+
 ```json
 {
   "success": true,
@@ -222,13 +228,13 @@ const data = await response.json()
 
 ### Configuration des listes
 
-| Variable d'environnement | ID par défaut | Description |
-|--------------------------|---------------|-------------|
-| `BREVO_LIST_ALL_USERS` | 1 | Tous les utilisateurs |
-| `BREVO_LIST_FREE_USERS` | 2 | Utilisateurs gratuits |
-| `BREVO_LIST_PREMIUM_USERS` | 3 | Utilisateurs premium |
-| `BREVO_LIST_ACTIVE_USERS` | 4 | Utilisateurs actifs (ont généré des lettres) |
-| `BREVO_LIST_CHURNED_USERS` | 5 | Utilisateurs inactifs (30+ jours) |
+| Variable d'environnement   | ID par défaut | Description                                  |
+| -------------------------- | ------------- | -------------------------------------------- |
+| `BREVO_LIST_ALL_USERS`     | 1             | Tous les utilisateurs                        |
+| `BREVO_LIST_FREE_USERS`    | 2             | Utilisateurs gratuits                        |
+| `BREVO_LIST_PREMIUM_USERS` | 3             | Utilisateurs premium                         |
+| `BREVO_LIST_ACTIVE_USERS`  | 4             | Utilisateurs actifs (ont généré des lettres) |
+| `BREVO_LIST_CHURNED_USERS` | 5             | Utilisateurs inactifs (30+ jours)            |
 
 ### Attribution automatique des listes
 
@@ -243,19 +249,19 @@ L'attribution aux listes se fait automatiquement selon ces critères :
 
 Chaque contact synchronisé contient ces attributs :
 
-| Attribut | Type | Description |
-|----------|------|-------------|
-| `USER_ID` | String | ID utilisateur LetterCraft |
-| `SUBSCRIPTION_TIER` | String | `free` ou `premium` |
-| `LANGUAGE` | String | Langue préférée (`fr`, `en`, `es`, etc.) |
-| `COUNTRY` | String | Code pays |
-| `LETTERS_GENERATED` | Number | Nombre de lettres créées |
-| `PROFILE_COMPLETE` | Boolean | Profil complet ou non |
-| `LAST_LOGIN` | Date | Dernière connexion |
-| `REGISTRATION_DATE` | Date | Date d'inscription |
-| `FIRSTNAME` | String | Prénom |
-| `LASTNAME` | String | Nom |
-| `SMS` | String | Numéro de téléphone (optionnel) |
+| Attribut            | Type    | Description                              |
+| ------------------- | ------- | ---------------------------------------- |
+| `USER_ID`           | String  | ID utilisateur LetterCraft               |
+| `SUBSCRIPTION_TIER` | String  | `free` ou `premium`                      |
+| `LANGUAGE`          | String  | Langue préférée (`fr`, `en`, `es`, etc.) |
+| `COUNTRY`           | String  | Code pays                                |
+| `LETTERS_GENERATED` | Number  | Nombre de lettres créées                 |
+| `PROFILE_COMPLETE`  | Boolean | Profil complet ou non                    |
+| `LAST_LOGIN`        | Date    | Dernière connexion                       |
+| `REGISTRATION_DATE` | Date    | Date d'inscription                       |
+| `FIRSTNAME`         | String  | Prénom                                   |
+| `LASTNAME`          | String  | Nom                                      |
+| `SMS`               | String  | Numéro de téléphone (optionnel)          |
 
 ## ⚠️ Gestion d'erreurs
 
@@ -321,18 +327,18 @@ Pour importer tous vos utilisateurs existants dans Brevo :
 
 ```javascript
 // 1. Créer tous les contacts manquants
-const migration = await fetch('/api/sync-contact', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ action: 'create-missing' })
-})
+const migration = await fetch("/api/sync-contact", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ action: "create-missing" }),
+});
 
 // 2. Synchroniser toutes les listes
-const lists = await fetch('/api/sync-contact', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ action: 'sync-all-lists' })
-})
+const lists = await fetch("/api/sync-contact", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ action: "sync-all-lists" }),
+});
 ```
 
 ### Maintenance quotidienne
@@ -341,13 +347,13 @@ Script de maintenance à exécuter périodiquement :
 
 ```javascript
 // Synchroniser les listes (utilisateurs qui ont changé de statut)
-const maintenance = await fetch('/api/sync-contact', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ action: 'sync-all-lists' })
-})
+const maintenance = await fetch("/api/sync-contact", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ action: "sync-all-lists" }),
+});
 
-console.log(`Maintenance terminée: ${maintenance.updated} mis à jour`)
+console.log(`Maintenance terminée: ${maintenance.updated} mis à jour`);
 ```
 
 ### Intégration dans le code
@@ -399,4 +405,4 @@ Pour toute question sur cette API :
 
 ---
 
-*Documentation générée automatiquement - Version 1.0*
+_Documentation générée automatiquement - Version 1.0_

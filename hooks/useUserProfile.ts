@@ -1,66 +1,70 @@
-import { useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabase-client'
-import type { Tables } from '@/lib/supabase-client'
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase-client";
+import type { Tables } from "@/lib/supabase-client";
 
-export type UserProfile = Tables<'users_with_profiles'>
+export type UserProfile = Tables<"users_with_profiles">;
 
 export interface UseUserProfileReturn {
-  profile: UserProfile | null
-  loading: boolean
-  error: string | null
-  refetch: () => Promise<void>
+  profile: UserProfile | null;
+  loading: boolean;
+  error: string | null;
+  refetch: () => Promise<void>;
 }
 
 export function useUserProfile(): UseUserProfileReturn {
-  const [profile, setProfile] = useState<UserProfile | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchProfile = async () => {
     try {
-      setLoading(true)
-      setError(null)
+      setLoading(true);
+      setError(null);
 
-      const { data: { session } } = await supabase.auth.getSession()
-      
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
       if (!session?.user) {
-        setError('Utilisateur non authentifié')
-        return
+        setError("Utilisateur non authentifié");
+        return;
       }
 
       // Utiliser la vue users_with_profiles
       const { data, error: fetchError } = await supabase
-        .from('users_with_profiles')
-        .select('*')
-        .eq('id', session.user.id)
-        .single()
+        .from("users_with_profiles")
+        .select("*")
+        .eq("id", session.user.id)
+        .single();
 
       if (fetchError) {
-        setError(fetchError.message)
-        return
+        setError(fetchError.message);
+        return;
       }
 
-      setProfile(data)
+      setProfile(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur inconnue')
+      setError(err instanceof Error ? err.message : "Erreur inconnue");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    fetchProfile()
-  }, [])
+    fetchProfile();
+  }, []);
 
   return {
     profile,
     loading,
     error,
-    refetch: fetchProfile
-  }
+    refetch: fetchProfile,
+  };
 }
 
 // Helper function to get CV limits based on subscription
-export function getCVLimitsBySubscription(subscriptionTier: 'free' | 'premium' = 'free'): number {
-  return subscriptionTier === 'premium' ? 3 : 1
+export function getCVLimitsBySubscription(
+  subscriptionTier: "free" | "premium" = "free",
+): number {
+  return subscriptionTier === "premium" ? 3 : 1;
 }

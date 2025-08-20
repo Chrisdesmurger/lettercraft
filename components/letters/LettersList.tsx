@@ -1,43 +1,50 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { Tables } from '@/lib/supabase-client'
-import LetterCard from './LetterCard'
-import LetterViewer from './LetterViewer'
-import { Input } from '@/components/ui/input'
-import { Search, Filter } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { useI18n } from '@/lib/i18n-context'
+import { useState } from "react";
+import { Tables } from "@/lib/supabase-client";
+import LetterCard from "./LetterCard";
+import LetterViewer from "./LetterViewer";
+import { Input } from "@/components/ui/input";
+import { Search, Filter } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useI18n } from "@/lib/i18n-context";
 
-type GeneratedLetter = Tables<'generated_letters'> & {
-  job_offers: Tables<'job_offers'> | null
-  candidates_profile: { title: string } | null
-}
+type GeneratedLetter = Tables<"generated_letters"> & {
+  job_offers: Tables<"job_offers"> | null;
+  candidates_profile: { title: string } | null;
+};
 
 interface LettersListProps {
-  letters: GeneratedLetter[]
+  letters: GeneratedLetter[];
 }
 
 export default function LettersList({ letters }: LettersListProps) {
-  const { t } = useI18n()
-  const [searchTerm, setSearchTerm] = useState('')
-  const [selectedLetter, setSelectedLetter] = useState<GeneratedLetter | null>(null)
-  const [isViewerOpen, setIsViewerOpen] = useState(false)
+  const { t } = useI18n();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedLetter, setSelectedLetter] = useState<GeneratedLetter | null>(
+    null,
+  );
+  const [isViewerOpen, setIsViewerOpen] = useState(false);
 
-  const filteredLetters = letters.filter(letter => 
-    letter.job_offers?.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    letter.job_offers?.company?.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const filteredLetters = letters.filter(
+    (letter) =>
+      letter.job_offers?.title
+        ?.toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      letter.job_offers?.company
+        ?.toLowerCase()
+        .includes(searchTerm.toLowerCase()),
+  );
 
   const handleViewLetter = (letter: GeneratedLetter) => {
-    setSelectedLetter(letter)
-    setIsViewerOpen(true)
-  }
+    setSelectedLetter(letter);
+    setIsViewerOpen(true);
+  };
 
   const handleCloseViewer = () => {
-    setSelectedLetter(null)
-    setIsViewerOpen(false)
-  }
+    setSelectedLetter(null);
+    setIsViewerOpen(false);
+  };
 
   if (letters.length === 0) {
     return (
@@ -46,19 +53,17 @@ export default function LettersList({ letters }: LettersListProps) {
           <Search className="w-8 h-8 text-gray-400" />
         </div>
         <h3 className="text-lg font-semibold text-gray-900 mb-2">
-          {t('dashboard.noLetters')}
+          {t("dashboard.noLetters")}
         </h3>
-        <p className="text-gray-600 mb-6">
-          {t('dashboard.noLettersSubtitle')}
-        </p>
-        <Button 
-          onClick={() => window.location.href = '/generate-letter'}
+        <p className="text-gray-600 mb-6">{t("dashboard.noLettersSubtitle")}</p>
+        <Button
+          onClick={() => (window.location.href = "/generate-letter")}
           className="bg-gradient-to-r from-orange-400 to-amber-500 hover:from-orange-500 hover:to-amber-600"
         >
-          {t('dashboard.createFirst')}
+          {t("dashboard.createFirst")}
         </Button>
       </div>
-    )
+    );
   }
 
   return (
@@ -69,7 +74,7 @@ export default function LettersList({ letters }: LettersListProps) {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
               type="text"
-              placeholder={t('dashboard.searchPlaceholder')}
+              placeholder={t("dashboard.searchPlaceholder")}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -77,7 +82,12 @@ export default function LettersList({ letters }: LettersListProps) {
           </div>
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <Filter className="w-4 h-4" />
-            <span>{filteredLetters.length} {filteredLetters.length === 1 ? t('dashboard.letterCount.singular') : t('dashboard.letterCount.plural')}</span>
+            <span>
+              {filteredLetters.length}{" "}
+              {filteredLetters.length === 1
+                ? t("dashboard.letterCount.singular")
+                : t("dashboard.letterCount.plural")}
+            </span>
           </div>
         </div>
       </div>
@@ -100,5 +110,5 @@ export default function LettersList({ letters }: LettersListProps) {
         />
       )}
     </>
-  )
+  );
 }

@@ -1,274 +1,283 @@
-'use client'
+"use client";
 
-import { useState, useEffect, useRef } from 'react'
-import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabase-client'
-import { Camera, Mail, Award, Calendar } from 'lucide-react'
-import toast from 'react-hot-toast'
-import { useI18n } from '@/lib/i18n-context'
-import { ContributorBadge } from '@/components/reviews/contributor-badge'
-import { useContributorBadge } from '@/hooks/useContributorBadge'
+import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase-client";
+import { Camera, Mail, Award, Calendar } from "lucide-react";
+import toast from "react-hot-toast";
+import { useI18n } from "@/lib/i18n-context";
+import { ContributorBadge } from "@/components/reviews/contributor-badge";
+import { useContributorBadge } from "@/hooks/useContributorBadge";
 
 export default function ProfileTab() {
-  const { t } = useI18n()
-  const router = useRouter()
+  const { t } = useI18n();
+  const router = useRouter();
   const [profile, setProfile] = useState({
-    email: '',
-    firstName: '',
-    lastName: '',
-    phone: '',
-    bio: '',
-    avatar_url: '',
-    created_at: '',
-    generation_count: 0
-  })
-  const [avatarDisplayUrl, setAvatarDisplayUrl] = useState('')
-  const [loading, setLoading] = useState(true)
-  const [uploading, setUploading] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  
+    email: "",
+    firstName: "",
+    lastName: "",
+    phone: "",
+    bio: "",
+    avatar_url: "",
+    created_at: "",
+    generation_count: 0,
+  });
+  const [avatarDisplayUrl, setAvatarDisplayUrl] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   // Hook pour le badge contributeur
-  const { badge: contributorBadge } = useContributorBadge()
+  const { badge: contributorBadge } = useContributorBadge();
 
   useEffect(() => {
-    loadProfile()
-    
+    loadProfile();
+
     // Écouter l'événement de rafraîchissement
     const handleRefresh = () => {
-      loadProfile()
-    }
-    
-    window.addEventListener('letter-generated', handleRefresh)
-    
+      loadProfile();
+    };
+
+    window.addEventListener("letter-generated", handleRefresh);
+
     return () => {
-      window.removeEventListener('letter-generated', handleRefresh)
-    }
-  }, [])
+      window.removeEventListener("letter-generated", handleRefresh);
+    };
+  }, []);
 
   const loadProfile = async () => {
     try {
-      const { data: { session } } = await supabase.auth.getSession()
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (session) {
         // Récupérer le nombre de lettres générées depuis user_quotas
         const { data: quotaData } = await supabase
-          .from('user_quotas')
-          .select('letters_generated')
-          .eq('user_id', session.user.id)
-          .single()
+          .from("user_quotas")
+          .select("letters_generated")
+          .eq("user_id", session.user.id)
+          .single();
 
-        const letterCount = quotaData?.letters_generated || 0
+        const letterCount = quotaData?.letters_generated || 0;
 
         // Récupérer les données du profil depuis user_profiles
         const { data: profileData } = await supabase
-          .from('user_profiles')
-          .select('*')
-          .eq('user_id', session.user.id)
-          .single()
+          .from("user_profiles")
+          .select("*")
+          .eq("user_id", session.user.id)
+          .single();
 
-        const avatarUrl = profileData?.avatar_url || ''
+        const avatarUrl = profileData?.avatar_url || "";
 
         setProfile({
-          email: session.user.email || '',
-          firstName: profileData?.first_name || '',
-          lastName: profileData?.last_name || '',
-          phone: profileData?.phone || '',
-          bio: profileData?.bio || '',
+          email: session.user.email || "",
+          firstName: profileData?.first_name || "",
+          lastName: profileData?.last_name || "",
+          phone: profileData?.phone || "",
+          bio: profileData?.bio || "",
           avatar_url: avatarUrl,
-          created_at: session.user.created_at || '',
-          generation_count: letterCount
-        })
+          created_at: session.user.created_at || "",
+          generation_count: letterCount,
+        });
 
         // Si il y a un avatar_url, récupérer l'URL d'affichage via le proxy
         if (avatarUrl) {
-          loadAvatarDisplayUrl(avatarUrl)
+          loadAvatarDisplayUrl(avatarUrl);
         }
       }
     } catch (error) {
-      console.error('Error loading profile:', error)
+      console.error("Error loading profile:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const loadAvatarDisplayUrl = async (avatarUrl: string) => {
     try {
       // Extraire le nom de fichier de l'URL complète
-      const fileName = avatarUrl.split('/').pop()
+      const fileName = avatarUrl.split("/").pop();
       if (fileName) {
         // Utiliser l'API storage-proxy pour récupérer le fichier
-        const proxyUrl = `/api/storage-proxy?bucket=documents&path=${fileName}`
-        setAvatarDisplayUrl(proxyUrl)
+        const proxyUrl = `/api/storage-proxy?bucket=documents&path=${fileName}`;
+        setAvatarDisplayUrl(proxyUrl);
       }
     } catch (error) {
-      console.error('Error loading avatar display URL:', error)
+      console.error("Error loading avatar display URL:", error);
     }
-  }
+  };
 
   const handleAvatarClick = () => {
-    fileInputRef.current?.click()
-  }
+    fileInputRef.current?.click();
+  };
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const file = e.target.files?.[0];
+    if (!file) return;
 
     // Vérifications côté client
-    if (!file.type.startsWith('image/')) {
-      toast.error(t('profile.selectImage'))
-      return
+    if (!file.type.startsWith("image/")) {
+      toast.error(t("profile.selectImage"));
+      return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      toast.error(t('profile.imageTooLarge'))
-      return
+      toast.error(t("profile.imageTooLarge"));
+      return;
     }
 
-    setUploading(true)
-    
+    setUploading(true);
+
     try {
       // Obtenir le token d'authentification
-      const { data: { session } } = await supabase.auth.getSession()
-      
-      console.log('Session status:', {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      console.log("Session status:", {
         hasSession: !!session,
         hasUser: !!session?.user,
         userId: session?.user?.id,
         hasAccessToken: !!session?.access_token,
-        tokenPreview: session?.access_token?.substring(0, 20) + '...'
-      })
-      
+        tokenPreview: session?.access_token?.substring(0, 20) + "...",
+      });
+
       if (!session) {
-        toast.error(t('profile.mustBeLoggedIn'))
-        return
+        toast.error(t("profile.mustBeLoggedIn"));
+        return;
       }
 
-      console.log('File to upload:', {
+      console.log("File to upload:", {
         name: file.name,
         size: file.size,
-        type: file.type
-      })
+        type: file.type,
+      });
 
-      const formData = new FormData()
-      formData.append('avatar', file)
+      const formData = new FormData();
+      formData.append("avatar", file);
 
-      const response = await fetch('/api/upload-avatar', {
-        method: 'POST',
+      const response = await fetch("/api/upload-avatar", {
+        method: "POST",
         headers: {
-          'Authorization': `Bearer ${session.access_token}`
+          Authorization: `Bearer ${session.access_token}`,
         },
-        body: formData
-      })
+        body: formData,
+      });
 
-      console.log('API Response:', {
+      console.log("API Response:", {
         status: response.status,
         statusText: response.statusText,
-        ok: response.ok
-      })
+        ok: response.ok,
+      });
 
       if (!response.ok) {
-        const errorData = await response.json()
-        console.error('API Error Details:', errorData)
-        throw new Error(errorData.error || t('profile.photoUpdateError'))
+        const errorData = await response.json();
+        console.error("API Error Details:", errorData);
+        throw new Error(errorData.error || t("profile.photoUpdateError"));
       }
 
-      const { avatar_url } = await response.json()
-      
+      const { avatar_url } = await response.json();
+
       // Mettre à jour le profil dans user_profiles
       const { error: updateError } = await supabase
-        .from('user_profiles')
+        .from("user_profiles")
         .update({
           avatar_url: avatar_url,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
-        .eq('user_id', session.user.id)
+        .eq("user_id", session.user.id);
 
       if (updateError) {
-        console.error('Error updating profile:', updateError)
-        toast.error(t('profile.photoUpdateError'))
-        return
+        console.error("Error updating profile:", updateError);
+        toast.error(t("profile.photoUpdateError"));
+        return;
       }
-      
+
       // Synchroniser les données mises à jour avec Brevo
       try {
-        const { autoSyncUser } = await import('@/lib/internal-api')
-        await autoSyncUser(session.user.id, 'avatar-update')
+        const { autoSyncUser } = await import("@/lib/internal-api");
+        await autoSyncUser(session.user.id, "avatar-update");
       } catch (syncError) {
-        console.warn('Erreur synchronisation contact Brevo:', syncError)
+        console.warn("Erreur synchronisation contact Brevo:", syncError);
         // Ne pas bloquer la mise à jour si la sync échoue
       }
-      
+
       // Mettre à jour l'état local
-      setProfile(prev => ({ ...prev, avatar_url }))
-      
+      setProfile((prev) => ({ ...prev, avatar_url }));
+
       // Charger la nouvelle URL d'affichage
-      await loadAvatarDisplayUrl(avatar_url)
-      
-      toast.success(t('profile.photoUpdateSuccess'))
-      
+      await loadAvatarDisplayUrl(avatar_url);
+
+      toast.success(t("profile.photoUpdateSuccess"));
     } catch (error) {
-      console.error('Error uploading avatar:', error)
-      toast.error(error instanceof Error ? error.message : t('profile.photoUpdateError'))
+      console.error("Error uploading avatar:", error);
+      toast.error(
+        error instanceof Error ? error.message : t("profile.photoUpdateError"),
+      );
     } finally {
-      setUploading(false)
+      setUploading(false);
       // Reset input pour permettre de re-sélectionner le même fichier
       if (fileInputRef.current) {
-        fileInputRef.current.value = ''
+        fileInputRef.current.value = "";
       }
     }
-  }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
+    e.preventDefault();
+
     try {
-      const { data: { session } } = await supabase.auth.getSession()
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (!session) {
-        toast.error(t('auth.mustBeLoggedIn'))
-        return
+        toast.error(t("auth.mustBeLoggedIn"));
+        return;
       }
 
       // Mettre à jour les données dans user_profiles
       const { error } = await supabase
-        .from('user_profiles')
+        .from("user_profiles")
         .update({
           first_name: profile.firstName,
           last_name: profile.lastName,
           phone: profile.phone,
           bio: profile.bio,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
-        .eq('user_id', session.user.id)
+        .eq("user_id", session.user.id);
 
       if (error) {
-        console.error('Error updating profile:', error)
-        toast.error(t('profile.updateError'))
-        return
+        console.error("Error updating profile:", error);
+        toast.error(t("profile.updateError"));
+        return;
       }
 
       // Synchroniser les données mises à jour avec Brevo
       try {
-        const { autoSyncUser } = await import('@/lib/internal-api')
-        await autoSyncUser(session.user.id, 'profile-update')
+        const { autoSyncUser } = await import("@/lib/internal-api");
+        await autoSyncUser(session.user.id, "profile-update");
       } catch (syncError) {
-        console.warn('Erreur synchronisation contact Brevo:', syncError)
+        console.warn("Erreur synchronisation contact Brevo:", syncError);
         // Ne pas bloquer la mise à jour du profil si la sync échoue
       }
 
-      toast.success(t('profile.updateSuccess'))
+      toast.success(t("profile.updateSuccess"));
     } catch (error) {
-      console.error('Error saving profile:', error)
-      toast.error(t('profile.updateError'))
+      console.error("Error saving profile:", error);
+      toast.error(t("profile.updateError"));
     }
-  }
+  };
 
   if (loading) {
-    return <div className="animate-pulse">
-      <div className="h-32 bg-gray-200 rounded-lg mb-4"></div>
-      <div className="space-y-3">
-        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-        <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+    return (
+      <div className="animate-pulse">
+        <div className="h-32 bg-gray-200 rounded-lg mb-4"></div>
+        <div className="space-y-3">
+          <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+          <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+        </div>
       </div>
-    </div>
+    );
   }
 
   return (
@@ -281,23 +290,29 @@ export default function ProfileTab() {
         onChange={handleAvatarChange}
         className="hidden"
       />
-      
+
       {/* Profile Header */}
       <div className="flex items-center space-x-6">
         <div className="relative">
           <div className="w-24 h-24 bg-gradient-to-br from-orange-400 to-amber-500 rounded-full flex items-center justify-center">
             {avatarDisplayUrl ? (
-              <img src={avatarDisplayUrl} alt="Avatar" className="w-full h-full rounded-full object-cover" />
+              <img
+                src={avatarDisplayUrl}
+                alt="Avatar"
+                className="w-full h-full rounded-full object-cover"
+              />
             ) : (
               <span className="text-white text-3xl font-bold">
-                {profile.firstName?.charAt(0) || profile.email?.charAt(0) || 'U'}
+                {profile.firstName?.charAt(0) ||
+                  profile.email?.charAt(0) ||
+                  "U"}
               </span>
             )}
           </div>
-          <button 
+          <button
             onClick={handleAvatarClick}
             disabled={uploading}
-            title={uploading ? t('common.uploading') : t('profile.changePhoto')}
+            title={uploading ? t("common.uploading") : t("profile.changePhoto")}
             className="absolute bottom-0 right-0 bg-white rounded-full p-2 shadow-lg hover:shadow-xl transition-shadow disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {uploading ? (
@@ -312,13 +327,13 @@ export default function ProfileTab() {
             {profile.firstName} {profile.lastName}
           </h2>
           <p className="text-gray-600">{profile.email}</p>
-          
+
           {/* Badge contributeur */}
           {contributorBadge && (
             <div className="mt-3">
-              <ContributorBadge 
-                badge={contributorBadge} 
-                size="sm" 
+              <ContributorBadge
+                badge={contributorBadge}
+                size="sm"
                 showDescription={false}
                 className="w-fit"
               />
@@ -329,17 +344,21 @@ export default function ProfileTab() {
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div 
+        <div
           className="bg-gray-50 rounded-lg p-4 cursor-pointer hover:bg-gray-100 transition-colors"
-          onClick={() => router.push('/dashboard/letters')}
+          onClick={() => router.push("/dashboard/letters")}
         >
           <div className="flex items-center space-x-3">
             <div className="bg-blue-100 rounded-lg p-2">
               <Award className="w-5 h-5 text-blue-600" />
             </div>
             <div>
-              <p className="text-sm text-gray-600">{t('profile.lettersGenerated')}</p>
-              <p className="text-xl font-semibold">{profile.generation_count || 0}</p>
+              <p className="text-sm text-gray-600">
+                {t("profile.lettersGenerated")}
+              </p>
+              <p className="text-xl font-semibold">
+                {profile.generation_count || 0}
+              </p>
             </div>
           </div>
         </div>
@@ -349,8 +368,10 @@ export default function ProfileTab() {
               <Mail className="w-5 h-5 text-green-600" />
             </div>
             <div>
-              <p className="text-sm text-gray-600">{t('profile.emailVerified')}</p>
-              <p className="text-xl font-semibold">{t('common.yes')}</p>
+              <p className="text-sm text-gray-600">
+                {t("profile.emailVerified")}
+              </p>
+              <p className="text-xl font-semibold">{t("common.yes")}</p>
             </div>
           </div>
         </div>
@@ -360,9 +381,14 @@ export default function ProfileTab() {
               <Calendar className="w-5 h-5 text-purple-600" />
             </div>
             <div>
-              <p className="text-sm text-gray-600">{t('profile.memberSince')}</p>
+              <p className="text-sm text-gray-600">
+                {t("profile.memberSince")}
+              </p>
               <p className="text-xl font-semibold">
-                {new Date(profile.created_at).toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' })}
+                {new Date(profile.created_at).toLocaleDateString("fr-FR", {
+                  month: "short",
+                  year: "numeric",
+                })}
               </p>
             </div>
           </div>
@@ -374,23 +400,27 @@ export default function ProfileTab() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t('profile.firstName')}
+              {t("profile.firstName")}
             </label>
             <input
               type="text"
               value={profile.firstName}
-              onChange={(e) => setProfile({ ...profile, firstName: e.target.value })}
+              onChange={(e) =>
+                setProfile({ ...profile, firstName: e.target.value })
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
             />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t('profile.lastName')}
+              {t("profile.lastName")}
             </label>
             <input
               type="text"
               value={profile.lastName}
-              onChange={(e) => setProfile({ ...profile, lastName: e.target.value })}
+              onChange={(e) =>
+                setProfile({ ...profile, lastName: e.target.value })
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
             />
           </div>
@@ -398,7 +428,7 @@ export default function ProfileTab() {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            {t('profile.phone')}
+            {t("profile.phone")}
           </label>
           <input
             type="tel"
@@ -410,14 +440,14 @@ export default function ProfileTab() {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            {t('profile.bio')}
+            {t("profile.bio")}
           </label>
           <textarea
             value={profile.bio}
             onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
             rows={4}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-            placeholder={t('profile.bioPlaceholder')}
+            placeholder={t("profile.bioPlaceholder")}
           />
         </div>
 
@@ -426,10 +456,10 @@ export default function ProfileTab() {
             type="submit"
             className="px-6 py-2 bg-gradient-to-r from-orange-400 to-amber-500 text-white rounded-lg hover:shadow-lg transition-shadow"
           >
-            {t('profile.saveChanges')}
+            {t("profile.saveChanges")}
           </button>
         </div>
       </form>
     </div>
-  )
+  );
 }

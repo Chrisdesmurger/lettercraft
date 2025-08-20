@@ -1,19 +1,19 @@
-import { NextRequest, NextResponse } from 'next/server';
-import OpenAI from 'openai';
-import fs from 'fs';
-import path from 'path';
-import os from 'os';
-import { getOpenAIConfig } from '@/lib/openai-config';
+import { NextRequest, NextResponse } from "next/server";
+import OpenAI from "openai";
+import fs from "fs";
+import path from "path";
+import os from "os";
+import { getOpenAIConfig } from "@/lib/openai-config";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 // Fonction pour normaliser les données extraites et assurer la rétrocompatibilité
 function normalizeExtractedData(data: any) {
-  console.log('🔍 [CV-EXTRACT] Starting normalization with data:', data);
-  
+  console.log("🔍 [CV-EXTRACT] Starting normalization with data:", data);
+
   // Valider que data existe et est un objet
-  if (!data || typeof data !== 'object') {
-    console.error('❌ [CV-EXTRACT] Invalid data for normalization:', data);
+  if (!data || typeof data !== "object") {
+    console.error("❌ [CV-EXTRACT] Invalid data for normalization:", data);
     return createDefaultData();
   }
 
@@ -21,51 +21,61 @@ function normalizeExtractedData(data: any) {
   let normalizedSkills = [];
   if (Array.isArray(data.skills)) {
     normalizedSkills = data.skills;
-  } else if (data.skills && typeof data.skills === 'object' && Array.isArray(data.skills.technical)) {
+  } else if (
+    data.skills &&
+    typeof data.skills === "object" &&
+    Array.isArray(data.skills.technical)
+  ) {
     normalizedSkills = data.skills.technical;
-  } else if (data.skills && typeof data.skills === 'object') {
+  } else if (data.skills && typeof data.skills === "object") {
     // Combiner toutes les catégories de compétences
     normalizedSkills = [
       ...(data.skills.technical || []),
       ...(data.skills.soft_skills || []),
-      ...(data.skills.other || [])
+      ...(data.skills.other || []),
     ];
   }
 
   // Normaliser les expériences
   const normalizedExperiences = (data.experiences || []).map((exp: any) => {
-    if (typeof exp === 'string') return exp;
-    if (!exp || typeof exp !== 'object') return '';
-    
+    if (typeof exp === "string") return exp;
+    if (!exp || typeof exp !== "object") return "";
+
     const parts = [];
     if (exp.position) parts.push(`${exp.position}`);
     if (exp.company) parts.push(`chez ${exp.company}`);
     if (exp.start_date || exp.end_date) {
-      const dates = [exp.start_date, exp.end_date || 'Présent'].filter(Boolean).join(' - ');
+      const dates = [exp.start_date, exp.end_date || "Présent"]
+        .filter(Boolean)
+        .join(" - ");
       if (dates) parts.push(`(${dates})`);
     }
     if (exp.description) parts.push(`\n${exp.description}`);
-    if (exp.key_points && Array.isArray(exp.key_points) && exp.key_points.length) {
-      parts.push(`\n• ${exp.key_points.join('\n• ')}`);
+    if (
+      exp.key_points &&
+      Array.isArray(exp.key_points) &&
+      exp.key_points.length
+    ) {
+      parts.push(`\n• ${exp.key_points.join("\n• ")}`);
     }
-    return parts.length > 0 ? parts.join(' ') : 'Expérience non spécifiée';
+    return parts.length > 0 ? parts.join(" ") : "Expérience non spécifiée";
   });
 
   // Normaliser l'éducation
   const normalizedEducation = (data.education || []).map((edu: any) => {
-    if (typeof edu === 'string') return edu;
-    if (!edu || typeof edu !== 'object') return '';
-    
+    if (typeof edu === "string") return edu;
+    if (!edu || typeof edu !== "object") return "";
+
     const parts = [];
     if (edu.degree) parts.push(edu.degree);
     if (edu.field) parts.push(`en ${edu.field}`);
     if (edu.institution) parts.push(`à ${edu.institution}`);
     if (edu.start_date || edu.end_date) {
-      const dates = [edu.start_date, edu.end_date].filter(Boolean).join(' - ');
+      const dates = [edu.start_date, edu.end_date].filter(Boolean).join(" - ");
       if (dates) parts.push(`(${dates})`);
     }
     if (edu.honors) parts.push(`- ${edu.honors}`);
-    return parts.length > 0 ? parts.join(' ') : 'Formation non spécifiée';
+    return parts.length > 0 ? parts.join(" ") : "Formation non spécifiée";
   });
 
   // Créer la structure normalisée
@@ -76,12 +86,12 @@ function normalizeExtractedData(data: any) {
     last_name: data.last_name?.trim() || null,
     email: data.email?.trim() || null,
     phone: data.phone?.trim() || null,
-    
+
     // Arrays normalisés
     skills: normalizedSkills,
     experiences: normalizedExperiences,
     education: normalizedEducation,
-    
+
     // Structure de données enrichie
     structured_data: {
       contact: {
@@ -89,27 +99,34 @@ function normalizeExtractedData(data: any) {
         phone: data.phone?.trim() || null,
         location: data.location?.trim() || null,
         linkedin: data.linkedin?.trim() || null,
-        website: data.website?.trim() || null
+        website: data.website?.trim() || null,
       },
       professional_summary: data.summary?.trim() || null,
-      detailed_experiences: Array.isArray(data.experiences) ? data.experiences : [],
+      detailed_experiences: Array.isArray(data.experiences)
+        ? data.experiences
+        : [],
       detailed_education: Array.isArray(data.education) ? data.education : [],
-      categorized_skills: data.skills && typeof data.skills === 'object' ? data.skills : { technical: normalizedSkills },
+      categorized_skills:
+        data.skills && typeof data.skills === "object"
+          ? data.skills
+          : { technical: normalizedSkills },
       projects: Array.isArray(data.projects) ? data.projects : [],
-      certifications: Array.isArray(data.certifications) ? data.certifications : [],
+      certifications: Array.isArray(data.certifications)
+        ? data.certifications
+        : [],
       languages: Array.isArray(data.languages) ? data.languages : [],
       achievements: Array.isArray(data.achievements) ? data.achievements : [],
       volunteer: Array.isArray(data.volunteer) ? data.volunteer : [],
-      interests: Array.isArray(data.interests) ? data.interests : []
-    }
+      interests: Array.isArray(data.interests) ? data.interests : [],
+    },
   };
 
-  console.log('✅ [CV-EXTRACT] Normalization completed:', {
+  console.log("✅ [CV-EXTRACT] Normalization completed:", {
     skills_count: normalized.skills.length,
     experiences_count: normalized.experiences.length,
     education_count: normalized.education.length,
     has_first_name: !!normalized.first_name,
-    has_last_name: !!normalized.last_name
+    has_last_name: !!normalized.last_name,
   });
 
   return normalized;
@@ -126,48 +143,60 @@ function createDefaultData() {
     experiences: [],
     education: [],
     structured_data: {
-      contact: { email: null, phone: null, location: null, linkedin: null, website: null },
+      contact: {
+        email: null,
+        phone: null,
+        location: null,
+        linkedin: null,
+        website: null,
+      },
       professional_summary: null,
       detailed_experiences: [],
       detailed_education: [],
-      categorized_skills: { technical: [], languages: [], soft_skills: [], certifications: [], other: [] },
+      categorized_skills: {
+        technical: [],
+        languages: [],
+        soft_skills: [],
+        certifications: [],
+        other: [],
+      },
       projects: [],
       certifications: [],
       languages: [],
       achievements: [],
       volunteer: [],
-      interests: []
-    }
+      interests: [],
+    },
   };
 }
 
 export async function POST(request: NextRequest) {
-  console.log('🔍 [CV-EXTRACT] Starting CV extraction...');
-  
-  try {
-    console.log('🔍 [CV-EXTRACT] Parsing form data...');
-    const form = await request.formData();
-    const file = form.get('file') as File | null;
+  console.log("🔍 [CV-EXTRACT] Starting CV extraction...");
 
-    console.log('🔍 [CV-EXTRACT] File received:', {
+  try {
+    console.log("🔍 [CV-EXTRACT] Parsing form data...");
+    const form = await request.formData();
+    const file = form.get("file") as File | null;
+
+    console.log("🔍 [CV-EXTRACT] File received:", {
       name: file?.name,
       size: file?.size,
-      type: file?.type
+      type: file?.type,
     });
 
-    if (!file || typeof file.arrayBuffer !== 'function') {
-      console.log('❌ [CV-EXTRACT] File validation failed');
-      return NextResponse.json({ error: 'Fichier manquant' }, { status: 400 });
+    if (!file || typeof file.arrayBuffer !== "function") {
+      console.log("❌ [CV-EXTRACT] File validation failed");
+      return NextResponse.json({ error: "Fichier manquant" }, { status: 400 });
     }
 
-    console.log('🔍 [CV-EXTRACT] Converting file to buffer...');
+    console.log("🔍 [CV-EXTRACT] Converting file to buffer...");
     const buffer = Buffer.from(await file.arrayBuffer());
     const tempFilePath = path.join(os.tmpdir(), file.name);
 
-    console.log('🔍 [CV-EXTRACT] Writing temp file:', tempFilePath);
+    console.log("🔍 [CV-EXTRACT] Writing temp file:", tempFilePath);
     fs.writeFileSync(tempFilePath, new Uint8Array(buffer));
 
-    console.log('🔍 [CV-EXTRACT] Creating OpenAI assistant...');
+    console.log("🔍 [CV-EXTRACT] Creating OpenAI assistant...");
     // Utiliser l'Assistants API avec file_search pour traiter le PDF
     const assistant = await openai.beta.assistants.create({
       name: "Advanced CV Extractor",
@@ -271,18 +300,18 @@ ACHIEVEMENT IDENTIFICATION (CRITICAL):
 - DO NOT include routine job responsibilities in achievements - only standout accomplishments
 
 Return ONLY the JSON object, no explanations or additional text.`,
-      model: getOpenAIConfig('CV_EXTRACTION').model,
-      tools: [{ type: "file_search" }]
+      model: getOpenAIConfig("CV_EXTRACTION").model,
+      tools: [{ type: "file_search" }],
     });
 
-    console.log('🔍 [CV-EXTRACT] Uploading file to OpenAI...');
+    console.log("🔍 [CV-EXTRACT] Uploading file to OpenAI...");
     const uploadedFile = await openai.files.create({
       file: fs.createReadStream(tempFilePath),
       purpose: "assistants",
     });
-    console.log('✅ [CV-EXTRACT] File uploaded:', uploadedFile.id);
+    console.log("✅ [CV-EXTRACT] File uploaded:", uploadedFile.id);
 
-    console.log('🔍 [CV-EXTRACT] Creating thread...');
+    console.log("🔍 [CV-EXTRACT] Creating thread...");
     const thread = await openai.beta.threads.create({
       messages: [
         {
@@ -298,28 +327,33 @@ IMPORTANT REMINDERS:
 - Return ONLY the JSON object as specified in your instructions
 
 Analyze this CV document now:`,
-          attachments: [{ file_id: uploadedFile.id, tools: [{ type: "file_search" }] }]
-        }
-      ]
+          attachments: [
+            { file_id: uploadedFile.id, tools: [{ type: "file_search" }] },
+          ],
+        },
+      ],
     });
 
     const run = await openai.beta.threads.runs.create(thread.id, {
-      assistant_id: assistant.id
+      assistant_id: assistant.id,
     });
 
     // Attendre la completion
     let runStatus = await openai.beta.threads.runs.retrieve(thread.id, run.id);
-    while (runStatus.status === "in_progress" || runStatus.status === "queued") {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+    while (
+      runStatus.status === "in_progress" ||
+      runStatus.status === "queued"
+    ) {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       runStatus = await openai.beta.threads.runs.retrieve(thread.id, run.id);
     }
 
     const messages = await openai.beta.threads.messages.list(thread.id);
     const lastMessage = messages.data[0];
     const content = lastMessage.content[0];
-    
-    let responseText = '';
-    if (content.type === 'text') {
+
+    let responseText = "";
+    if (content.type === "text") {
       responseText = content.text.value;
     }
 
@@ -354,61 +388,72 @@ Analyze this CV document now:`,
             languages: [],
             soft_skills: [],
             certifications: [],
-            other: []
+            other: [],
           },
           projects: [],
           certifications: [],
           languages: [],
           achievements: [],
           volunteer: [],
-          interests: []
+          interests: [],
         };
       }
     }
 
     // Normaliser les données pour assurer la compatibilité avec l'app existante
-    console.log('🔍 [CV-EXTRACT] Raw extracted data before normalization:', data);
+    console.log(
+      "🔍 [CV-EXTRACT] Raw extracted data before normalization:",
+      data,
+    );
     const normalizedData = normalizeExtractedData(data);
-    console.log('✅ [CV-EXTRACT] Normalized data structure:', {
+    console.log("✅ [CV-EXTRACT] Normalized data structure:", {
       hasFirstName: !!normalizedData.first_name,
       hasLastName: !!normalizedData.last_name,
       skillsCount: normalizedData.skills?.length || 0,
       experiencesCount: normalizedData.experiences?.length || 0,
       educationCount: normalizedData.education?.length || 0,
       hasStructuredData: !!normalizedData.structured_data,
-      allTopLevelKeys: Object.keys(normalizedData)
+      allTopLevelKeys: Object.keys(normalizedData),
     });
 
     fs.unlinkSync(tempFilePath);
 
-    console.log('✅ [CV-EXTRACT] Extraction completed successfully, returning data');
+    console.log(
+      "✅ [CV-EXTRACT] Extraction completed successfully, returning data",
+    );
     return NextResponse.json(normalizedData);
   } catch (error) {
-    console.error('❌ [CV-EXTRACT] Error occurred:', error);
-    
+    console.error("❌ [CV-EXTRACT] Error occurred:", error);
+
     // Log plus détaillé de l'erreur
     if (error instanceof Error) {
-      console.error('❌ [CV-EXTRACT] Error details:', {
+      console.error("❌ [CV-EXTRACT] Error details:", {
         name: error.name,
         message: error.message,
-        stack: error.stack
+        stack: error.stack,
       });
     }
-    
+
     // Nettoyage en cas d'erreur si le fichier temp existe
     try {
-      const tempFilePath = path.join(os.tmpdir(), 'temp_cv_file');
+      const tempFilePath = path.join(os.tmpdir(), "temp_cv_file");
       if (fs.existsSync(tempFilePath)) {
         fs.unlinkSync(tempFilePath);
-        console.log('🧹 [CV-EXTRACT] Temp file cleaned up after error');
+        console.log("🧹 [CV-EXTRACT] Temp file cleaned up after error");
       }
     } catch (cleanupError) {
-      console.warn('⚠️ [CV-EXTRACT] Could not clean up temp file:', cleanupError);
+      console.warn(
+        "⚠️ [CV-EXTRACT] Could not clean up temp file:",
+        cleanupError,
+      );
     }
-    
-    return NextResponse.json({ 
-      error: "Erreur lors de l'extraction",
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+
+    return NextResponse.json(
+      {
+        error: "Erreur lors de l'extraction",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 },
+    );
   }
 }

@@ -1,11 +1,11 @@
-import { supabase } from '@/lib/supabase-client'
+import { supabase } from "@/lib/supabase-client";
 
 export interface UploadDocumentArgs {
-  userId: string
-  file: File
-  title: string
-  language: string
-  description?: string
+  userId: string;
+  file: File;
+  title: string;
+  language: string;
+  description?: string;
 }
 
 export async function uploadDocument({
@@ -15,16 +15,16 @@ export async function uploadDocument({
   language,
   description,
 }: UploadDocumentArgs): Promise<{ id: string; path: string }> {
-  const extension = file.name.split('.').pop()
-  const path = `${userId}/${Date.now()}.${extension}`
+  const extension = file.name.split(".").pop();
+  const path = `${userId}/${Date.now()}.${extension}`;
 
   const { error: uploadError } = await supabase.storage
-    .from('documents')
-    .upload(path, file)
-  if (uploadError) throw uploadError
+    .from("documents")
+    .upload(path, file);
+  if (uploadError) throw uploadError;
 
   const { data, error } = await supabase
-    .from('candidates_profile')
+    .from("candidates_profile")
     .insert({
       user_id: userId,
       title,
@@ -33,9 +33,9 @@ export async function uploadDocument({
       file_url: path,
       uploaded_at: new Date().toISOString(),
     })
-    .select('id')
-    .single()
-  if (error) throw error
+    .select("id")
+    .single();
+  if (error) throw error;
 
-  return { id: data.id, path }
+  return { id: data.id, path };
 }

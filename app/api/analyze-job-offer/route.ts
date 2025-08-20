@@ -1,30 +1,33 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-import OpenAI from 'openai'
-import { getOpenAIConfig } from '@/lib/openai-config'
+import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
+import OpenAI from "openai";
+import { getOpenAIConfig } from "@/lib/openai-config";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
-})
+});
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+);
 
 export async function POST(request: NextRequest) {
   try {
     // Temporairement désactiver l'auth pour tester
-    console.log('API analyze-job-offer called')
+    console.log("API analyze-job-offer called");
 
-    const { jobOfferText, sourceUrl } = await request.json()
+    const { jobOfferText, sourceUrl } = await request.json();
 
-    if (!jobOfferText || typeof jobOfferText !== 'string') {
-      return NextResponse.json({ error: 'Texte d\'offre d\'emploi requis' }, { status: 400 })
+    if (!jobOfferText || typeof jobOfferText !== "string") {
+      return NextResponse.json(
+        { error: "Texte d'offre d'emploi requis" },
+        { status: 400 },
+      );
     }
 
     // Analyser l'offre d'emploi avec OpenAI
-    const jobConfig = getOpenAIConfig('JOB_ANALYSIS')
+    const jobConfig = getOpenAIConfig("JOB_ANALYSIS");
     const completion = await openai.chat.completions.create({
       model: jobConfig.model,
       messages: [
@@ -56,41 +59,45 @@ Pour la langue, détecte automatiquement la langue principale du texte de l'offr
 - "de" pour l'allemand
 - "it" pour l'italien
 
-Si une information n'est pas disponible, utilise null (sauf pour la langue qui doit toujours être détectée).`
+Si une information n'est pas disponible, utilise null (sauf pour la langue qui doit toujours être détectée).`,
         },
         {
           role: "user",
-          content: `Analyse cette offre d'emploi:\n\n${jobOfferText}`
-        }
+          content: `Analyse cette offre d'emploi:\n\n${jobOfferText}`,
+        },
       ],
       temperature: jobConfig.temperature,
-      max_tokens: jobConfig.max_tokens
-    })
+      max_tokens: jobConfig.max_tokens,
+    });
 
-    const analysisText = completion.choices[0].message.content
+    const analysisText = completion.choices[0].message.content;
     if (!analysisText) {
-      throw new Error('Aucune réponse reçue d\'OpenAI')
+      throw new Error("Aucune réponse reçue d'OpenAI");
     }
 
     // Parser la réponse JSON
-    let analyzedData
+    let analyzedData;
     try {
-      analyzedData = JSON.parse(analysisText)
+      analyzedData = JSON.parse(analysisText);
     } catch (parseError) {
       // Si le parsing échoue, essayer d'extraire le JSON de la réponse
-      const jsonMatch = analysisText.match(/\{[\s\S]*\}/)
+      const jsonMatch = analysisText.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
-        analyzedData = JSON.parse(jsonMatch[0])
+        analyzedData = JSON.parse(jsonMatch[0]);
       } else {
-        throw new Error('Impossible de parser la réponse d\'OpenAI')
+        throw new Error("Impossible de parser la réponse d'OpenAI");
       }
     }
 
     // Validation des données essentielles
     if (!analyzedData.title || !analyzedData.company) {
-      return NextResponse.json({ 
-        error: 'Impossible d\'extraire les informations essentielles de l\'offre d\'emploi' 
-      }, { status: 400 })
+      return NextResponse.json(
+        {
+          error:
+            "Impossible d'extraire les informations essentielles de l'offre d'emploi",
+        },
+        { status: 400 },
+      );
     }
 
     // Enrichir avec des données par défaut si nécessaire
@@ -107,24 +114,26 @@ Si une information n'est pas disponible, utilise null (sauf pour la langue qui d
       benefits: analyzedData.benefits || [],
       experience_level: analyzedData.experience_level || null,
       skills: analyzedData.skills || [],
-      language: analyzedData.language || 'fr' // Défaut français si pas détecté
-    }
+      language: analyzedData.language || "fr", // Défaut français si pas détecté
+    };
 
-    return NextResponse.json(enrichedData)
-
+    return NextResponse.json(enrichedData);
   } catch (error) {
-    console.error('Erreur lors de l\'analyse de l\'offre d\'emploi:', error)
-    return NextResponse.json({ 
-      error: 'Erreur lors de l\'analyse de l\'offre d\'emploi',
-      details: error instanceof Error ? error.message : 'Erreur inconnue'
-    }, { status: 500 })
+    console.error("Erreur lors de l'analyse de l'offre d'emploi:", error);
+    return NextResponse.json(
+      {
+        error: "Erreur lors de l'analyse de l'offre d'emploi",
+        details: error instanceof Error ? error.message : "Erreur inconnue",
+      },
+      { status: 500 },
+    );
   }
 }
 
 // Méthode GET pour vérifier le statut de l'API
 export async function GET() {
-  return NextResponse.json({ 
-    message: 'API d\'analyse d\'offres d\'emploi fonctionnelle',
-    version: '1.0.0'
-  })
+  return NextResponse.json({
+    message: "API d'analyse d'offres d'emploi fonctionnelle",
+    version: "1.0.0",
+  });
 }

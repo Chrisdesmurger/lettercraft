@@ -6,7 +6,7 @@
   },
   "navigation": {
     "dashboard": "Panel",
-    "generator": "Generador", 
+    "generator": "Generador",
     "letters": "Mis Cartas",
     "profile": "Perfil"
   },
@@ -28,7 +28,7 @@
       "description": "Personaliza y genera tu carta"
     },
     "preview": {
-      "title": "Vista previa", 
+      "title": "Vista previa",
       "description": "Revisa y descarga tu carta"
     }
   },
@@ -349,7 +349,7 @@
       "retry": "Reintentar",
       "refresh": "Actualizar facturas",
       "refreshing": "Actualizando...",
-    "optional": "opcional",
+      "optional": "opcional",
       "download": "Descargar factura",
       "downloadTitle": "Descargar factura",
       "viewOnStripe": "Ver en Stripe",
@@ -513,17 +513,66 @@
     "question6": {
       "title": "¿En qué idioma te gustaría generar tu carta de presentación?",
       "placeholder": "Selecciona el idioma para tu carta",
+      "premiumFeature": "Función Premium",
       "detectedLanguage": "Idioma detectado automáticamente: {language}",
       "french": "Francés",
       "english": "Inglés",
       "spanish": "Español"
+    },
+    "question7": {
+      "title": "Elige el tono de tu carta de presentación",
+      "placeholder": "Selecciona el estilo de escritura que te representa",
+      "premiumFeature": "Función Premium",
+      "example": "Ejemplo:",
+      "customToneLabel": "Describe tu tono personalizado (máx 120 caracteres)",
+      "customTonePlaceholder": "Ej: Casual pero respetuoso, con un toque de humor...",
+      "customToneHelp": "Sé específico sobre el estilo de escritura deseado",
+      "tones": {
+        "professional": {
+          "label": "Profesional",
+          "description": "Estilo formal y estructurado, ideal para candidaturas tradicionales",
+          "example": "Tengo el honor de presentar mi candidatura..."
+        },
+        "warm": {
+          "label": "Cálido",
+          "description": "Tono cordial y humano que crea una conexión personal",
+          "example": "Es con verdadero entusiasmo que les escribo..."
+        },
+        "direct": {
+          "label": "Directo",
+          "description": "Enfoque franco y eficiente, va directo al grano",
+          "example": "Mis 5 años de experiencia corresponden exactamente a sus necesidades..."
+        },
+        "persuasive": {
+          "label": "Persuasivo",
+          "description": "Enfatiza el valor agregado y los beneficios",
+          "example": "Mi experiencia les permitirá aumentar su rendimiento..."
+        },
+        "creative": {
+          "label": "Creativo",
+          "description": "Estilo original con expresiones variadas y un toque de originalidad",
+          "example": "Como un rompecabezas donde cada pieza encuentra su lugar..."
+        },
+        "concise": {
+          "label": "Conciso",
+          "description": "Máximo impacto en mínimas palabras",
+          "example": "Desarrollador experimentado. Resultados comprobados. Disponible inmediatamente."
+        },
+        "custom": {
+          "label": "Personalizado",
+          "description": "Describe el tono deseado en pocas palabras"
+        }
+      }
     },
     "validation": {
       "required": "Este campo es obligatorio",
       "min50chars": "Por favor ingresa al menos 50 caracteres",
       "min30chars": "Por favor ingresa al menos 30 caracteres",
       "selectExperience": "Por favor selecciona una experiencia",
-      "selectSkills": "Por favor selecciona al menos una habilidad"
+      "selectSkills": "Por favor selecciona al menos una habilidad",
+      "selectTone": "Por favor selecciona un tono de escritura",
+      "customToneRequired": "El texto personalizado es requerido para el tono personalizado",
+      "customToneTooLong": "El texto personalizado no puede exceder 120 caracteres"
     }
   },
   "flow": {
@@ -558,6 +607,7 @@
     "position": "Puesto",
     "company": "Empresa",
     "cvUsed": "CV utilizado",
+    "toneUsed": "Tono utilizado",
     "generatedOn": "Generado el"
   },
   "auth": {
@@ -675,7 +725,7 @@
         "description": "Estilo tradicional francés con Times New Roman"
       },
       "modern": {
-        "name": "Moderno", 
+        "name": "Moderno",
         "description": "Diseño limpio y contemporáneo"
       },
       "elegant": {
@@ -703,7 +753,7 @@
       "label": "Valoración",
       "labels": {
         "1": "Muy insatisfecho",
-        "2": "Insatisfecho", 
+        "2": "Insatisfecho",
         "3": "Neutral",
         "4": "Satisfecho",
         "5": "Muy satisfecho"
@@ -718,7 +768,7 @@
     "categories": {
       "label": "Aspectos a mejorar (opcional)",
       "content": "Contenido",
-      "style": "Estilo", 
+      "style": "Estilo",
       "relevance": "Relevancia",
       "length": "Longitud",
       "categoryLabel": "Categoría {category}",

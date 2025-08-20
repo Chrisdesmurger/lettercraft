@@ -14,7 +14,7 @@ Une application web moderne pour générer des lettres de motivation personnalis
 
 ## 📋 Prérequis
 
-- **Node.js 18+** 
+- **Node.js 18+**
 - **Compte OpenAI** avec accès API GPT-4
 - **Projet Supabase** avec base de données PostgreSQL
 - **npm** ou **yarn** pour la gestion des dépendances
@@ -22,22 +22,26 @@ Une application web moderne pour générer des lettres de motivation personnalis
 ## 🛠️ Installation
 
 1. **Cloner le repository**
+
 ```bash
 git clone https://github.com/votre-username/lettercraft.git
 cd lettercraft
 ```
 
 2. **Installer les dépendances**
+
 ```bash
 npm install
 ```
 
 3. **Configurer les variables d'environnement**
+
 ```bash
 cp .env.local.example .env.local
 ```
 
 Puis éditer `.env.local` avec vos clés :
+
 ```env
 # Supabase
 NEXT_PUBLIC_SUPABASE_URL=https://votre-projet.supabase.co
@@ -53,6 +57,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 4. **Configurer la base de données Supabase** (voir section Database Schema)
 
 5. **Lancer le serveur de développement**
+
 ```bash
 npm run dev
 ```
@@ -93,6 +98,7 @@ lettercraft/
 ### Tables Principales
 
 #### `user_profiles`
+
 ```sql
 CREATE TABLE user_profiles (
   user_id UUID PRIMARY KEY REFERENCES auth.users(id),
@@ -112,6 +118,7 @@ CREATE TABLE user_profiles (
 ```
 
 #### `candidates_profile` (CV)
+
 ```sql
 CREATE TABLE candidates_profile (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -132,6 +139,7 @@ CREATE TABLE candidates_profile (
 ```
 
 #### `job_offers`
+
 ```sql
 CREATE TABLE job_offers (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -151,6 +159,7 @@ CREATE TABLE job_offers (
 ```
 
 #### `generated_letters`
+
 ```sql
 CREATE TABLE generated_letters (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -169,6 +178,7 @@ CREATE TABLE generated_letters (
 ```
 
 #### `user_quotas`
+
 ```sql
 CREATE TABLE user_quotas (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -185,6 +195,7 @@ CREATE TABLE user_quotas (
 ### Tables de Référence
 
 #### `countries`
+
 ```sql
 CREATE TABLE countries (
   code TEXT PRIMARY KEY,
@@ -193,6 +204,7 @@ CREATE TABLE countries (
 ```
 
 #### `languages`
+
 ```sql
 CREATE TABLE languages (
   code TEXT PRIMARY KEY,
@@ -344,26 +356,31 @@ Ce projet est sous licence MIT - voir le fichier [LICENSE](LICENSE) pour plus de
 ## 🔄 Système de Quotas Avancé
 
 ### Protection Complète du Flux
+
 Le système de quotas protège maintenant **dès la première étape** :
 
 #### Vérification Préventive
+
 - ✅ **Analyse d'offre bloquée** si quota épuisé
 - ✅ **Messages informatifs** avec redirection Premium
 - ✅ **Interface adaptative** selon le tier d'abonnement
 
 #### Composants Intégrés
+
 - `QuotaBanner` - Affichage du statut en temps réel
-- `QuotaGuard` - Protection des actions sensibles  
+- `QuotaGuard` - Protection des actions sensibles
 - `QuotaStatus` - Détails complets des quotas
 - `useQuota` - Hook de gestion centralisée
 
 #### Flux Utilisateur Protégé
+
 1. **Étape 1** : Vérification quota lors du clic "Analyser l'offre"
 2. **Si quota épuisé** : Blocage immédiat avec message toast
 3. **Si quota OK** : Poursuite normale du flux
 4. **Génération finale** : Consommation effective du quota
 
 ### Gestion Automatique Personnalisée
+
 - **Reset personnalisé** : 30 jours après la première génération, puis cycles mensuels
 - **Synchronisation temps réel** avec la base de données
 - **Adaptation Premium** : quotas illimités
@@ -378,6 +395,7 @@ Le système de quotas protège maintenant **dès la première étape** :
 ## 📞 Support
 
 Pour toute question ou problème :
+
 - Créer une issue sur GitHub
 - Consulter la documentation Supabase
 - Vérifier les logs dans la console de développement
