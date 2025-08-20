@@ -17,13 +17,6 @@ export default function CVTab() {
   const maxCVs = getCVLimitsBySubscription(subscriptionTier)
   const canUpload = cvs.length < maxCVs
 
-  const formatFileSize = (bytes: number | null): string => {
-    if (!bytes) return t('cv.unknownSize')
-    const kb = bytes / 1024
-    if (kb < 1024) return `${Math.round(kb)} KB`
-    const mb = kb / 1024
-    return `${mb.toFixed(1)} MB`
-  }
 
   const handleSetActive = async (cvId: string) => {
     const success = await setActiveCV(cvId)
@@ -154,7 +147,7 @@ export default function CVTab() {
                   <div>
                     <p className="font-medium text-gray-900">{cv.title}</p>
                     <p className="text-sm text-gray-500">
-                      {formatFileSize(cv.file_size)} • {t('cv.uploadedOn')} {new Date(cv.uploaded_at).toLocaleDateString('fr-FR')}
+                      {t('cv.uploadedOn')} {new Date(cv.uploaded_at).toLocaleDateString('fr-FR')}
                     </p>
                   </div>
                 </div>
