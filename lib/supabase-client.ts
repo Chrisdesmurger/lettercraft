@@ -463,6 +463,8 @@ export type Database = {
           subscription_end_date: string | null;
           stripe_customer_id: string | null;
           stripe_subscription_id: string | null;
+          email_notifications: boolean;
+          newsletter_enabled: boolean;
           created_at: string | null;
           updated_at: string | null;
         };
@@ -480,6 +482,8 @@ export type Database = {
           subscription_end_date?: string | null;
           stripe_customer_id?: string | null;
           stripe_subscription_id?: string | null;
+          email_notifications?: boolean;
+          newsletter_enabled?: boolean;
           created_at?: string | null;
           updated_at?: string | null;
         };
@@ -497,6 +501,8 @@ export type Database = {
           subscription_end_date?: string | null;
           stripe_customer_id?: string | null;
           stripe_subscription_id?: string | null;
+          email_notifications?: boolean;
+          newsletter_enabled?: boolean;
           created_at?: string | null;
           updated_at?: string | null;
         };

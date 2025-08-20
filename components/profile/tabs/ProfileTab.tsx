@@ -6,6 +6,8 @@ import { supabase } from '@/lib/supabase-client'
 import { Camera, Mail, Award, Calendar } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useI18n } from '@/lib/i18n-context'
+import { ContributorBadge } from '@/components/reviews/contributor-badge'
+import { useContributorBadge } from '@/hooks/useContributorBadge'
 
 export default function ProfileTab() {
   const { t } = useI18n()
@@ -20,9 +22,13 @@ export default function ProfileTab() {
     created_at: '',
     generation_count: 0
   })
+  const [avatarDisplayUrl, setAvatarDisplayUrl] = useState('')
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  
+  // Hook pour le badge contributeur
+  const { badge: contributorBadge } = useContributorBadge()
 
   useEffect(() => {
     loadProfile()
@@ -43,13 +49,14 @@ export default function ProfileTab() {
     try {
       const { data: { session } } = await supabase.auth.getSession()
       if (session) {
-        // Récupérer le nombre de lettres générées
-        const { data: lettersData } = await supabase
-          .from('generated_letters')
-          .select('id')
+        // Récupérer le nombre de lettres générées depuis user_quotas
+        const { data: quotaData } = await supabase
+          .from('user_quotas')
+          .select('letters_generated')
           .eq('user_id', session.user.id)
+          .single()
 
-        const letterCount = lettersData?.length || 0
+        const letterCount = quotaData?.letters_generated || 0
 
         // Récupérer les données du profil depuis user_profiles
         const { data: profileData } = await supabase
@@ -58,21 +65,42 @@ export default function ProfileTab() {
           .eq('user_id', session.user.id)
           .single()
 
+        const avatarUrl = profileData?.avatar_url || ''
+
         setProfile({
           email: session.user.email || '',
           firstName: profileData?.first_name || '',
           lastName: profileData?.last_name || '',
           phone: profileData?.phone || '',
           bio: profileData?.bio || '',
-          avatar_url: profileData?.avatar_url || '',
+          avatar_url: avatarUrl,
           created_at: session.user.created_at || '',
           generation_count: letterCount
         })
+
+        // Si il y a un avatar_url, récupérer l'URL d'affichage via le proxy
+        if (avatarUrl) {
+          loadAvatarDisplayUrl(avatarUrl)
+        }
       }
     } catch (error) {
       console.error('Error loading profile:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const loadAvatarDisplayUrl = async (avatarUrl: string) => {
+    try {
+      // Extraire le nom de fichier de l'URL complète
+      const fileName = avatarUrl.split('/').pop()
+      if (fileName) {
+        // Utiliser l'API storage-proxy pour récupérer le fichier
+        const proxyUrl = `/api/storage-proxy?bucket=documents&path=${fileName}`
+        setAvatarDisplayUrl(proxyUrl)
+      }
+    } catch (error) {
+      console.error('Error loading avatar display URL:', error)
     }
   }
 
@@ -172,6 +200,9 @@ export default function ProfileTab() {
       // Mettre à jour l'état local
       setProfile(prev => ({ ...prev, avatar_url }))
       
+      // Charger la nouvelle URL d'affichage
+      await loadAvatarDisplayUrl(avatar_url)
+      
       toast.success(t('profile.photoUpdateSuccess'))
       
     } catch (error) {
@@ -255,8 +286,8 @@ export default function ProfileTab() {
       <div className="flex items-center space-x-6">
         <div className="relative">
           <div className="w-24 h-24 bg-gradient-to-br from-orange-400 to-amber-500 rounded-full flex items-center justify-center">
-            {profile.avatar_url ? (
-              <img src={profile.avatar_url} alt="Avatar" className="w-full h-full rounded-full object-cover" />
+            {avatarDisplayUrl ? (
+              <img src={avatarDisplayUrl} alt="Avatar" className="w-full h-full rounded-full object-cover" />
             ) : (
               <span className="text-white text-3xl font-bold">
                 {profile.firstName?.charAt(0) || profile.email?.charAt(0) || 'U'}
@@ -281,6 +312,18 @@ export default function ProfileTab() {
             {profile.firstName} {profile.lastName}
           </h2>
           <p className="text-gray-600">{profile.email}</p>
+          
+          {/* Badge contributeur */}
+          {contributorBadge && (
+            <div className="mt-3">
+              <ContributorBadge 
+                badge={contributorBadge} 
+                size="sm" 
+                showDescription={false}
+                className="w-fit"
+              />
+            </div>
+          )}
         </div>
       </div>
 
