@@ -14,14 +14,18 @@ import com.ora.wellbeing.data.repository.impl.DailyJournalRepositoryImpl
 import com.ora.wellbeing.data.repository.impl.FirestoreUserProfileRepositoryImpl
 import com.ora.wellbeing.data.repository.impl.FirestoreUserStatsRepositoryImpl
 import com.ora.wellbeing.data.repository.impl.GratitudeRepositoryImpl
+import com.ora.wellbeing.data.repository.impl.InformationScreenRepositoryImpl
 import com.ora.wellbeing.data.repository.impl.ProgramRepositoryImpl
+import com.ora.wellbeing.data.repository.impl.RecommendationRuleRepositoryImpl
 import com.ora.wellbeing.data.repository.impl.UserProgramRepositoryImpl
 import com.ora.wellbeing.domain.repository.ContentRepository
 import com.ora.wellbeing.domain.repository.DailyJournalRepository
 import com.ora.wellbeing.domain.repository.FirestoreUserProfileRepository
 import com.ora.wellbeing.domain.repository.FirestoreUserStatsRepository
 import com.ora.wellbeing.domain.repository.GratitudeRepository
+import com.ora.wellbeing.domain.repository.InformationScreenRepository
 import com.ora.wellbeing.domain.repository.ProgramRepository
+import com.ora.wellbeing.domain.repository.RecommendationRuleRepository
 import com.ora.wellbeing.domain.repository.UserProgramRepository
 import com.ora.wellbeing.data.repository.UserStatsRepository
 import dagger.Module
@@ -109,6 +113,33 @@ object FirestoreModule {
     ): DailyJournalRepository {
         Timber.d("provideDailyJournalRepository: Creating repository")
         return DailyJournalRepositoryImpl(firestore)
+    }
+
+    /**
+     * Fournit le repository pour les écrans d'information dynamiques (Phase 1)
+     * Read-only: configurés par les admins via OraWebApp
+     */
+    @Provides
+    @Singleton
+    fun provideInformationScreenRepository(
+        firestore: FirebaseFirestore
+    ): InformationScreenRepository {
+        Timber.d("provideInformationScreenRepository: Creating repository")
+        return InformationScreenRepositoryImpl(firestore)
+    }
+
+    /**
+     * Fournit le repository pour les règles de recommandation (Phase 1)
+     * Read-only: configurés par les admins via OraWebApp
+     * Utilisé par le moteur de recommandation pour personnaliser les suggestions de programmes
+     */
+    @Provides
+    @Singleton
+    fun provideRecommendationRuleRepository(
+        firestore: FirebaseFirestore
+    ): RecommendationRuleRepository {
+        Timber.d("provideRecommendationRuleRepository: Creating repository")
+        return RecommendationRuleRepositoryImpl(firestore)
     }
 
     /**
