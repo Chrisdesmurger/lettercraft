@@ -26,6 +26,15 @@ class OnboardingConfig {
     var version: String = "1.0"
     var questions: List<OnboardingQuestion> = emptyList()
 
+    /**
+     * Information screens to display between questions
+     * Provides contextual education and engagement during onboarding
+     * Screens are sorted by position and conditionally rendered
+     */
+    @get:PropertyName("information_screens")
+    @set:PropertyName("information_screens")
+    var informationScreens: List<InformationScreen> = emptyList()
+
     @get:PropertyName("created_at")
     @set:PropertyName("created_at")
     var createdAt: Timestamp? = null
@@ -55,6 +64,7 @@ class OnboardingConfig {
         status: String,
         version: String,
         questions: List<OnboardingQuestion>,
+        informationScreens: List<InformationScreen> = emptyList(),
         createdAt: Timestamp?,
         updatedAt: Timestamp?,
         createdBy: String,
@@ -67,6 +77,7 @@ class OnboardingConfig {
         this.status = status
         this.version = version
         this.questions = questions
+        this.informationScreens = informationScreens
         this.createdAt = createdAt
         this.updatedAt = updatedAt
         this.createdBy = createdBy
@@ -84,4 +95,33 @@ class OnboardingConfig {
     }
 
     fun isActive(): Boolean = getStatusEnum() == OnboardingStatus.ACTIVE
+
+    /**
+     * Get information screens that should be displayed for a given position
+     * Filters screens based on their position and display conditions
+     * @param position The current position in the onboarding flow
+     * @param userResponses User's answers so far (for conditional screens)
+     * @return List of screens to display at this position
+     */
+    fun getInformationScreensForPosition(
+        position: Int,
+        userResponses: Map<String, String> = emptyMap()
+    ): List<InformationScreen> {
+        return informationScreens
+            .filter { screen -> screen.position == position }
+            .filter { screen ->
+                // If no conditions, always show
+                if (screen.displayConditions == null) return@filter true
+
+                // Check conditions against user responses
+                val conditions = screen.displayConditions!!
+                if (conditions.showIfAnswer != null) {
+                    val userAnswer = userResponses[conditions.showIfAnswer]
+                    if (userAnswer != null) {
+                        return@filter screen.shouldDisplay(conditions.showIfAnswer!!, userAnswer)
+                    }
+                }
+                true
+            }
+    }
 }

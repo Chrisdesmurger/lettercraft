@@ -132,6 +132,15 @@ service cloud.firestore {
       allow write: if false; // Admin only (from OraWebApp)
     }
 
+    // Collection recommendation_rules/{ruleId}
+    // Règle: Lecture pour tous les utilisateurs authentifiés, écriture admin uniquement
+    // Les règles de recommandation sont configurées par les admins via OraWebApp
+    // et utilisées par le moteur de recommandation Android pour personnaliser les suggestions de programmes
+    match /recommendation_rules/{ruleId} {
+      allow read: if request.auth != null;
+      allow write: if false; // Admin only (from OraWebApp)
+    }
+
     // Collection user_onboarding_responses/{uid}/responses/{configVersion}
     // Règle: UID-based isolation - chaque utilisateur accède uniquement à ses propres réponses
     match /user_onboarding_responses/{uid}/responses/{configVersion} {
