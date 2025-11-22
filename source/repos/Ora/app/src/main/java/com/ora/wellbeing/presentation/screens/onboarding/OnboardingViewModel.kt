@@ -6,12 +6,14 @@ import androidx.lifecycle.viewModelScope
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.ora.wellbeing.BuildConfig
+import com.ora.wellbeing.data.model.onboarding.InformationScreen
 import com.ora.wellbeing.data.model.onboarding.OnboardingConfig
 import com.ora.wellbeing.data.model.onboarding.OnboardingMetadata
 import com.ora.wellbeing.data.model.onboarding.OnboardingQuestion
 import com.ora.wellbeing.data.model.onboarding.UserOnboardingAnswer
 import com.ora.wellbeing.data.model.onboarding.UserOnboardingResponse
 import com.ora.wellbeing.data.repository.OnboardingRepository
+import com.ora.wellbeing.domain.repository.InformationScreenRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -28,6 +30,7 @@ import javax.inject.Inject
 @HiltViewModel
 class OnboardingViewModel @Inject constructor(
     private val onboardingRepository: OnboardingRepository,
+    private val informationScreenRepository: InformationScreenRepository,
     private val userProfileRepository: com.ora.wellbeing.domain.repository.FirestoreUserProfileRepository,
     private val auth: FirebaseAuth
 ) : ViewModel() {
@@ -52,6 +55,7 @@ class OnboardingViewModel @Inject constructor(
             OnboardingUiEvent.SkipQuestion -> skipCurrentQuestion()
             OnboardingUiEvent.CompleteOnboarding -> completeOnboarding()
             OnboardingUiEvent.RetryLoad -> loadOnboardingConfig()
+            OnboardingUiEvent.ContinueFromInformationScreen -> continueFromInformationScreen()
         }
     }
 
@@ -103,6 +107,9 @@ class OnboardingViewModel @Inject constructor(
                 .onSuccess {
                     _uiState.value = _uiState.value.copy(hasStarted = true)
                     Timber.d("Onboarding started for user $uid")
+
+                    // Phase 3: Load information screens for first question (position 0)
+                    loadInformationScreensForCurrentPosition()
                 }
                 .onFailure { error ->
                     Timber.e(error, "Failed to start onboarding")
@@ -162,6 +169,9 @@ class OnboardingViewModel @Inject constructor(
                 canProceed = isQuestionAnswered(nextIndex)
             )
             Timber.d("Moved to question $nextIndex")
+
+            // Phase 3: Load information screens for next question
+            loadInformationScreensForCurrentPosition()
         }
     }
 
@@ -268,6 +278,77 @@ class OnboardingViewModel @Inject constructor(
         if (currentState.totalQuestions == 0) return 0f
         return (currentState.currentQuestionIndex + 1) / currentState.totalQuestions.toFloat()
     }
+
+    /**
+     * Phase 3: Load information screens for current position
+     * Checks if there are information screens to display before the current question
+     */
+    private fun loadInformationScreensForCurrentPosition() {
+        val configId = config?.id ?: return
+        val currentState = _uiState.value
+        val position = currentState.currentQuestionIndex
+
+        viewModelScope.launch {
+            // Build user responses map for conditional screen evaluation
+            val userResponses = answers.mapValues { (_, answer) ->
+                answer.selectedOptions.firstOrNull() ?: answer.textAnswer ?: ""
+            }
+
+            informationScreenRepository.getScreensForPosition(
+                configId = configId,
+                position = position,
+                userResponses = userResponses
+            )
+                .onSuccess { screens ->
+                    if (screens.isNotEmpty()) {
+                        _uiState.value = currentState.copy(
+                            currentInformationScreens = screens,
+                            currentInformationScreenIndex = 0,
+                            showingInformationScreen = true
+                        )
+                        Timber.d("Loaded ${screens.size} information screens for position $position")
+                    } else {
+                        // No information screens, show question directly
+                        _uiState.value = currentState.copy(
+                            currentInformationScreens = emptyList(),
+                            showingInformationScreen = false
+                        )
+                    }
+                }
+                .onFailure { error ->
+                    Timber.e(error, "Failed to load information screens for position $position")
+                    // Continue to question on error
+                    _uiState.value = currentState.copy(
+                        currentInformationScreens = emptyList(),
+                        showingInformationScreen = false
+                    )
+                }
+        }
+    }
+
+    /**
+     * Phase 3: Handle continue from information screen
+     * Either show next information screen OR proceed to question
+     */
+    private fun continueFromInformationScreen() {
+        val currentState = _uiState.value
+
+        if (currentState.hasMoreInformationScreens) {
+            // Show next information screen
+            _uiState.value = currentState.copy(
+                currentInformationScreenIndex = currentState.currentInformationScreenIndex + 1
+            )
+            Timber.d("Moved to information screen ${currentState.currentInformationScreenIndex + 1}")
+        } else {
+            // All information screens viewed, show question
+            _uiState.value = currentState.copy(
+                showingInformationScreen = false,
+                currentInformationScreens = emptyList(),
+                currentInformationScreenIndex = 0
+            )
+            Timber.d("Finished viewing information screens, showing question ${currentState.currentQuestionIndex}")
+        }
+    }
 }
 
 /**
@@ -284,16 +365,26 @@ data class OnboardingUiState(
     val currentQuestionIndex: Int = 0,
     val totalQuestions: Int = 0,
     val currentAnswers: Map<String, List<String>> = emptyMap(),
-    val canProceed: Boolean = false
+    val canProceed: Boolean = false,
+    // Phase 3: Information screens state
+    val currentInformationScreens: List<InformationScreen> = emptyList(),
+    val currentInformationScreenIndex: Int = 0,
+    val showingInformationScreen: Boolean = false
 ) {
     val currentQuestion: OnboardingQuestion?
         get() = questions.getOrNull(currentQuestionIndex)
+
+    val currentInformationScreen: InformationScreen?
+        get() = currentInformationScreens.getOrNull(currentInformationScreenIndex)
 
     val isFirstQuestion: Boolean
         get() = currentQuestionIndex == 0
 
     val isLastQuestion: Boolean
         get() = currentQuestionIndex == totalQuestions - 1
+
+    val hasMoreInformationScreens: Boolean
+        get() = currentInformationScreenIndex < currentInformationScreens.size - 1
 
     val progressPercentage: Int
         get() = if (totalQuestions > 0) {
@@ -315,4 +406,6 @@ sealed class OnboardingUiEvent {
     object SkipQuestion : OnboardingUiEvent()
     object CompleteOnboarding : OnboardingUiEvent()
     object RetryLoad : OnboardingUiEvent()
+    // Phase 3: Information screen events
+    object ContinueFromInformationScreen : OnboardingUiEvent()
 }

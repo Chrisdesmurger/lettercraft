@@ -206,39 +206,61 @@ fun OnboardingQuestionnaireContent(
             )
         }
 
-        // Question content with animation
+        // Content with animation: either information screen OR question
         AnimatedContent(
-            targetState = uiState.currentQuestionIndex,
+            targetState = uiState.showingInformationScreen,
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f),
             transitionSpec = {
-                if (targetState > initialState) {
-                    slideInHorizontally { width -> width } + fadeIn() togetherWith
-                            slideOutHorizontally { width -> -width } + fadeOut()
-                } else {
-                    slideInHorizontally { width -> -width } + fadeIn() togetherWith
-                            slideOutHorizontally { width -> width } + fadeOut()
-                }
+                fadeIn() togetherWith fadeOut()
             },
-            label = "question_transition"
-        ) { questionIndex ->
-            uiState.currentQuestion?.let { question ->
-                OnboardingQuestionCard(
-                    question = question,
-                    selectedOptions = uiState.currentAnswers[question.id] ?: emptyList(),
-                    onAnswerChange = { selectedOptions, textAnswer ->
-                        onEvent(OnboardingUiEvent.AnswerQuestion(selectedOptions, textAnswer))
+            label = "content_transition"
+        ) { showingInfoScreen ->
+            if (showingInfoScreen) {
+                // Phase 3: Show information screen
+                uiState.currentInformationScreen?.let { informationScreen ->
+                    InformationScreenUI(
+                        informationScreen = informationScreen,
+                        onContinue = { onEvent(OnboardingUiEvent.ContinueFromInformationScreen) }
+                    )
+                }
+            } else {
+                // Show question
+                AnimatedContent(
+                    targetState = uiState.currentQuestionIndex,
+                    modifier = Modifier.fillMaxSize(),
+                    transitionSpec = {
+                        if (targetState > initialState) {
+                            slideInHorizontally { width -> width } + fadeIn() togetherWith
+                                    slideOutHorizontally { width -> -width } + fadeOut()
+                        } else {
+                            slideInHorizontally { width -> -width } + fadeIn() togetherWith
+                                    slideOutHorizontally { width -> width } + fadeOut()
+                        }
+                    },
+                    label = "question_transition"
+                ) { questionIndex ->
+                    uiState.currentQuestion?.let { question ->
+                        OnboardingQuestionCard(
+                            question = question,
+                            selectedOptions = uiState.currentAnswers[question.id] ?: emptyList(),
+                            onAnswerChange = { selectedOptions, textAnswer ->
+                                onEvent(OnboardingUiEvent.AnswerQuestion(selectedOptions, textAnswer))
+                            }
+                        )
                     }
-                )
+                }
             }
         }
 
-        // Navigation buttons
-        OnboardingNavigationButtons(
-            uiState = uiState,
-            onEvent = onEvent
-        )
+        // Navigation buttons (hidden when showing information screen)
+        if (!uiState.showingInformationScreen) {
+            OnboardingNavigationButtons(
+                uiState = uiState,
+                onEvent = onEvent
+            )
+        }
     }
 }
 
