@@ -37,7 +37,7 @@ class InformationScreenRepositoryImpl @Inject constructor(
 
     companion object {
         private const val COLLECTION_ONBOARDING_CONFIGS = "onboarding_configs"
-        private const val FIELD_INFORMATION_SCREENS = "informationScreens"
+        private const val FIELD_INFORMATION_SCREENS = "information_screens" // snake_case to match backend schema
         private const val FIELD_STATUS = "status"
         private const val STATUS_ACTIVE = "active"
     }
