@@ -164,14 +164,63 @@ class OnboardingViewModel @Inject constructor(
         val currentState = _uiState.value
         if (currentState.currentQuestionIndex < currentState.totalQuestions - 1) {
             val nextIndex = currentState.currentQuestionIndex + 1
-            _uiState.value = currentState.copy(
-                currentQuestionIndex = nextIndex,
-                canProceed = isQuestionAnswered(nextIndex)
-            )
-            Timber.d("Moved to question $nextIndex")
 
-            // Phase 3: Load information screens for next question
-            loadInformationScreensForCurrentPosition()
+            // Phase 3: Load information screens for next position FIRST (before changing index)
+            // This prevents the next question from briefly flashing before showing info screens
+            val configId = config?.id
+            if (configId != null) {
+                viewModelScope.launch {
+                    // Build user responses map for conditional screen evaluation
+                    val userResponses = answers.mapValues { (_, answer) ->
+                        answer.selectedOptions.firstOrNull() ?: answer.textAnswer ?: ""
+                    }
+
+                    informationScreenRepository.getScreensForPosition(
+                        configId = configId,
+                        position = nextIndex,
+                        userResponses = userResponses
+                    )
+                        .onSuccess { screens ->
+                            if (screens.isNotEmpty()) {
+                                // There are information screens, update state with both new index AND screens
+                                _uiState.value = currentState.copy(
+                                    currentQuestionIndex = nextIndex,
+                                    canProceed = isQuestionAnswered(nextIndex),
+                                    currentInformationScreens = screens,
+                                    currentInformationScreenIndex = 0,
+                                    showingInformationScreen = true
+                                )
+                                Timber.d("Moved to question $nextIndex with ${screens.size} information screens")
+                            } else {
+                                // No information screens, just move to next question
+                                _uiState.value = currentState.copy(
+                                    currentQuestionIndex = nextIndex,
+                                    canProceed = isQuestionAnswered(nextIndex),
+                                    showingInformationScreen = false,
+                                    currentInformationScreens = emptyList()
+                                )
+                                Timber.d("Moved to question $nextIndex (no information screens)")
+                            }
+                        }
+                        .onFailure { error ->
+                            Timber.e(error, "Failed to load information screens for position $nextIndex")
+                            // Continue to question on error
+                            _uiState.value = currentState.copy(
+                                currentQuestionIndex = nextIndex,
+                                canProceed = isQuestionAnswered(nextIndex),
+                                showingInformationScreen = false,
+                                currentInformationScreens = emptyList()
+                            )
+                        }
+                }
+            } else {
+                // No config ID, just move to next question
+                _uiState.value = currentState.copy(
+                    currentQuestionIndex = nextIndex,
+                    canProceed = isQuestionAnswered(nextIndex)
+                )
+                Timber.d("Moved to question $nextIndex (no config)")
+            }
         }
     }
 
