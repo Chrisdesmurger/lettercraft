@@ -105,11 +105,43 @@ class OnboardingViewModel @Inject constructor(
         viewModelScope.launch {
             onboardingRepository.startOnboarding(uid, configVersion)
                 .onSuccess {
-                    _uiState.value = _uiState.value.copy(hasStarted = true)
                     Timber.d("Onboarding started for user $uid")
 
-                    // Phase 3: Load information screens for first question (position 0)
-                    loadInformationScreensForCurrentPosition()
+                    // Phase 3: Load information screens for position 0 (before first question)
+                    // If screens exist, show them immediately
+                    val userResponses = emptyMap<String, String>() // No answers yet
+                    informationScreenRepository.getScreensForPosition(
+                        configId = configVersion,
+                        position = 0,
+                        userResponses = userResponses
+                    )
+                        .onSuccess { screens ->
+                            if (screens.isNotEmpty()) {
+                                // Show information screens before first question
+                                _uiState.value = _uiState.value.copy(
+                                    hasStarted = true,
+                                    currentInformationScreens = screens,
+                                    currentInformationScreenIndex = 0,
+                                    showingInformationScreen = true
+                                )
+                                Timber.d("Starting with ${screens.size} information screens")
+                            } else {
+                                // No information screens, go directly to first question
+                                _uiState.value = _uiState.value.copy(
+                                    hasStarted = true,
+                                    showingInformationScreen = false
+                                )
+                                Timber.d("Starting directly with first question")
+                            }
+                        }
+                        .onFailure { error ->
+                            Timber.e(error, "Failed to load information screens for position 0")
+                            // Start anyway
+                            _uiState.value = _uiState.value.copy(
+                                hasStarted = true,
+                                showingInformationScreen = false
+                            )
+                        }
                 }
                 .onFailure { error ->
                     Timber.e(error, "Failed to start onboarding")
@@ -165,8 +197,9 @@ class OnboardingViewModel @Inject constructor(
         if (currentState.currentQuestionIndex < currentState.totalQuestions - 1) {
             val nextIndex = currentState.currentQuestionIndex + 1
 
-            // Phase 3: Load information screens for next position FIRST (before changing index)
-            // This prevents the next question from briefly flashing before showing info screens
+            // Phase 3: Load information screens for next position FIRST
+            // If screens exist, show them WITHOUT changing the question index yet
+            // The index will be updated when user finishes viewing the screens
             val configId = config?.id
             if (configId != null) {
                 viewModelScope.launch {
@@ -182,22 +215,24 @@ class OnboardingViewModel @Inject constructor(
                     )
                         .onSuccess { screens ->
                             if (screens.isNotEmpty()) {
-                                // There are information screens, update state with both new index AND screens
+                                // There are information screens, show them WITHOUT changing question index
+                                // The index will be updated when screens are finished (in continueFromInformationScreen)
                                 _uiState.value = currentState.copy(
-                                    currentQuestionIndex = nextIndex,
-                                    canProceed = isQuestionAnswered(nextIndex),
+                                    // Keep currentQuestionIndex unchanged
                                     currentInformationScreens = screens,
                                     currentInformationScreenIndex = 0,
-                                    showingInformationScreen = true
+                                    showingInformationScreen = true,
+                                    pendingQuestionIndex = nextIndex // Store the target index
                                 )
-                                Timber.d("Moved to question $nextIndex with ${screens.size} information screens")
+                                Timber.d("Showing ${screens.size} information screens before moving to question $nextIndex")
                             } else {
-                                // No information screens, just move to next question
+                                // No information screens, move to next question immediately
                                 _uiState.value = currentState.copy(
                                     currentQuestionIndex = nextIndex,
                                     canProceed = isQuestionAnswered(nextIndex),
                                     showingInformationScreen = false,
-                                    currentInformationScreens = emptyList()
+                                    currentInformationScreens = emptyList(),
+                                    pendingQuestionIndex = null
                                 )
                                 Timber.d("Moved to question $nextIndex (no information screens)")
                             }
@@ -209,7 +244,8 @@ class OnboardingViewModel @Inject constructor(
                                 currentQuestionIndex = nextIndex,
                                 canProceed = isQuestionAnswered(nextIndex),
                                 showingInformationScreen = false,
-                                currentInformationScreens = emptyList()
+                                currentInformationScreens = emptyList(),
+                                pendingQuestionIndex = null
                             )
                         }
                 }
@@ -329,53 +365,6 @@ class OnboardingViewModel @Inject constructor(
     }
 
     /**
-     * Phase 3: Load information screens for current position
-     * Checks if there are information screens to display before the current question
-     */
-    private fun loadInformationScreensForCurrentPosition() {
-        val configId = config?.id ?: return
-        val currentState = _uiState.value
-        val position = currentState.currentQuestionIndex
-
-        viewModelScope.launch {
-            // Build user responses map for conditional screen evaluation
-            val userResponses = answers.mapValues { (_, answer) ->
-                answer.selectedOptions.firstOrNull() ?: answer.textAnswer ?: ""
-            }
-
-            informationScreenRepository.getScreensForPosition(
-                configId = configId,
-                position = position,
-                userResponses = userResponses
-            )
-                .onSuccess { screens ->
-                    if (screens.isNotEmpty()) {
-                        _uiState.value = currentState.copy(
-                            currentInformationScreens = screens,
-                            currentInformationScreenIndex = 0,
-                            showingInformationScreen = true
-                        )
-                        Timber.d("Loaded ${screens.size} information screens for position $position")
-                    } else {
-                        // No information screens, show question directly
-                        _uiState.value = currentState.copy(
-                            currentInformationScreens = emptyList(),
-                            showingInformationScreen = false
-                        )
-                    }
-                }
-                .onFailure { error ->
-                    Timber.e(error, "Failed to load information screens for position $position")
-                    // Continue to question on error
-                    _uiState.value = currentState.copy(
-                        currentInformationScreens = emptyList(),
-                        showingInformationScreen = false
-                    )
-                }
-        }
-    }
-
-    /**
      * Phase 3: Handle continue from information screen
      * Either show next information screen OR proceed to question
      */
@@ -389,13 +378,17 @@ class OnboardingViewModel @Inject constructor(
             )
             Timber.d("Moved to information screen ${currentState.currentInformationScreenIndex + 1}")
         } else {
-            // All information screens viewed, show question
+            // All information screens viewed, NOW update question index if we have a pending one
+            val targetIndex = currentState.pendingQuestionIndex ?: currentState.currentQuestionIndex
             _uiState.value = currentState.copy(
                 showingInformationScreen = false,
                 currentInformationScreens = emptyList(),
-                currentInformationScreenIndex = 0
+                currentInformationScreenIndex = 0,
+                currentQuestionIndex = targetIndex,
+                canProceed = isQuestionAnswered(targetIndex),
+                pendingQuestionIndex = null
             )
-            Timber.d("Finished viewing information screens, showing question ${currentState.currentQuestionIndex}")
+            Timber.d("Finished viewing information screens, showing question $targetIndex")
         }
     }
 }
@@ -418,7 +411,8 @@ data class OnboardingUiState(
     // Phase 3: Information screens state
     val currentInformationScreens: List<InformationScreen> = emptyList(),
     val currentInformationScreenIndex: Int = 0,
-    val showingInformationScreen: Boolean = false
+    val showingInformationScreen: Boolean = false,
+    val pendingQuestionIndex: Int? = null // Target question index when showing info screens
 ) {
     val currentQuestion: OnboardingQuestion?
         get() = questions.getOrNull(currentQuestionIndex)
